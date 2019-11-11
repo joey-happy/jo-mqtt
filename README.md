@@ -64,3 +64,9 @@ joey-mqtt
   7. 获取授权管理实现: IAuth initAuthManager(List<AuthUser> userList);
   8. 获取集群间通信实现: IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
   9. 获取事件监听器列表: List<IEventListener> initEventListeners();
+  
+#### 参考实现
+1. https://github.com/moquette-io/moquette
+2. https://gitee.com/recallcode/iot-mqtt-server
+3. https://github.com/Cicizz/jmqtt
+4. https://github.com/Wizzercn/MqttWk
