@@ -101,7 +101,7 @@ public class MqttServer {
 
         ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
                 .channel(channelClass)
-                .handler(new LoggingHandler(LogLevel.INFO))
+                .handler(new LoggingHandler(LogLevel.ERROR))
                 .childHandler(new ChannelInitializer() {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {

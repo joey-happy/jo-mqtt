@@ -6,7 +6,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 /**
  *
  */
-public class TestMqttClient extends Thread implements MqttCallback {
+public class TestMqttClient implements MqttCallback {
     private String topic;
 
     private String clientId;
@@ -20,9 +20,11 @@ public class TestMqttClient extends Thread implements MqttCallback {
         this.clientId = clientId;
         this.broker = broker;
         this.qos = qos;
+
+        run();
     }
 
-    @Override
+//    @Override
     public void run() {
         try {
             MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
