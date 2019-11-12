@@ -11,6 +11,7 @@
     <name>mqtt-springboot</name>
     <artifactId>mqtt-springboot</artifactId>
     <version>${mqtt.springboot.version}</version>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -71,6 +72,19 @@
                 <configuration>
                     <mainClass>joey.mqtt.springboot.MqttApplication</mainClass>
                 </configuration>
+
+                <!--
+                   原因：因为我使用spring-boot-dependencies这个BOM代替了spring-boot-starter-parent这个parent POM
+                  （详见13.2.2. Using Spring Boot without the parent POM）
+                   导致spring-boot-maven-plugin的配置项丢失，使得打包后的jar中的MANIFEST.MF文件缺少Main-Class
+                -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!--  添加编译插件 -->

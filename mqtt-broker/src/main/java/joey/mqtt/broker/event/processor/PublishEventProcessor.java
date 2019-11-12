@@ -124,8 +124,9 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 Stopwatch start = Stopwatch.start();
 
                 try {
-                    publish2Subscriber(sub, pubMsg);
-                    log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
+                    if (publish2Subscriber(sub, pubMsg)) {
+                        log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
+                    }
 
                 } catch (Throwable ex) {
                     log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
@@ -140,7 +141,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
      * @param sub
      * @param commonPubMsg
      */
-    void publish2Subscriber(Subscription sub, CommonPublishMessage commonPubMsg) {
+    boolean publish2Subscriber(Subscription sub, CommonPublishMessage commonPubMsg) {
         String targetClientId = sub.getClientId();
         ClientSession targetSession = sessionStore.get(targetClientId);
 
@@ -177,7 +178,11 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                     log.error("Process-publish error. Invalid mqtt qos. targetClientId={},topic={},qos={}", targetClientId, commonPubMsg.getTopic(), commonPubMsg.getMqttQoS());
                     break;
             }
+
+            return true;
         }
+
+        return false;
     }
 
     /**

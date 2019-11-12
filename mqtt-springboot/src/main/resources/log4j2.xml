@@ -7,7 +7,7 @@
 <configuration status="error" monitorInterval="300">
     <!-- 定义通用的属性 -->
     <Properties>
-        <Property name="LOG_PATH">/home/logs/jo-mqtt</Property><!-- 这里的logs为项目根目录下的logs文件夹 -->
+        <Property name="LOG_PATH">./</Property><!-- 这里的logs为项目根目录下的logs文件夹 -->
         <Property name="LOG_PATTERN">[%d{yyyy-MM-dd HH:mm:ss,sss}] [%-5p] [%t] %c{1.}:%L %m%n</Property><!-- 定义统一的日志输出格式 -->
         <!-- 高亮控制台输出  -->
         <Property name="LOG_PATTERN_HIGHLIGHT">%highlight{${LOG_PATTERN}}{FATAL=Bright Red, ERROR=Magenta, WARN=Cyan, INFO=Green}</Property>

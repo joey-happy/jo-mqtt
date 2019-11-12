@@ -39,9 +39,9 @@ joey-mqtt
 #### 快速开始
 - 本地运行
   - 代码clone到本地，启动MqttApplication程序即可，默认端口1883，配置详情：application-local.properties
-- jar保运行（生产环境）
+- jar保运行（本地环境）
   - 代码clone到本地，修改application-production.properties的相关配置，用maven达成jar包
-  - 执行命令：java -jar -Dspring.profiles.active=production mqtt-springboot-1.0.0-SNAPSHOT.jar
+  - nohup java -jar -Dspring.profiles.active=local mqtt-springboot-1.0.0-SNAPSHOT.jar 2>&1 &
 
 #### 日志文件配置
 采用log4j2日志框架，可自行定义日志格式，修改log4j2.xml文件中相关配置即可
