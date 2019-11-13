@@ -74,7 +74,7 @@ joey-mqtt
 6. https://github.com/1ssqq1lxr/iot_push
 
 #### 压测工具
-1. https://github.com/takanorig/mqtt-bench
+1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
 2. https://github.com/daoshenzzg/mqtt-mock
 
 #### 工具推荐

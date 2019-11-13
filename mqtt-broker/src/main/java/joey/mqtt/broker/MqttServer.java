@@ -17,8 +17,6 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.StringUtil;
 import joey.mqtt.broker.codec.MqttWebSocketCodec;
@@ -101,7 +99,7 @@ public class MqttServer {
 
         ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
                 .channel(channelClass)
-                .handler(new LoggingHandler(LogLevel.ERROR))
+//                .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new ChannelInitializer() {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {
