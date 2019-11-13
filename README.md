@@ -70,6 +70,13 @@ joey-mqtt
 2. https://gitee.com/recallcode/iot-mqtt-server
 3. https://github.com/Cicizz/jmqtt
 4. https://github.com/Wizzercn/MqttWk
+5. https://github.com/daoshenzzg/socket-mqtt
+6. https://github.com/1ssqq1lxr/iot_push
+
+#### 压测工具
+1.https://github.com/takanorig/mqtt-bench
+2.https://github.com/daoshenzzg/mqtt-mock
 
 #### 工具推荐
-1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者也是有问必答 强烈推荐
+1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
+2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
