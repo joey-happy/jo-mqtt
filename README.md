@@ -23,7 +23,7 @@
     ```
 #### 项目结构
 ```
-joey-mqtt
+jo-mqtt
   ├── mqtt-broker -- MQTT服务器功能的核心实现
   ├── mqtt-springboot -- springboot集成mqtt启动
   ├── mqtt-test -- MQTT服务器测试用例
