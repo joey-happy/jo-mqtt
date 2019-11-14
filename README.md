@@ -6,9 +6,9 @@
 #### 软件架构说明
 基于netty+springboot+redis+hazelcast技术栈实现
 1. 使用netty实现通信及协议解析
-2. 使用springboot提供依赖注入及属性配置
-3. redis实现集群间消息存储
-4. hazelcast实现集群间消息通信
+2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
+3. redis实现集群间消息存储（可自定义扩展）
+4. hazelcast实现集群间消息通信（可自定义扩展）
 
 #### 不支持
 1. 暂且不支持websocket协议
