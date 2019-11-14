@@ -98,36 +98,36 @@ public class MqttServer {
         }
 
         ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
-                .channel(channelClass)
-//                .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new ChannelInitializer() {
-                    @Override
-                    protected void initChannel(Channel channel) throws Exception {
-                        ChannelPipeline pipeline = channel.pipeline();
+                                                        .channel(channelClass)
+                                        //              .handler(new LoggingHandler(LogLevel.INFO))
+                                                        .childHandler(new ChannelInitializer() {
+                                                            @Override
+                                                            protected void initChannel(Channel channel) throws Exception {
+                                                                ChannelPipeline pipeline = channel.pipeline();
 
-                        //心跳检测
-                        pipeline.addFirst(Constants.HANDLER_IDLE_STATE, new IdleStateHandler(0, 0, nettyConfig.getChannelTimeoutSeconds()));
+                                                                //心跳检测
+                                                                pipeline.addFirst(Constants.HANDLER_IDLE_STATE, new IdleStateHandler(0, 0, nettyConfig.getChannelTimeoutSeconds()));
 
-                        //webSocket协议
-                        if (Constants.ServerProtocolType.WEB_SOCKET == protocolType) {
-                            // 将请求和应答消息编码或解码为HTTP消息
-                            pipeline.addLast("http-codec", new HttpServerCodec());
-                            // 将HTTP消息的多个部分合成一条完整的HTTP消息
-                            pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
-                            // 将HTTP消息进行压缩编码
-                            pipeline.addLast("compressor ", new HttpContentCompressor());
-                            pipeline.addLast("protocol", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPath(), Constants.MQTT_SUB_PROTOCOL_CSV_LIST, true, 65536));
-                            pipeline.addLast("mqttWebSocketCodec", new MqttWebSocketCodec());
-                        }
+                                                                //webSocket协议
+                                                                if (Constants.ServerProtocolType.WEB_SOCKET == protocolType) {
+                                                                    // 将请求和应答消息编码或解码为HTTP消息
+                                                                    pipeline.addLast("http-codec", new HttpServerCodec());
+                                                                    // 将HTTP消息的多个部分合成一条完整的HTTP消息
+                                                                    pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
+                                                                    // 将HTTP消息进行压缩编码
+                                                                    pipeline.addLast("compressor ", new HttpContentCompressor());
+                                                                    pipeline.addLast("protocol", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPath(), Constants.MQTT_SUB_PROTOCOL_CSV_LIST, true, 65536));
+                                                                    pipeline.addLast("mqttWebSocketCodec", new MqttWebSocketCodec());
+                                                                }
 
-                        //mqtt解码编码
-                        pipeline.addLast(Constants.HANDLER_MQTT_DECODER, new MqttDecoder());
-                        pipeline.addLast(Constants.HANDLER_MQTT_ENCODER, MqttEncoder.INSTANCE);
+                                                                //mqtt解码编码
+                                                                pipeline.addLast(Constants.HANDLER_MQTT_DECODER, new MqttDecoder());
+                                                                pipeline.addLast(Constants.HANDLER_MQTT_ENCODER, MqttEncoder.INSTANCE);
 
-                        //mqtt操作handler
-                        pipeline.addLast(Constants.HANDLER_MQTT_MAIN, mqttMainHandler);
-                    }
-                });
+                                                                //mqtt操作handler
+                                                                pipeline.addLast(Constants.HANDLER_MQTT_MAIN, mqttMainHandler);
+                                                            }
+                                                        });
 
         initConnectionOptions(bootstrap);
 
@@ -137,16 +137,15 @@ public class MqttServer {
         }
 
         ChannelFuture channelFuture = bootstrap.bind(socketAddress).addListener((future) -> {
-            if (future.isSuccess()) {
-                log.info(protocolType.name + " server started at port: {}", port);
+                                            if (future.isSuccess()) {
+                                                log.info(protocolType.name + " server started at port: {}", port);
 
-            } else {
-                log.error(protocolType.name + " server start failed at port: {}!", port);
-            }
-        });
+                                            } else {
+                                                log.error(protocolType.name + " server start failed at port: {}!", port);
+                                            }
+                                      });
 
         return channelFuture.channel();
-
     }
 
     /**
