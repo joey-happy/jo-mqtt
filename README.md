@@ -51,7 +51,7 @@ joey-mqtt
 - hazelcast方式
   - 只需配置文件中mqtt.customConfig.hazelcastConfig.enable=true即可
 
-#### 可配置参数
+#### 配置参数
 ```
 #server config
 mqtt.serverConfig.tcpPort=1883
