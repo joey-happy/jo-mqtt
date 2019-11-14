@@ -5,10 +5,10 @@
 
 #### 软件架构说明
 基于netty+springboot+redis+hazelcast技术栈实现
-1. 使用netty实现通信及协议解析
-2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
-3. redis实现集群间消息存储（可自定义扩展）
-4. hazelcast实现集群间消息通信（可自定义扩展）
+>1. 使用netty实现通信及协议解析
+>2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
+>3. redis实现集群间消息存储（可自定义扩展）
+>4. hazelcast实现集群间消息通信（可自定义扩展）
 
 #### 不支持
 1. 暂且不支持websocket协议
@@ -30,11 +30,11 @@ joey-mqtt
 ```
 
 #### 功能说明
-1. 参考MQTT3.1.1规范实现
-2. 完整的QoS服务质量等级实现
-3. 遗嘱消息, 保留消息及消息分发重试
-4. 心跳机制
-5. 集群功能
+>1. 参考MQTT3.1.1规范实现
+>2. 完整的QoS服务质量等级实现
+>3. 遗嘱消息, 保留消息及消息分发重试
+>4. 心跳机制
+>5. 集群功能
 
 #### 快速开始
 - 本地运行
@@ -48,8 +48,7 @@ joey-mqtt
 
 #### 集群使用
 目前集群使用hazelcast的通信方式，使用者也可自定义
-- hazelcast方式
-  - 只需配置文件中mqtt.customConfig.hazelcastConfig.enable=true即可
+- hazelcast方式,只需配置文件中mqtt.customConfig.hazelcastConfig.enable=true即可
 
 #### 配置参数
 ```
@@ -101,30 +100,30 @@ mqtt.customConfig.redisConfig.pool.minIdle=20
 
 #### 自定义扩展
 - 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法即可
-  1. 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.XXXXProvider
+  > 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.XXXXProvider
 - 扩展方法说明（扩展接口：IExtendProvider）
-  1. 获取messageId存储实现: IMessageIdStore initMessageIdStore();
-  2. 获取session存储实现: ISessionStore initSessionStore();
-  3. 获取主题订阅存储实现: ISubscriptionStore initSubscriptionStore(ISessionStore sessionStore);
-  4. 获取retain消息存储实现: IRetainMessageStore initRetainMessageStore();
-  5. 获取pubMessage消息存储实现: IDupPubMessageStore initDupPubMessageStore();
-  6. 获取pubRelMessage消息存储实现: IDupPubRelMessageStore initDupPubRelMessageStore();
-  7. 获取授权管理实现: IAuth initAuthManager(List<AuthUser> userList);
-  8. 获取集群间通信实现: IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
-  9. 获取事件监听器列表: List<IEventListener> initEventListeners();
+  >1. 获取messageId存储实现: IMessageIdStore initMessageIdStore();
+  >2. 获取session存储实现: ISessionStore initSessionStore();
+  >3. 获取主题订阅存储实现: ISubscriptionStore initSubscriptionStore(ISessionStore sessionStore);
+  >4. 获取retain消息存储实现: IRetainMessageStore initRetainMessageStore();
+  >5. 获取pubMessage消息存储实现: IDupPubMessageStore initDupPubMessageStore();
+  >6. 获取pubRelMessage消息存储实现: IDupPubRelMessageStore initDupPubRelMessageStore();
+  >7. 获取授权管理实现: IAuth initAuthManager(List<AuthUser> userList);
+  >8. 获取集群间通信实现: IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
+  >9. 获取事件监听器列表: List<IEventListener> initEventListeners();
   
 #### 参考实现
-1. https://github.com/moquette-io/moquette
-2. https://gitee.com/recallcode/iot-mqtt-server
-3. https://github.com/Cicizz/jmqtt
-4. https://github.com/Wizzercn/MqttWk
-5. https://github.com/daoshenzzg/socket-mqtt
-6. https://github.com/1ssqq1lxr/iot_push
+>1. https://github.com/moquette-io/moquette
+>2. https://gitee.com/recallcode/iot-mqtt-server
+>3. https://github.com/Cicizz/jmqtt
+>4. https://github.com/Wizzercn/MqttWk
+>5. https://github.com/daoshenzzg/socket-mqtt
+>6. https://github.com/1ssqq1lxr/iot_push
 
 #### 压测工具
-1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
-2. https://github.com/daoshenzzg/mqtt-mock
+>1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
+>2. https://github.com/daoshenzzg/mqtt-mock
 
 #### 工具推荐
-1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
-2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
+>1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
+>2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
