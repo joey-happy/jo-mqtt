@@ -127,3 +127,4 @@ mqtt.customConfig.redisConfig.pool.minIdle=20
 #### 工具推荐
 >1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
 >2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
+>3. https://blog.csdn.net/Just_shunjian/article/details/78288229 Linux 内核优化-调大TCP最大连接数
