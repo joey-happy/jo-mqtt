@@ -1,7 +1,11 @@
 package joey.mqtt.broker.provider.redis;
 
+import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.RedisConfig;
+import joey.mqtt.broker.inner.IInnerTraffic;
+import joey.mqtt.broker.inner.InnerPublishEventProcessor;
+import joey.mqtt.broker.inner.redis.RedisInnerTraffic;
 import joey.mqtt.broker.provider.adapter.ExtendProviderAdapter;
 import joey.mqtt.broker.redis.RedisClient;
 import joey.mqtt.broker.store.IDupPubMessageStore;
@@ -64,8 +68,15 @@ public class RedisExtendProvider extends ExtendProviderAdapter {
         //逐出扫描的时间间隔(毫秒) 如果为负数,则不运行逐出线程, 默认-1
         config.setTimeBetweenEvictionRunsMillis(redisConfig.getPool().getTimeBetweenEvictionRunsMillis());
 
-        JedisPool jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(),
-                                            redisConfig.getTimeout(), redisConfig.getPassword(), redisConfig.getDatabase());
+        JedisPool jedisPool = null;
+        String password = redisConfig.getPassword();
+        if (StrUtil.isNotBlank(password)) {
+            jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(),
+                                      redisConfig.getTimeout(), password, redisConfig.getDatabase());
+        } else {
+            jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(),
+                                      redisConfig.getTimeout(), null, redisConfig.getDatabase());
+        }
 
         redisClient = new RedisClient(jedisPool);
     }
@@ -88,5 +99,15 @@ public class RedisExtendProvider extends ExtendProviderAdapter {
     @Override
     public IDupPubRelMessageStore initDupPubRelMessageStore() {
         return new RedisDupPubRelMessageStore(redisClient);
+    }
+
+    @Override
+    public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName) {
+        return new RedisInnerTraffic(redisClient, innerPublishEventProcessor, nodeName);
+    }
+
+    @Override
+    public String getNodeName() {
+        return super.getNodeName();
     }
 }

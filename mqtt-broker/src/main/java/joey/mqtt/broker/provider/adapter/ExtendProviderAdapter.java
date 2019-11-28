@@ -1,6 +1,7 @@
 package joey.mqtt.broker.provider.adapter;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.UUID;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.auth.impl.DefaultAuthImpl;
@@ -69,12 +70,17 @@ public class ExtendProviderAdapter implements IExtendProvider {
     }
 
     @Override
-    public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor) {
-        return new HazelcastInnerTraffic(innerPublishEventProcessor, customConfig);
+    public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName) {
+        return new HazelcastInnerTraffic(innerPublishEventProcessor, customConfig, nodeName);
     }
 
     @Override
     public List<IEventListener> initEventListeners() {
         return CollUtil.newArrayList(new EventListenerAdapter());
+    }
+
+    @Override
+    public String getNodeName() {
+        return UUID.randomUUID().toString();
     }
 }

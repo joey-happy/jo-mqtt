@@ -66,11 +66,17 @@ public interface IExtendProvider {
      * @param innerPublishEventProcessor
      * @return
      */
-    IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
+    IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName);
 
     /**
      * 获取事件监听器列表
      * @return
      */
     List<IEventListener> initEventListeners();
+
+    /**
+     * 获取节点名称
+     * @return
+     */
+    String getNodeName();
 }

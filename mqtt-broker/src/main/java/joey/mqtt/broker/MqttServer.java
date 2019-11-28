@@ -141,7 +141,7 @@ public class MqttServer {
                                                 log.info(protocolType.name + " server started at port: {}", port);
 
                                             } else {
-                                                log.error(protocolType.name + " server start failed at port: {}!", port);
+                                                log.error(protocolType.name + " server start failed at port: {}!, errMsg={}", port, future.cause().getMessage());
                                             }
                                       });
 

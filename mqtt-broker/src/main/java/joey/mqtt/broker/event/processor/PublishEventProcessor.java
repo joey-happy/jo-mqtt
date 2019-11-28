@@ -43,16 +43,19 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
     private final EventListenerExecutor eventListenerExecutor;
 
+    private final String nodeName;
+
     @Setter
     private IInnerTraffic innerTraffic;
 
-    public PublishEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor) {
+    public PublishEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor, String nodeName) {
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.messageIdStore = messageIdStore;
         this.retainMessageStore = retainMessageStore;
         this.dupPubMessageStore = dupPubMessageStore;
         this.eventListenerExecutor = eventListenerExecutor;
+        this.nodeName = nodeName;
     }
 
     @Override
@@ -60,10 +63,10 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         String clientId = NettyUtils.clientId(ctx.channel());
         String userName = NettyUtils.userName(ctx.channel());
 
-        CommonPublishMessage pubMsg = CommonPublishMessage.convert(message, false);
+        CommonPublishMessage pubMsg = CommonPublishMessage.convert(message, false, nodeName);
 
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={}", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS());
+        log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
 
         //集群间发送消息
         innerTraffic.publish(pubMsg);

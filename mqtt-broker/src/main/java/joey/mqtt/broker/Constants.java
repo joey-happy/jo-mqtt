@@ -74,6 +74,8 @@ public class Constants {
 
     public static final String REDIS_MSG_DUP_PUB_REL_KEY_PRE = REDIS_KEY_PRE + "msgDupPubRel:";
 
+    public static final String REDIS_INNER_TRAFFIC_PUB_CHANNEL = REDIS_KEY_PRE + "innerTrafficChannel";
+
     /**
      * event listener executor 线程池基本属性设置
      */

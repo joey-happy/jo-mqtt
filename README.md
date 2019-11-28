@@ -8,7 +8,7 @@
 >1. 使用netty实现通信及协议解析
 >2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
 >3. redis实现集群间消息存储（可自定义扩展）
->4. hazelcast实现集群间消息通信（可自定义扩展）
+>4. redis-pubsub或者hazelcast实现集群间消息通信（可自定义扩展）
 
 #### 不支持
 1. 暂且不支持websocket协议
@@ -47,8 +47,7 @@ jo-mqtt
 采用log4j2日志框架，可自行定义日志格式，修改log4j2.xml文件中相关配置即可
 
 #### 集群使用
-目前集群使用hazelcast的通信方式，使用者也可自定义
-- hazelcast方式,只需配置文件中mqtt.customConfig.hazelcastConfig.enable=true即可
+目前集群默认使用RedisExtendProvider实现扩展，则集群间通信依赖redis的pubsub功能
 
 #### 配置参数
 ```
@@ -57,8 +56,8 @@ mqtt.serverConfig.tcpPort=1883
 #-1表示不开启
 mqtt.serverConfig.webSocketPort=-1
 mqtt.serverConfig.hostname=
-mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
-#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
+#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
+mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
 
 #password 采用sha256hex加密 例子中密码明文和用户名一致
 mqtt.serverConfig.enableAuth=true

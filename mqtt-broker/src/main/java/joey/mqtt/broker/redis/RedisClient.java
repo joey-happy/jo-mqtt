@@ -4,10 +4,7 @@
 package joey.mqtt.broker.redis;
 
 import cn.hutool.core.collection.CollUtil;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -222,6 +219,18 @@ public class RedisClient {
     public Long srem(String key, String member){
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.srem(key, member);
+        }
+    }
+
+    public void publish(String channel, String message){
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.publish(channel, message);
+        }
+    }
+
+    public void subscribe(JedisPubSub pubSub, String... channels){
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.subscribe(pubSub, channels);
         }
     }
 }

@@ -37,7 +37,9 @@ public class CommonPublishMessage implements Serializable {
 
     private long createTimestamp;
 
-    public static CommonPublishMessage convert(MqttPublishMessage msg, boolean isWill) {
+    private String sourceNodeName;
+
+    public static CommonPublishMessage convert(MqttPublishMessage msg, boolean isWill, String sourceNodeName) {
         CommonPublishMessage convert = new CommonPublishMessage();
 
         convert.topic = msg.variableHeader().topicName();
@@ -49,6 +51,7 @@ public class CommonPublishMessage implements Serializable {
         convert.isWill = isWill;
 
         convert.createTimestamp = System.currentTimeMillis();
+        convert.sourceNodeName = sourceNodeName;
 
         return convert;
     }
@@ -67,6 +70,7 @@ public class CommonPublishMessage implements Serializable {
         copy.isWill = this.isWill;
 
         copy.createTimestamp = this.createTimestamp;
+        copy.sourceNodeName = this.sourceNodeName;
 
         return copy;
     }

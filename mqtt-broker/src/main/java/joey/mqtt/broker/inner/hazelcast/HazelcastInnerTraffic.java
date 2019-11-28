@@ -29,11 +29,14 @@ import static cn.hutool.core.util.URLUtil.FILE_URL_PREFIX;
 public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<CommonPublishMessage> {
     private final InnerPublishEventProcessor innerPublishEventProcessor;
     private final HazelcastConfig hazelcastConfig;
+    private final String nodeName;
+
     private HazelcastInstance hzInstance;
 
-    public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig) {
+    public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
         this.innerPublishEventProcessor = innerPublishEventProcessor;
         this.hazelcastConfig = customConfig.getHazelcastConfig();
+        this.nodeName = nodeName;
 
         initHazelcastInstance();
 

@@ -1,5 +1,6 @@
 package joey.mqtt.broker.core;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,6 +12,7 @@ import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.processor.*;
+import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.inner.IInnerTraffic;
 import joey.mqtt.broker.inner.InnerPublishEventProcessor;
 import joey.mqtt.broker.provider.IExtendProvider;
@@ -51,6 +53,8 @@ public class MqttMaster {
 
     private final List<IEventListener> eventListenerList;
 
+    private final String nodeName;
+
     private final ConnectEventProcessor connectEvent;
     private final ConnectionLostEventProcessor connectionLostEvent;
     private final SubscribeEventProcessor subscribeEvent;
@@ -77,6 +81,11 @@ public class MqttMaster {
         eventListenerList = extendProvider.initEventListeners();
         eventListenerExecutor = new EventListenerExecutor(eventListenerList);
 
+        nodeName = extendProvider.getNodeName();
+        if (StrUtil.isBlank(nodeName)) {
+            throw new MqttException("Node name is empty.nodeName=" + nodeName);
+        }
+
         ServerConfig serverConfig = config.getServerConfig();
         if (serverConfig.isEnableAuth()) {
             List<AuthUser> copyAuthUserList = JSONObject.parseArray(JSON.toJSONString(serverConfig.getAuthUsers()), AuthUser.class);
@@ -85,10 +94,10 @@ public class MqttMaster {
 
         connectEvent = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableAuth(), eventListenerExecutor);
 
-        publishEvent = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor);
-        connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, eventListenerExecutor);
+        publishEvent = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
+        connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, eventListenerExecutor, nodeName);
 
-        innerTraffic = extendProvider.initInnerTraffic(new InnerPublishEventProcessor(publishEvent));
+        innerTraffic = extendProvider.initInnerTraffic(new InnerPublishEventProcessor(publishEvent), nodeName);
         publishEvent.setInnerTraffic(innerTraffic);
 
         pubAckEvent = new PubAckEventProcessor(dupPubMessageStore, eventListenerExecutor);
