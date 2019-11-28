@@ -57,6 +57,7 @@ mqtt.serverConfig.tcpPort=1883
 mqtt.serverConfig.webSocketPort=-1
 mqtt.serverConfig.hostname=
 #mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
+#RedisExtendProvider支持集群间通信及所有Qos等级的消息
 mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
 
 #password 采用sha256hex加密 例子中密码明文和用户名一致
