@@ -36,35 +36,42 @@ public class RedisInnerTraffic implements IInnerTraffic {
 
     private void subTopic() {
         new Thread(() -> {
-            redisClient.subscribe(new JedisPubSub() {
-                @Override
-                public void onMessage(String channel, String message) {
-                    log.info("RedisInnerTraffic-onMessage. channel={},message={}", channel, message);
+            //防止redis连接意外断开不能重新订阅
+            for (;;) {
+                try {
+                    redisClient.subscribe(new JedisPubSub() {
+                        @Override
+                        public void onMessage(String channel, String message) {
+                            log.info("RedisInnerTraffic-onMessage. nodeName={},channel={},message={}", nodeName, channel, message);
 
-                    try {
-                        if (StrUtil.isNotBlank(message)) {
-                            CommonPublishMessage pubMsg = JSONObject.parseObject(message, CommonPublishMessage.class);
+                            try {
+                                if (StrUtil.isNotBlank(message)) {
+                                    CommonPublishMessage pubMsg = JSONObject.parseObject(message, CommonPublishMessage.class);
 
-                            //消息来源不是同一个node时候才会继续发布
-                            if (null != pubMsg && ObjectUtil.notEqual(nodeName, pubMsg.getSourceNodeName())) {
-                                innerPublishEventProcessor.publish2Subscribers(pubMsg);
+                                    //消息来源不是同一个node时候才会继续发布
+                                    if (null != pubMsg && ObjectUtil.notEqual(nodeName, pubMsg.getSourceNodeName())) {
+                                        innerPublishEventProcessor.publish2Subscribers(pubMsg);
+                                    }
+                                }
+                            } catch (Throwable t) {
+                                log.error("RedisInnerTraffic-onMessage error. nodeName={},channel={},message={}", nodeName, channel, message, t);
                             }
                         }
-                    } catch (Throwable t) {
-                        log.error("RedisInnerTraffic-onMessage error. channel={},message={}", channel, message, t);
-                    }
-                }
 
-                @Override
-                public void onSubscribe(String channel, int subscribedChannels) {
-                    log.info("RedisInnerTraffic-onSubscribe. channel={},subscribedChannels={}", channel, subscribedChannels);
-                }
+                        @Override
+                        public void onSubscribe(String channel, int subscribedChannels) {
+                            log.info("RedisInnerTraffic-onSubscribe. nodeName={},channel={},subscribedChannels={}", nodeName, channel, subscribedChannels);
+                        }
 
-                @Override
-                public void onUnsubscribe(String channel, int subscribedChannels) {
-                    log.info("RedisInnerTraffic-onUnsubscribe. channel={},subscribedChannels={}", channel, subscribedChannels);
+                        @Override
+                        public void onUnsubscribe(String channel, int subscribedChannels) {
+                            log.info("RedisInnerTraffic-onUnsubscribe. nodeName={},channel={},subscribedChannels={}", nodeName, channel, subscribedChannels);
+                        }
+                    }, Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL);
+                } catch (Exception ex) {
+                    log.error("RedisInnerTraffic-subTopic error. nodeName={}", nodeName, ex);
                 }
-            }, Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL);
+            }
         }).start();
     }
 
