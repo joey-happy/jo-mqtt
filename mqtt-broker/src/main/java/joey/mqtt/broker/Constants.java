@@ -46,7 +46,7 @@ public class Constants {
     /**
      * topic token常量
      */
-    public static final String TOKEN_ROOT = "joRoot";
+    public static final String TOKEN_ROOT = "joRootTopic";
 
     public static final String TOKEN_MULTI = "#";
 

@@ -23,7 +23,7 @@ public class TopicUtils {
      * topic不支持如下格式
      * <li>为空</li>
      * <li>以'/'开始或结束</li>
-     * <li>命名为'tRoot'</li>
+     * <li>命名为'joRootTopic'</li>
      * <li>分隔符之间无字符 例如：ab///c</li>
      * <li>包含禁用字符 例如：ab/+11 或者c/12#1</li>
      * @param topic
