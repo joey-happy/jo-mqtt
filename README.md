@@ -80,9 +80,9 @@ mqtt.nettyConfig.channelTimeoutSeconds=200
 
 #customer config
 #inner traffic config 如果mqtt.serverConfig.extendProviderClass配置的实现类实现了initInnerTraffic方法 则如下配置无效
-mqtt.customer.innerTrafficConfig.enableHazelcast=false
-mqtt.customer.innerTrafficConfig.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
-#mqtt.customer.innerTraffic.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
+mqtt.customConfig.innerTrafficConfig.enableHazelcast=false
+mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
+#mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=file:/home/hazelcast-local.xml
 
 #如果使用了RedisExtendProvider 则必须配置redisConfig
 mqtt.customConfig.redisConfig.host=172.16.32.177
