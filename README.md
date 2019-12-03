@@ -7,8 +7,8 @@
 基于netty+springboot+redis+hazelcast技术栈实现
 >1. 使用netty实现通信及协议解析
 >2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
->3. redis实现集群间消息存储（可自定义扩展）
->4. redis-pubsub或者hazelcast实现集群间消息通信（可自定义扩展）
+>3. 默认配置使用RedisExtendProvider实现，支持所有Qos等级消息，默认采用pub-sub方式实现集群间通信,可自定义扩展实现
+>4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息.若想支持集群间通信,请配置mqtt.customer.innerTrafficConfig.enableHazelcast=true或自定义扩展实现
 
 #### 不支持
 1. 暂且不支持websocket协议
@@ -56,9 +56,8 @@ mqtt.serverConfig.tcpPort=1883
 #-1表示不开启
 mqtt.serverConfig.webSocketPort=-1
 mqtt.serverConfig.hostname=
-#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
-#RedisExtendProvider支持集群间通信及所有Qos等级的消息
 mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
+#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
 
 #password 采用sha256hex加密 例子中密码明文和用户名一致
 mqtt.serverConfig.enableAuth=true
@@ -80,12 +79,12 @@ mqtt.nettyConfig.soKeepAlive=true
 mqtt.nettyConfig.channelTimeoutSeconds=200
 
 #customer config
-#hazelcast config
-mqtt.customConfig.hazelcastConfig.enable=true
-mqtt.customConfig.hazelcastConfig.configFilePath=classpath:hazelcast/hazelcast-local.xml
-#mqtt.customConfig.hazelcastConfig.configFilePath=file:/home/hazelcast-local.xml
+#inner traffic config 如果mqtt.serverConfig.extendProviderClass配置的实现类实现了initInnerTraffic方法 则如下配置无效
+mqtt.customer.innerTrafficConfig.enableHazelcast=false
+mqtt.customer.innerTrafficConfig.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
+#mqtt.customer.innerTraffic.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
 
-#redis config
+#如果使用了RedisExtendProvider 则必须配置redisConfig
 mqtt.customConfig.redisConfig.host=172.16.32.177
 mqtt.customConfig.redisConfig.password=
 mqtt.customConfig.redisConfig.port=19000
@@ -95,7 +94,6 @@ mqtt.customConfig.redisConfig.pool.maxActive=200
 mqtt.customConfig.redisConfig.pool.maxWait=1000
 mqtt.customConfig.redisConfig.pool.maxIdle=50
 mqtt.customConfig.redisConfig.pool.minIdle=20
-
 ```
 
 #### 自定义扩展

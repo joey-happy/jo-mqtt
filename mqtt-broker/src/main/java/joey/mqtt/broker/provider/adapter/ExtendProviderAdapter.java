@@ -71,7 +71,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     @Override
     public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName) {
-        return new HazelcastInnerTraffic(innerPublishEventProcessor, customConfig, nodeName);
+        return null;
     }
 
     @Override

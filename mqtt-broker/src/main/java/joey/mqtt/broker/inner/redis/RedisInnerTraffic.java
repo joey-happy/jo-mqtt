@@ -81,6 +81,9 @@ public class RedisInnerTraffic implements IInnerTraffic {
      */
     @Override
     public void publish(CommonPublishMessage message) {
-        redisClient.publish(Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL, JSON.toJSONString(message));
+        String jsonMsg = JSON.toJSONString(message);
+        log.debug("RedisInnerTraffic-publish message={}", jsonMsg);
+
+        redisClient.publish(Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL, jsonMsg);
     }
 }

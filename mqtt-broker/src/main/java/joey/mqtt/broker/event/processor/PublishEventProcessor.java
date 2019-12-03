@@ -69,7 +69,11 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
 
         //集群间发送消息
-        innerTraffic.publish(pubMsg);
+        try {
+            innerTraffic.publish(pubMsg);
+        } catch (Exception ex) {
+            log.error("PublishEventProcessor-process inner traffic publish error.", ex);
+        }
 
         int packetId = message.variableHeader().packetId();
         MqttQoS msgQoS = MqttQoS.valueOf(pubMsg.getMqttQoS());

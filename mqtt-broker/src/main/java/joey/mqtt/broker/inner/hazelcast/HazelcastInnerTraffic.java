@@ -1,13 +1,13 @@
 package joey.mqtt.broker.inner.hazelcast;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.core.*;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
-import joey.mqtt.broker.config.HazelcastConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.inner.IInnerTraffic;
@@ -28,14 +28,14 @@ import static cn.hutool.core.util.URLUtil.FILE_URL_PREFIX;
 @Slf4j
 public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<CommonPublishMessage> {
     private final InnerPublishEventProcessor innerPublishEventProcessor;
-    private final HazelcastConfig hazelcastConfig;
+    private final String configFile;
     private final String nodeName;
 
     private HazelcastInstance hzInstance;
 
     public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
         this.innerPublishEventProcessor = innerPublishEventProcessor;
-        this.hazelcastConfig = customConfig.getHazelcastConfig();
+        this.configFile = customConfig.getInnerTrafficConfig().getHazelcastConfigFile();
         this.nodeName = nodeName;
 
         initHazelcastInstance();
@@ -49,41 +49,31 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
      * 初始化hazelcast实例
      */
     private void initHazelcastInstance() {
-        boolean enableHazelcast = hazelcastConfig.isEnable();
+        if (StrUtil.isBlank(configFile)) {
+            log.info("Hazelcast:use empty config.");
+            hzInstance = Hazelcast.newHazelcastInstance();
 
-        if (enableHazelcast) {
-            String configFilePath = hazelcastConfig.getConfigFilePath();
-
-            if (StrUtil.isBlank(configFilePath)) {
-                log.info("Hazelcast:use empty config.");
-                hzInstance = Hazelcast.newHazelcastInstance();
-
-            } else {
-                try {
-                    Config hzConfig = null;
-
-                    if (configFilePath.startsWith(CLASSPATH_URL_PREFIX)) {
-                        configFilePath = configFilePath.substring(CLASSPATH_URL_PREFIX.length());
-                        hzConfig = new ClasspathXmlConfig(configFilePath);
-
-                    } else if (configFilePath.startsWith(FILE_URL_PREFIX)) {
-                        configFilePath = configFilePath.substring(CLASSPATH_URL_PREFIX.length());
-                        hzConfig = new FileSystemXmlConfig(configFilePath);
-                    }
-
-                    if (null == hzConfig) {
-                        throw new MqttException("Hazelcast:config file path error. configFilePath=" + configFilePath);
-                    }
-
-                    log.info("Hazelcast:config file path={}", configFilePath);
-                    hzInstance = Hazelcast.newHazelcastInstance(hzConfig);
-
-                } catch (FileNotFoundException e) {
-                    throw new MqttException("Hazelcast:could not find hazelcast config file. configFilePath=" + configFilePath);
-                }
-            }
         } else {
-            throw new MqttException("Hazelcast:enable switch not open.");
+            try {
+                Config hzConfig = null;
+
+                if (configFile.startsWith(CLASSPATH_URL_PREFIX)) {
+                    hzConfig = new ClasspathXmlConfig(configFile.substring(CLASSPATH_URL_PREFIX.length()));
+
+                } else if (configFile.startsWith(FILE_URL_PREFIX)) {
+                    hzConfig = new FileSystemXmlConfig(configFile.substring(CLASSPATH_URL_PREFIX.length()));
+                }
+
+                if (null == hzConfig) {
+                    throw new MqttException("Hazelcast:config file path error. configFilePath=" + configFile);
+                }
+
+                log.info("Hazelcast:config file path={}", configFile);
+                hzInstance = Hazelcast.newHazelcastInstance(hzConfig);
+
+            } catch (FileNotFoundException e) {
+                throw new MqttException("Hazelcast:could not find hazelcast config file. configFilePath=" + configFile);
+            }
         }
     }
 
@@ -93,6 +83,8 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
      */
     @Override
     public void publish(CommonPublishMessage message) {
+        log.debug("HazelcastInnerTraffic-publish message={}", JSON.toJSONString(message));
+
         ITopic<CommonPublishMessage> topic = hzInstance.getTopic(Constants.HAZELCAST_INNER_TRAFFIC_TOPIC);
         topic.publish(message);
     }

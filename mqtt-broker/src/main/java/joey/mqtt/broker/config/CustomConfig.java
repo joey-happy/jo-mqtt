@@ -16,9 +16,9 @@ import lombok.ToString;
 @ToString
 public class CustomConfig {
     /**
-     * hazelcast配置
+     * 集群间通信配置
      */
-    private HazelcastConfig hazelcastConfig = new HazelcastConfig();
+    private InnerTrafficConfig innerTrafficConfig = new InnerTrafficConfig();
 
     /**
      * redis配置
