@@ -61,7 +61,7 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
                     hzConfig = new ClasspathXmlConfig(configFile.substring(CLASSPATH_URL_PREFIX.length()));
 
                 } else if (configFile.startsWith(FILE_URL_PREFIX)) {
-                    hzConfig = new FileSystemXmlConfig(configFile.substring(CLASSPATH_URL_PREFIX.length()));
+                    hzConfig = new FileSystemXmlConfig(configFile.substring(FILE_URL_PREFIX.length()));
                 }
 
                 if (null == hzConfig) {
