@@ -97,7 +97,7 @@ mqtt.customConfig.redisConfig.pool.minIdle=20
 ```
 
 #### 自定义扩展
-- 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法即可
+- 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法，同时也可以自己实现配置(继承CustomerConfig类,自定义参数)
   > 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.XXXXProvider
 - 扩展方法说明（扩展接口：IExtendProvider）
   >1. 获取messageId存储实现: IMessageIdStore initMessageIdStore();
