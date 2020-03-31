@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- https://github.com/wojiaoxiaomayun/jsUtil/blob/master/mqttX/js%E8%BF%9E%E6%8E%A5mqtt.md -->
+    <!-- https://blog.csdn.net/lcr_happy/article/details/86588770 -->
+
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+        // Create a client instance
+        var options = {
+            //mqtt客户端的id，这里面应该还可以加上其他参数，具体看官方文档
+            clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
+            username: 'local',
+            password: 'local'
+        }
+        //console.log(options.clientId);
+
+        //浏览器采用websocket协议，host主机地址为192.168.0.200，端口为9001，路径为/mqtt
+        var client = mqtt.connect("ws://localhost:2883/mqtt",options) // you add a ws:// url here
+
+        //建立连接
+        client.on('connect', function () {
+            console.log("connect success!")
+            //订阅主题 presence
+            client.subscribe('jo/test', function (err) {
+                if (!err) {
+                    console.log("subscribe success!")
+                    //发布主题presence,消息内容为Hello mqtt
+                    client.publish('jo/test', 'Hello mqtt')
+                }else{
+                    //打印错误
+                    console.log(err)
+                }
+            })
+        })
+
+        //如果连接错误，打印错误
+        client.on('error', function (err) {
+            console.log(err)
+            client.end()
+        })
+
+        //如果client订阅主题成功，那么这里就是当接收到自己订阅主题的处理逻辑
+        client.on('message', function (topic, message) {
+            // message is Buffer,此处就是打印消息的具体内容
+            console.log('-> ' + message.toString())
+        })
+    </script>
+
+    <meta charset="UTF-8">
+    <title>websocket-测试</title>
+</head>
+<body>
+
+</body>
+</html>

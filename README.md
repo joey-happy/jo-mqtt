@@ -11,9 +11,8 @@
 >4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息及cleanSession为true的配置.若想支持集群间通信,请配置mqtt.customer.innerTrafficConfig.enableHazelcast=true或自定义扩展实现
 
 #### 不支持
-1. 暂且不支持websocket协议
-2. 暂且不支持tcp-ssl配置
-3. 不支持topic如下
+1. 暂且不支持tcp-ssl配置
+2. 不支持topic如下
     ```
     * 不支持为空
     * 不支持以'/'开始或结束
@@ -54,7 +53,7 @@ jo-mqtt
 #server config
 mqtt.serverConfig.tcpPort=1883
 #-1表示不开启
-mqtt.serverConfig.webSocketPort=-1
+mqtt.serverConfig.webSocketPort=2883
 mqtt.serverConfig.hostname=
 mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
 #mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
