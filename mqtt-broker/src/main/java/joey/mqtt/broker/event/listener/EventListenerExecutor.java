@@ -54,7 +54,7 @@ public class EventListenerExecutor {
         executorService.shutdown();
     }
 
-    private class EventTask implements Runnable {
+    private static class EventTask implements Runnable {
         private final IEventListener listener;
 
         private final EventMessage message;

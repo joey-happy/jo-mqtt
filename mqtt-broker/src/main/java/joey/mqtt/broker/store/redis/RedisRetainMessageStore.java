@@ -46,22 +46,15 @@ public class RedisRetainMessageStore implements IRetainMessageStore {
 
         if (CollUtil.isNotEmpty(subTokenList)) {
             Map<String, String> retainMessageMap = redisClient.hgetAllWithScan(REDIS_MSG_RETAIN_KEY, REDIS_EACH_SCAN_COUNT);
-            Set<String> topicKeySet = retainMessageMap.keySet();
 
-            if (CollUtil.isNotEmpty(topicKeySet)) {
-                Iterator<String> iterator = topicKeySet.iterator();
-
-                while (iterator.hasNext()) {
-                    String matchTopic = iterator.next();
-
+            if (CollUtil.isNotEmpty(retainMessageMap)) {
+                retainMessageMap.forEach((matchTopic, retainMessageStr) -> {
                     if (TopicUtils.match(subTokenList, TopicUtils.getTokenList(matchTopic))) {
-                        String retainMessageStr = retainMessageMap.get(matchTopic);
-
                         if (StrUtil.isNotBlank(retainMessageStr)) {
                             retainMessageList.add(JSONObject.parseObject(retainMessageStr, CommonPublishMessage.class));
                         }
                     }
-                }
+                });
             }
         }
 

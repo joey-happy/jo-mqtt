@@ -52,10 +52,8 @@ public class SubWildcardTree {
                 break;
             }
 
-            if (null != subNodeWrapper) {
-                matchNodeWrapper = subNodeWrapper;
-                tokenMatchIndex = i;
-            }
+            matchNodeWrapper = subNodeWrapper;
+            tokenMatchIndex = i;
         }
 
         //2.如果节点完全匹配topic 即:所订阅的topic在当前树中存在 则在当前节点添加订阅信息
@@ -122,9 +120,7 @@ public class SubWildcardTree {
                 break;
             }
 
-            if (null != subNodeWrapper) {
-                matchNodeWrapper = subNodeWrapper;
-            }
+            matchNodeWrapper = subNodeWrapper;
         }
 
         //2.没有找到匹配节点
@@ -250,7 +246,7 @@ public class SubWildcardTree {
      * 订阅节点包装 目的:并发添加和删除锁控制
      */
     @Getter
-    private class SubNodeWrapper {
+    private static class SubNodeWrapper {
         private AtomicReference<SubNode> mainNode = new AtomicReference<>();
 
         SubNodeWrapper(SubNode mainNode) {
