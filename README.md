@@ -84,9 +84,9 @@ mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=classpath:hazelcast/haz
 #mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=file:/home/hazelcast-local.xml
 
 #如果使用了RedisExtendProvider 则必须配置redisConfig
-mqtt.customConfig.redisConfig.host=172.16.32.177
+mqtt.customConfig.redisConfig.host=localhost
 mqtt.customConfig.redisConfig.password=
-mqtt.customConfig.redisConfig.port=19000
+mqtt.customConfig.redisConfig.port=6379
 mqtt.customConfig.redisConfig.database=0
 mqtt.customConfig.redisConfig.timeout=3000
 mqtt.customConfig.redisConfig.pool.maxActive=200
