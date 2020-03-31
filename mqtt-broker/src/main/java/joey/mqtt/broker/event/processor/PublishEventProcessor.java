@@ -66,7 +66,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         CommonPublishMessage pubMsg = CommonPublishMessage.convert(message, false, nodeName);
 
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
+        log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName={}", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
 
         //集群间发送消息
         try {
