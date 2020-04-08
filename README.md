@@ -37,7 +37,7 @@ jo-mqtt
 
 #### 快速开始
 - 本地运行
-  - 代码clone到本地，启动MqttApplication程序即可，tcp连接默认端口1883，websocket连接默认端口2883，配置详情：application-local.properties
+  - 代码clone到本地，启动MqttApplication程序即可，tcp端口1883，tcp-ssl端口1888，websocket端口2883，websocket-ssl端口2888，配置详情：application-local.properties
 - jar保运行（本地环境）
   - 代码clone到本地，修改application-production.properties的相关配置，用maven达成jar包
   - nohup java -jar -Dspring.profiles.active=local mqtt-springboot-1.0.0-SNAPSHOT.jar 2>&1 &
