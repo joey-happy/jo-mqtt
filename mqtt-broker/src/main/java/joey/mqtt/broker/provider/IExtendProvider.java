@@ -1,5 +1,6 @@
 package joey.mqtt.broker.provider;
 
+import io.netty.handler.ssl.SslContext;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -16,6 +17,23 @@ import java.util.List;
  * @date 2019/7/23
  */
 public interface IExtendProvider {
+    /**
+     * 初始化sslContext
+     *
+     * 建议使用：keytool -genkey -alias <desired certificate alias>
+     *                         -keystore <path to keystore.pfx>
+     *                         -storetype PKCS12
+     *                         -keyalg RSA
+     *                         -storepass <password>
+     *                         -validity 730
+     *                         -keysize 2048
+     *
+     * @param enableClientCA
+     * @return
+     * @throws Exception
+     */
+    SslContext initSslContext(boolean enableClientCA) throws Exception;
+
     /**
      * 获取messageId存储实现
      * @return
@@ -64,6 +82,7 @@ public interface IExtendProvider {
     /**
      * 获取集群间通信实现
      * @param innerPublishEventProcessor
+     * @param nodeName 部署实例唯一标识
      * @return
      */
     IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName);

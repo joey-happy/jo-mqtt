@@ -27,7 +27,7 @@ public class EventListenerExecutor {
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNamePrefix(EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE).build();
 
         this.executorService = new ThreadPoolExecutor(EVENT_LISTENER_EXECUTOR_THREAD_CORE_SIZE, EVENT_LISTENER_EXECUTOR_THREAD_MAX_SIZE,
-                                                      0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(EVENT_LISTENER_EXECUTOR_THREAD_QUEUE_SIZE),
+                                                      10L, TimeUnit.MINUTES, new LinkedBlockingDeque<>(EVENT_LISTENER_EXECUTOR_THREAD_QUEUE_SIZE),
                                                      threadFactory, new RejectedExecutionHandler() {
                                                                         @Override
                                                                         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
@@ -112,6 +112,8 @@ public class EventListenerExecutor {
 
                 case PING:
                     listener.onPing((PingEventMessage) message);
+                    break;
+
                 default:
                     break;
             }

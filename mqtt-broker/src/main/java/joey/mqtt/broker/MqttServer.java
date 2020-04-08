@@ -5,6 +5,7 @@ import cn.hutool.core.util.ClassLoaderUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -17,6 +18,8 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.StringUtil;
 import joey.mqtt.broker.codec.MqttWebSocketCodec;
@@ -25,12 +28,14 @@ import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.NettyConfig;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.core.MqttMaster;
+import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.handler.MqttMainHandler;
 import joey.mqtt.broker.provider.IExtendProvider;
 import joey.mqtt.broker.util.ConfigUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
 
 /**
@@ -48,13 +53,18 @@ public class MqttServer {
     private final ServerConfig serverConfig;
     private final NettyConfig nettyConfig;
     private final CustomConfig customConfig;
+
     private IExtendProvider extendProvider;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Class<? extends ServerSocketChannel> channelClass;
+
     private Channel tcpChannel;
+    private Channel tcpSslChannel;
+
     private Channel webSocketChannel;
+    private Channel webSocketSslChannel;
 
     private MqttMaster mqttMaster;
 
@@ -82,9 +92,40 @@ public class MqttServer {
 
         initGroups();
 
-        tcpChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.TCP, serverConfig.getTcpPort());
+        boolean startedFlag = false;
 
-        webSocketChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.WEB_SOCKET, serverConfig.getWebSocketPort());
+        //tcp启动
+        int tcpPort = serverConfig.getTcpPort();
+        if (tcpPort > Constants.INT_ZERO) {
+            tcpChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.TCP, tcpPort, false);
+            startedFlag = true;
+        }
+
+        //tcp-ssl启动
+        int tcpSslPort = serverConfig.getTcpSslPort();
+        if (tcpSslPort > Constants.INT_ZERO) {
+            tcpSslChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.TCP, tcpSslPort, true);
+            startedFlag = true;
+        }
+
+        //websocket启动
+        int webSocketPort = serverConfig.getWebSocketPort();
+        if (webSocketPort > Constants.INT_ZERO) {
+            webSocketChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.WEB_SOCKET, webSocketPort, false);
+            startedFlag = true;
+        }
+
+        //websocket-ssl启动
+        int webSocketSslPort = serverConfig.getWebSocketSslPort();
+        if (webSocketSslPort > Constants.INT_ZERO) {
+            webSocketSslChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.WEB_SOCKET, webSocketSslPort, true);
+            startedFlag = true;
+        }
+
+        if (!startedFlag) {
+            stop();
+            throw new MqttException("Mqtt-server 启动失败, 请设置有效的端口号.");
+        }
 
         /**
          * 添加钩子方法
@@ -92,11 +133,7 @@ public class MqttServer {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
-    private Channel startServer(MqttMainHandler mqttMainHandler, Constants.ServerProtocolType protocolType, int port) {
-        if (port <= Constants.INT_ZERO) {
-            return null;
-        }
-
+    private Channel startServer(MqttMainHandler mqttMainHandler, Constants.ServerProtocolType protocolType, int port, boolean useSsl) {
         ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
                                                         .channel(channelClass)
                                         //              .handler(new LoggingHandler(LogLevel.INFO))
@@ -107,6 +144,12 @@ public class MqttServer {
 
                                                                 //心跳检测
                                                                 pipeline.addFirst(Constants.HANDLER_IDLE_STATE, new IdleStateHandler(0, 0, nettyConfig.getChannelTimeoutSeconds()));
+
+                                                                //使用ssl
+                                                                if (useSsl) {
+                                                                    boolean enableClientCA = serverConfig.isEnableClientCA();
+                                                                    pipeline.addLast("ssl", buildSslHandler(channel.alloc(), extendProvider.initSslContext(enableClientCA), enableClientCA));
+                                                                }
 
                                                                 //webSocket协议
                                                                 if (Constants.ServerProtocolType.WEB_SOCKET == protocolType) {
@@ -138,10 +181,10 @@ public class MqttServer {
 
         ChannelFuture channelFuture = bootstrap.bind(socketAddress).addListener((future) -> {
                                             if (future.isSuccess()) {
-                                                log.info(protocolType.name + " server started at port: {}", port);
+                                                log.info(protocolType.name + " server started at port={} useSsl={}", port, useSsl);
 
                                             } else {
-                                                log.error(protocolType.name + " server start failed at port: {}!, errMsg={}", port, future.cause().getMessage());
+                                                log.error(protocolType.name + " server start failed at port={} useSsl={} errMsg={}", port, useSsl, future.cause().getMessage());
                                             }
                                       });
 
@@ -179,6 +222,29 @@ public class MqttServer {
     }
 
     /**
+     * 构建ssl-handler
+     *
+     *
+     * @param alloc
+     * @param sslContext
+     * @param needClientAuth
+     * @return
+     */
+    private ChannelHandler buildSslHandler(ByteBufAllocator alloc, SslContext sslContext, boolean needClientAuth) {
+        SSLEngine sslEngine = sslContext.newEngine(alloc);
+
+        //服务端模式
+        sslEngine.setUseClientMode(false);
+
+        //是否验证客户端
+        if (needClientAuth) {
+            sslEngine.setNeedClientAuth(true);
+        }
+
+        return new SslHandler(sslEngine);
+    }
+
+    /**
      * 停止服务
      */
     public void stop() {
@@ -186,16 +252,28 @@ public class MqttServer {
         workerGroup.shutdownGracefully().syncUninterruptibly();
 
         if (null != tcpChannel) {
+            log.info("Close tcp channel.");
             tcpChannel.closeFuture().syncUninterruptibly();
         }
 
+        if (null != tcpSslChannel) {
+            log.info("Close tcp ssl channel.");
+            tcpSslChannel.closeFuture().syncUninterruptibly();
+        }
+
         if (null != webSocketChannel) {
+            log.info("Close web socket channel.");
             webSocketChannel.closeFuture().syncUninterruptibly();
+        }
+
+        if (null != webSocketSslChannel) {
+            log.info("Close web socket ssl channel.");
+            webSocketSslChannel.closeFuture().syncUninterruptibly();
         }
 
         mqttMaster.close();
 
-        log.info("Server stopped");
+        log.info("Server stopped.");
     }
 
     /**

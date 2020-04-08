@@ -9,10 +9,10 @@
 >2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
 >3. 推荐使用默认配置RedisExtendProvider实现，支持所有Qos等级消息及cleanSession为false的配置.默认采用pub-sub方式实现集群间通信,可自定义扩展实现
 >4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息及cleanSession为true的配置.
+>5. 支持ssl
 
 #### 不支持
-1. 暂且不支持tcp-ssl配置
-2. 不支持topic如下
+1. 不支持topic如下
     ```
     * 不支持为空
     * 不支持以'/'开始或结束
@@ -51,15 +51,27 @@ jo-mqtt
 #### 配置参数
 ```
 #server config
+#tcp端口配置
+#-1表示不开启
 mqtt.serverConfig.tcpPort=1883
 #-1表示不开启
+mqtt.serverConfig.tcpSslPort=1888
+
+#webSocket配置
+mqtt.serverConfig.webSocketPath=/joMqtt
+#-1表示不开启
 mqtt.serverConfig.webSocketPort=2883
+#-1表示不开启
+mqtt.serverConfig.webSocketSslPort=2888
+
+mqtt.serverConfig.enableClientCA=false
+
 mqtt.serverConfig.hostname=
 mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
 #mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
 
 #password 采用sha256hex加密 例子中密码明文和用户名一致
-mqtt.serverConfig.enableAuth=true
+mqtt.serverConfig.enableUserAuth=true
 mqtt.serverConfig.authUsers[0].userName=local
 mqtt.serverConfig.authUsers[0].password=25bf8e1a2393f1108d37029b3df5593236c755742ec93465bbafa9b290bddcf6
 mqtt.serverConfig.authUsers[1].userName=admin
@@ -89,10 +101,23 @@ mqtt.customConfig.redisConfig.password=
 mqtt.customConfig.redisConfig.port=6379
 mqtt.customConfig.redisConfig.database=0
 mqtt.customConfig.redisConfig.timeout=3000
-mqtt.customConfig.redisConfig.pool.maxActive=200
+mqtt.customConfig.redisConfig.pool.maxActive=50
 mqtt.customConfig.redisConfig.pool.maxWait=1000
 mqtt.customConfig.redisConfig.pool.maxIdle=50
 mqtt.customConfig.redisConfig.pool.minIdle=20
+
+# 如果开启ssl 则必须配置如下信息
+# 建议使用：keytool -genkey -alias <desired certificate alias>
+#                         -keystore <path to keystore.pfx>
+#                         -storetype PKCS12
+#                         -keyalg RSA
+#                         -storepass <password>
+#                         -validity 730
+#                         -keysize 2048
+mqtt.customConfig.sslContextConfig.sslKeyFilePath=ssl/jomqtt-server.pfx
+mqtt.customConfig.sslContextConfig.sslKeyStoreType=PKCS12
+mqtt.customConfig.sslContextConfig.sslManagerPwd=jo_mqtt
+mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 ```
 
 #### 自定义扩展
@@ -108,6 +133,7 @@ mqtt.customConfig.redisConfig.pool.minIdle=20
   >7. 获取授权管理实现: IAuth initAuthManager(List<AuthUser> userList);
   >8. 获取集群间通信实现: IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
   >9. 获取事件监听器列表: List<IEventListener> initEventListeners();
+  >10. 初始化sslContext: SslContext initSslContext(boolean enableClientCA) throws Exception;
   
 #### 参考实现
 >1. https://github.com/moquette-io/moquette

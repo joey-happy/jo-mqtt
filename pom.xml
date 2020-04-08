@@ -52,19 +52,25 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-core</artifactId>
-                <version>4.6.6</version>
+                <version>5.2.5</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-setting</artifactId>
-                <version>4.6.6</version>
+                <version>5.2.5</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-crypto</artifactId>
-                <version>4.6.4</version>
+                <version>5.2.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-system</artifactId>
+                <version>5.2.5</version>
             </dependency>
 
             <dependency>

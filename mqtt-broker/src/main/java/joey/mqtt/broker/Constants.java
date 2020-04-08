@@ -79,7 +79,7 @@ public class Constants {
     /**
      * event listener executor 线程池基本属性设置
      */
-    public static final String EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE = "eventListenerExecutor-pool-";
+    public static final String EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
 
     public static final int EVENT_LISTENER_EXECUTOR_THREAD_CORE_SIZE = 10;
 

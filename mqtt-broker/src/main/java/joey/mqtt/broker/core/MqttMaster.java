@@ -91,14 +91,15 @@ public class MqttMaster {
         }
 
         ServerConfig serverConfig = config.getServerConfig();
-        if (serverConfig.isEnableAuth()) {
+        if (serverConfig.isEnableUserAuth()) {
             List<AuthUser> copyAuthUserList = JSONObject.parseArray(JSON.toJSONString(serverConfig.getAuthUsers()), AuthUser.class);
             authManager = extendProvider.initAuthManager(copyAuthUserList);
         }
 
-        connectEvent = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableAuth(), eventListenerExecutor);
+        connectEvent = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
 
         publishEvent = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
+
         connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, eventListenerExecutor, nodeName);
 
         InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEvent);

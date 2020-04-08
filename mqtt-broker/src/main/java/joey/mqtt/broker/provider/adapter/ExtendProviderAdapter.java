@@ -2,18 +2,20 @@ package joey.mqtt.broker.provider.adapter;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
+import io.netty.handler.ssl.SslContext;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.auth.impl.DefaultAuthImpl;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.config.SslContextConfig;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.listener.adapter.EventListenerAdapter;
 import joey.mqtt.broker.inner.IInnerTraffic;
 import joey.mqtt.broker.inner.InnerPublishEventProcessor;
-import joey.mqtt.broker.inner.hazelcast.HazelcastInnerTraffic;
 import joey.mqtt.broker.provider.IExtendProvider;
 import joey.mqtt.broker.store.*;
 import joey.mqtt.broker.store.memory.*;
+import joey.mqtt.broker.util.SslContextUtils;
 
 import java.util.List;
 
@@ -32,6 +34,15 @@ public class ExtendProviderAdapter implements IExtendProvider {
      */
     public ExtendProviderAdapter(CustomConfig customConfig) {
         this.customConfig = customConfig;
+    }
+
+    @Override
+    public SslContext initSslContext(boolean enableClientCA) throws Exception {
+        SslContextConfig cfg = customConfig.getSslContextConfig();
+
+        return SslContextUtils.build(enableClientCA, cfg.getSslKeyFilePath(),
+                                     cfg.getSslKeyStoreType(), cfg.getSslManagerPwd(),
+                                     cfg.getSslStorePwd());
     }
 
     @Override

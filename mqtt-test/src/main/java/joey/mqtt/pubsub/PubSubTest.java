@@ -5,8 +5,6 @@ import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.pubsub.performance.MqttCounter;
 import joey.mqtt.pubsub.performance.TestMqttClient;
 
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,7 +12,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/11/12
  */
 public class PubSubTest {
-    private static final String SERVICE_URL = "tcp://172.16.32.179:1883";
+    private static final String SERVICE_URL = "tcp://localhost:1883";
+    private static final String SERVICE_SSL_URL = "ssl://localhost:1888";
     private static final String DEFAULT_TOPIC = "jo/test";
 
     public static void main(String[] args) throws Exception {
@@ -29,14 +28,15 @@ public class PubSubTest {
             topic = DEFAULT_TOPIC;
         }
 
-        String clientIdPre = RandomUtil.randomString(10);
-        System.out.println("broker = " + broker + " topic = " + topic + " clientIdPre=" + clientIdPre);
+        for (int i = 0; i < 10; i++) {
+            String clientIdPre = RandomUtil.randomString(10);
+            new TestMqttClient(topic, clientIdPre + "_"+ i, broker, MqttQoS.AT_MOST_ONCE.value(), false);
+        }
 
-//        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 300, 30, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
-        for (int i = 0; i < 4500; i++) {
-//            executor.execute(new TestMqttClient(topic, clientIdPre + "_"+ i, broker, MqttQoS.AT_MOST_ONCE.value()));
-//            new Thread(new TestMqttClient(topic, clientIdPre + "_"+ i, broker, MqttQoS.AT_MOST_ONCE.value())).start();
-            new TestMqttClient(topic, clientIdPre + "_"+ i, broker, MqttQoS.AT_MOST_ONCE.value());
+        //SSL test
+        for (int i = 0; i < 10; i++) {
+            String clientIdPre = RandomUtil.randomString(10);
+            new TestMqttClient(topic, clientIdPre + "_"+ i, SERVICE_SSL_URL, MqttQoS.AT_MOST_ONCE.value(), true);
         }
 
         //定时查询统计数量

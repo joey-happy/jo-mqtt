@@ -24,4 +24,9 @@ public class CustomConfig {
      * redis配置
      */
     private RedisConfig redisConfig = new RedisConfig();
+
+    /**
+     * sslContext配置
+     */
+    private SslContextConfig sslContextConfig = new SslContextConfig();
 }

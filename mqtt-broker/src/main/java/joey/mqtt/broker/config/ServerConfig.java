@@ -18,16 +18,34 @@ import java.util.List;
 @ToString
 public class ServerConfig {
     /**
-     * tcp端口
+     * tcp端口 -1表示不启动
      */
     private int tcpPort = 1883;
 
     /**
-     * webSocket端口 -1表示不启动webSocket
+     * tcp-ssl端口 -1表示不启动
      */
-    private int webSocketPort = -1;
+    private int tcpSslPort = 1888;
 
-    private String webSocketPath = "/mqtt";
+    /**
+     * webSocket访问路径
+     */
+    private String webSocketPath = "/joMqtt";
+
+    /**
+     * webSocket端口 -1表示不启动
+     */
+    private int webSocketPort = 2883;
+
+    /**
+     * websocket-ssl端口 -1表示不启动
+     */
+    private int webSocketSslPort = 2888;
+
+    /**
+     * 开启用户CA认证
+     */
+    private boolean enableClientCA = false;
 
     private String hostname;
 
@@ -39,7 +57,7 @@ public class ServerConfig {
     /**
      * 开启用户名密码认证
      */
-    private boolean enableAuth = true;
+    private boolean enableUserAuth = true;
 
     /**
      * 授权用户名和密码list

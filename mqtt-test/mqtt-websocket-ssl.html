@@ -15,8 +15,8 @@
         }
         //console.log(options.clientId);
 
-        //浏览器采用websocket协议，host主机地址为192.168.0.200，端口为9001，路径为/mqtt
-        var client = mqtt.connect("ws://localhost:2883/joMqtt",options) // you add a ws:// url here
+        //针对wss连接 测试的时候 需要获得浏览器的信任 操作方法如下 1.输入https://localhost:2888/joMqtt 2.获得信任后继续前往 此时在访问此页面即可
+        var client = mqtt.connect("wss://localhost:2888/joMqtt",options)
 
         //建立连接
         client.on('connect', function () {
