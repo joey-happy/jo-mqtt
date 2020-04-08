@@ -8,7 +8,7 @@
 >1. 使用netty实现通信及协议解析
 >2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
 >3. 推荐使用默认配置RedisExtendProvider实现，支持所有Qos等级消息及cleanSession为false的配置.默认采用pub-sub方式实现集群间通信,可自定义扩展实现
->4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息及cleanSession为true的配置.
+>4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息及cleanSession为true的配置
 >5. 支持ssl,wss协议
 
 #### 不支持
