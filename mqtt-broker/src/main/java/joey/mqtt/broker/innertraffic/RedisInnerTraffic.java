@@ -1,4 +1,4 @@
-package joey.mqtt.broker.inner.redis;
+package joey.mqtt.broker.innertraffic;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -6,8 +6,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
 import joey.mqtt.broker.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.JedisPubSub;

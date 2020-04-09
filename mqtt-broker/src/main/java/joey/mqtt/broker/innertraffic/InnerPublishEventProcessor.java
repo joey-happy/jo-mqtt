@@ -1,4 +1,4 @@
-package joey.mqtt.broker.inner;
+package joey.mqtt.broker.innertraffic;
 
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.event.processor.PublishEventProcessor;

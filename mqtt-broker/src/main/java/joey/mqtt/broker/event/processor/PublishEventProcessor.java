@@ -13,7 +13,7 @@ import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PublishEventMessage;
-import joey.mqtt.broker.inner.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
 import joey.mqtt.broker.store.*;
 import joey.mqtt.broker.util.MessageUtils;
 import joey.mqtt.broker.util.NettyUtils;

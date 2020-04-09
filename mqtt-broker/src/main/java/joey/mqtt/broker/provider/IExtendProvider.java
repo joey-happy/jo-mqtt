@@ -4,8 +4,8 @@ import io.netty.handler.ssl.SslContext;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.event.listener.IEventListener;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
 import joey.mqtt.broker.store.*;
 
 import java.util.List;

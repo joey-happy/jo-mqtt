@@ -1,4 +1,4 @@
-package joey.mqtt.broker.provider.adapter;
+package joey.mqtt.broker.provider;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
@@ -10,9 +10,9 @@ import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.SslContextConfig;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.listener.adapter.EventListenerAdapter;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
-import joey.mqtt.broker.provider.IExtendProvider;
+import joey.mqtt.broker.innertraffic.EmptyInnerTraffic;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
 import joey.mqtt.broker.store.*;
 import joey.mqtt.broker.store.memory.*;
 import joey.mqtt.broker.util.SslContextUtils;
@@ -82,7 +82,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     @Override
     public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName) {
-        return null;
+        return new EmptyInnerTraffic();
     }
 
     @Override

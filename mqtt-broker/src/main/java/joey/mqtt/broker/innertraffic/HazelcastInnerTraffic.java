@@ -1,4 +1,4 @@
-package joey.mqtt.broker.inner.hazelcast;
+package joey.mqtt.broker.innertraffic;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -10,8 +10,6 @@ import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.exception.MqttException;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileNotFoundException;
@@ -35,7 +33,7 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
 
     public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
         this.innerPublishEventProcessor = innerPublishEventProcessor;
-        this.configFile = customConfig.getInnerTrafficConfig().getHazelcastConfigFile();
+        this.configFile = customConfig.getHazelcastConfigFile();
         this.nodeName = nodeName;
 
         initHazelcastInstance();

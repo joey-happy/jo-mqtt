@@ -5,21 +5,24 @@
 
 #### 软件架构说明
 基于netty+springboot+redis+hazelcast技术栈实现
->1. 使用netty实现通信及协议解析
->2. 使用springboot提供依赖注入及属性配置,方便打包及快速部署
->3. 推荐使用默认配置RedisExtendProvider实现，支持所有Qos等级消息及cleanSession为false的配置.默认采用pub-sub方式实现集群间通信,可自定义扩展实现
->4. 默认ExtendProviderAdapter实现只支持Qos等级为0的消息及cleanSession为true的配置
->5. 支持ssl,wss协议
+- 使用netty实现通信及协议解析
+- 使用springboot提供依赖注入及属性配置,方便打包及快速部署
+- 支持ssl,wss协议
+- 自定义实现扩展
+    >1. RedisExtendProvider实现，支持集群间通信，支持Qos所有等级消息
+    >2. HazelcastExtendProvider实现，支持集群间通信，只支持Qos为0等级的消息
+    >3. ExtendProviderAdapter实现，不支持集群间通信，只支持Qos为0等级的消息
+    >4. 以上3中不满足用户需求，可以自行扩展，修改配置文件mqtt.serverConfig.extendProviderClass=xxx.xxx.provider.XXXXProvider即可,可参考RedisExtendProvider实现
 
 #### 不支持
-1. 不支持topic如下
-    ```
-    * 不支持为空
-    * 不支持以'/'开始或结束
-    * 不支持命名为'joRootTopic'
-    * 不支持分隔符之间无字符 例如：ab///c
-    * 不支持包含禁用字符 例如：ab/+11 或者c/12#1
-    ```
+不支持topic如下
+```
+* 不支持为空
+* 不支持以'/'开始或结束
+* 不支持命名为'joRootTopic'
+* 不支持分隔符之间无字符 例如：ab///c
+* 不支持包含禁用字符 例如：ab/+11 或者c/12#1
+```
 #### 项目结构
 ```
 jo-mqtt
@@ -46,7 +49,7 @@ jo-mqtt
 采用log4j2日志框架，可自行定义日志格式，修改log4j2.xml文件中相关配置即可
 
 #### 集群使用
-目前集群默认使用RedisExtendProvider实现扩展，则集群间通信依赖redis的pubsub功能
+集群默认使用RedisExtendProvider实现扩展，则集群间通信依赖redis的pubsub功能
 
 #### 配置参数
 ```
@@ -67,8 +70,18 @@ mqtt.serverConfig.webSocketSslPort=2888
 mqtt.serverConfig.enableClientCA=false
 
 mqtt.serverConfig.hostname=
-mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.redis.RedisExtendProvider
-#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.ExtendProviderAdapter
+
+#provider配置 默认有如下3中实现
+#支持集群间通信 支持消息持久化
+mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.RedisExtendProvider
+
+#不支持集群间通信 不支持消息持久化
+#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.ExtendProviderAdapter
+
+#hazelcastProvider相关配置 支持集群间通信 不支持消息持久化
+#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.HazelcastExtendProvider
+#mqtt.customConfig.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
+#mqtt.customConfig.hazelcastConfigFile=file:/home/hazelcast-local.xml
 
 #password 采用sha256hex加密 例子中密码明文和用户名一致
 mqtt.serverConfig.enableUserAuth=true
@@ -88,12 +101,6 @@ mqtt.nettyConfig.soSndBuf=65536
 mqtt.nettyConfig.soRcvBuf=65536
 mqtt.nettyConfig.soKeepAlive=true
 mqtt.nettyConfig.channelTimeoutSeconds=200
-
-#customer config
-#inner traffic config 如果mqtt.serverConfig.extendProviderClass配置的实现类实现了initInnerTraffic方法 则如下配置无效
-mqtt.customConfig.innerTrafficConfig.enableHazelcast=false
-mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=classpath:hazelcast/hazelcast-local.xml
-#mqtt.customConfig.innerTrafficConfig.hazelcastConfigFile=file:/home/hazelcast-local.xml
 
 #如果使用了RedisExtendProvider 则必须配置redisConfig
 mqtt.customConfig.redisConfig.host=localhost
@@ -122,7 +129,7 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 
 #### 自定义扩展
 - 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法，同时也可以自己实现配置(继承CustomerConfig类,自定义参数)
-  > 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.adapter.XXXXProvider
+  > 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.XXXXProvider
 - 扩展方法说明（扩展接口：IExtendProvider）
   >1. 获取messageId存储实现: IMessageIdStore initMessageIdStore();
   >2. 获取session存储实现: ISessionStore initSessionStore();

@@ -8,17 +8,13 @@ import io.netty.handler.codec.mqtt.*;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.config.Config;
-import joey.mqtt.broker.config.CustomConfig;
-import joey.mqtt.broker.config.InnerTrafficConfig;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.processor.*;
 import joey.mqtt.broker.exception.MqttException;
-import joey.mqtt.broker.inner.EmptyInnerTraffic;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
-import joey.mqtt.broker.inner.hazelcast.HazelcastInnerTraffic;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
 import joey.mqtt.broker.provider.IExtendProvider;
 import joey.mqtt.broker.store.*;
 import lombok.Getter;
@@ -104,22 +100,6 @@ public class MqttMaster {
 
         InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEvent);
         innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
-
-        //若provider没有提供实现 则以配置文件为主
-        if (null == innerTraffic) {
-            CustomConfig customConfig = config.getCustomConfig();
-
-            InnerTrafficConfig innerTrafficConfig = customConfig.getInnerTrafficConfig();
-            boolean enableHazelcast = innerTrafficConfig.isEnableHazelcast();
-
-            if (enableHazelcast) {
-                innerTraffic = new HazelcastInnerTraffic(innerPublishEventProcessor, customConfig, nodeName);
-
-            } else {
-                //如果没有配置 则用空实现
-                innerTraffic = new EmptyInnerTraffic();
-            }
-        }
 
         publishEvent.setInnerTraffic(innerTraffic);
 

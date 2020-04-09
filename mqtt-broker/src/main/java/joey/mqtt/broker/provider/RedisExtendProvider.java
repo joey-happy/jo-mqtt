@@ -1,12 +1,11 @@
-package joey.mqtt.broker.provider.redis;
+package joey.mqtt.broker.provider;
 
 import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.RedisConfig;
-import joey.mqtt.broker.inner.IInnerTraffic;
-import joey.mqtt.broker.inner.InnerPublishEventProcessor;
-import joey.mqtt.broker.inner.redis.RedisInnerTraffic;
-import joey.mqtt.broker.provider.adapter.ExtendProviderAdapter;
+import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
+import joey.mqtt.broker.innertraffic.RedisInnerTraffic;
 import joey.mqtt.broker.redis.RedisClient;
 import joey.mqtt.broker.store.IDupPubMessageStore;
 import joey.mqtt.broker.store.IDupPubRelMessageStore;

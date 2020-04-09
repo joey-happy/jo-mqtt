@@ -1,4 +1,4 @@
-package joey.mqtt.broker.inner;
+package joey.mqtt.broker.innertraffic;
 
 import com.alibaba.fastjson.JSON;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
