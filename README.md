@@ -143,7 +143,8 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
   >7. 获取授权管理实现: IAuth initAuthManager(List<AuthUser> userList);
   >8. 获取集群间通信实现: IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor);
   >9. 获取事件监听器列表: List<IEventListener> initEventListeners();
-  >10. 初始化sslContext: SslContext initSslContext(boolean enableClientCA) throws Exception;
+  >10. 获取当前实例节点名称 String getNodeName();
+  >11. 初始化sslContext: SslContext initSslContext(boolean enableClientCA) throws Exception;
   
 #### 参考实现
 >1. https://github.com/moquette-io/moquette
