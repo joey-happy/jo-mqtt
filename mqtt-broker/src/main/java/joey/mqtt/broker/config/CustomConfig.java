@@ -1,5 +1,6 @@
 package joey.mqtt.broker.config;
 
+import cn.hutool.core.util.IdUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,4 +31,9 @@ public class CustomConfig {
      * sslContext配置
      */
     private SslContextConfig sslContextConfig = new SslContextConfig();
+
+    /**
+     * 节点名称 用于区分不同的服务实例
+     */
+    private String nodeName = IdUtil.fastSimpleUUID();
 }

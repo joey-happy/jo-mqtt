@@ -125,6 +125,9 @@ mqtt.customConfig.sslContextConfig.sslKeyFilePath=ssl/jomqtt-server.pfx
 mqtt.customConfig.sslContextConfig.sslKeyStoreType=PKCS12
 mqtt.customConfig.sslContextConfig.sslManagerPwd=jo_mqtt
 mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
+
+#自定义节点名称 可以不配置 默认是UUID
+#mqtt.customConfig.nodeName=jo_mqtt_1
 ```
 
 #### 自定义扩展

@@ -92,6 +92,6 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     @Override
     public String getNodeName() {
-        return UUID.randomUUID().toString();
+        return customConfig.getNodeName();
     }
 }
