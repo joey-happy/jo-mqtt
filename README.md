@@ -153,6 +153,7 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 >4. https://github.com/Wizzercn/MqttWk
 >5. https://github.com/daoshenzzg/socket-mqtt
 >6. https://github.com/1ssqq1lxr/iot_push
+>7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
 
 #### 压测工具
 >1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
