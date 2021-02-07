@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 本配置文件的目标是将不同级别的日志输出到不同文件，最大2MB一个文件， 文件数据达到最大值时，旧数据会被压缩并放进指定文件夹 -->
+
+<!-- status : 这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部各种详细输出 monitorInterval -->
+<!-- monitorInterval="60"表示每60秒配置文件会动态加载一次。在程序运行过程中，如果修改配置文件，程序会随之改变。 -->
+<configuration status="error" monitorInterval="300">
+    <!-- 定义通用的属性 -->
+    <Properties>
+        <Property name="LOG_PATH">./</Property><!-- 这里的logs为项目根目录下的logs文件夹 -->
+        <Property name="LOG_PATTERN">[%d{yyyy-MM-dd HH:mm:ss,sss}] [%-5p] [%t] %c{1.}:%L %m%n</Property><!-- 定义统一的日志输出格式 -->
+        <!-- 高亮控制台输出  -->
+        <Property name="LOG_PATTERN_HIGHLIGHT">%highlight{${LOG_PATTERN}}{FATAL=Bright Red, ERROR=Magenta, WARN=Cyan, INFO=Green}</Property>
+    </Properties>
+
+    <appenders>
+        <!-- 控制台输出  -->
+        <Console name="console" target="SYSTEM_OUT">
+            <!-- level定义级别 -->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout pattern="${LOG_PATTERN_HIGHLIGHT}"/>
+        </Console>
+    </appenders>
+
+    <Loggers>
+        <!-- 配置日志的根节点 -->
+        <root level="debug">
+            <appender-ref ref="console" />
+        </root>
+
+        <logger name="org.springframework" level="INFO" />
+        <logger name="com.hazelcast" level="INFO" />
+    </Loggers>
+</configuration>

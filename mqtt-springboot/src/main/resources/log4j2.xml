@@ -15,11 +15,11 @@
 
     <appenders>
         <!-- 控制台输出  -->
-        <Console name="console" target="SYSTEM_OUT">
-            <!-- level定义级别 -->
+<!--        <Console name="console" target="SYSTEM_OUT">
+            &lt;!&ndash; level定义级别 &ndash;&gt;
             <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="${LOG_PATTERN_HIGHLIGHT}"/>
-        </Console>
+        </Console>-->
 
         <!--这个输出控制台的配置，这里输出warn和error级别的信息到System.err，在eclipse控制台上看到的是红色文字 -->
         <!-- <Console name="console_err_appender" target="SYSTEM_ERR">
@@ -65,7 +65,6 @@
     <Loggers>
         <!-- 配置日志的根节点 -->
         <root level="debug">
-            <appender-ref ref="console" />
             <appender-ref ref="infoRollingRandomAccessFile" />
             <appender-ref ref="errorRollingRandomAccessFile" />
         </root>
