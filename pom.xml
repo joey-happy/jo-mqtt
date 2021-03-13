@@ -20,6 +20,8 @@
         <mqtt.springboot.version>1.0.0-SNAPSHOT</mqtt.springboot.version>
         <mqtt.test.version>1.0.0-SNAPSHOT</mqtt.test.version>
 
+        <springboot.version>2.2.8.RELEASE</springboot.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -37,7 +39,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.1.7.RELEASE</version>
+                <version>${springboot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -52,25 +54,25 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-core</artifactId>
-                <version>5.2.5</version>
+                <version>5.5.9</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-setting</artifactId>
-                <version>5.2.5</version>
+                <version>5.5.9</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-crypto</artifactId>
-                <version>5.2.5</version>
+                <version>5.5.9</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-system</artifactId>
-                <version>5.2.5</version>
+                <version>5.5.9</version>
             </dependency>
 
             <dependency>
@@ -113,7 +115,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.59</version>
+                <version>1.2.75</version>
             </dependency>
 
             <dependency>
@@ -123,4 +125,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

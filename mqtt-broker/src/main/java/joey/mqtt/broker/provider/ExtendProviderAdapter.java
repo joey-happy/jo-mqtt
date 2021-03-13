@@ -82,7 +82,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     @Override
     public IInnerTraffic initInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, String nodeName) {
-        return new EmptyInnerTraffic();
+        return new EmptyInnerTraffic(nodeName, innerPublishEventProcessor);
     }
 
     @Override

@@ -11,7 +11,11 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2019/12/3
  */
 @Slf4j
-public class EmptyInnerTraffic implements IInnerTraffic {
+public class EmptyInnerTraffic extends BaseInnerTraffic {
+
+    public EmptyInnerTraffic(String nodeName, InnerPublishEventProcessor innerPublishEventProcessor) {
+        super(nodeName, innerPublishEventProcessor);
+    }
 
     @Override
     public void publish(CommonPublishMessage message) {

@@ -7,17 +7,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * session controller
+ *
  * @author Joey
  * @date 2019/9/20
  */
 @RestController()
-@RequestMapping("/test")
-public class TestController {
+@RequestMapping("/api/session")
+public class SessionController {
     @Autowired
     private MqttServer mqttServer;
 
-    @GetMapping("/sessionCount")
-    public Object sessionCount() {
+    @GetMapping("/count")
+    public Object count() {
         return mqttServer.sessionCount();
     }
 }

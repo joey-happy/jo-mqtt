@@ -1,6 +1,3 @@
-/**
- * Copyright (c) 2014 http://www.jieqianhua.com
- */
 package joey.mqtt.broker.redis;
 
 import cn.hutool.core.collection.CollUtil;

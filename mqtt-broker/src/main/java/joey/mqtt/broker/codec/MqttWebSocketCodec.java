@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2018, Mr.Wang (recallcode@aliyun.com) All rights reserved.
- */
-
 package joey.mqtt.broker.codec;
 
 import io.netty.buffer.ByteBuf;
@@ -13,6 +9,10 @@ import java.util.List;
 
 /**
  * WebSocket Mqtt消息编解码器
+ *
+ * @author Joey
+ * @date 2021-03-13
+ *
  */
 public class MqttWebSocketCodec extends MessageToMessageCodec<BinaryWebSocketFrame, ByteBuf> {
 

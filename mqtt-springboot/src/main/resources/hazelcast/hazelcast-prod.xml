@@ -9,8 +9,8 @@
     </properties>
 
     <group>
-        <name>production</name>
-        <password>production!@#$</password>
+        <name>prod</name>
+        <password>prod!@#$</password>
     </group>
 
     <network>

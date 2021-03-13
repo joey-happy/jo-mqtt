@@ -24,17 +24,14 @@ import static cn.hutool.core.util.URLUtil.FILE_URL_PREFIX;
  * @date 2019/7/25
  */
 @Slf4j
-public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<CommonPublishMessage> {
-    private final InnerPublishEventProcessor innerPublishEventProcessor;
+public class HazelcastInnerTraffic extends BaseInnerTraffic implements MessageListener<CommonPublishMessage> {
     private final String configFile;
-    private final String nodeName;
 
     private HazelcastInstance hzInstance;
 
     public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
-        this.innerPublishEventProcessor = innerPublishEventProcessor;
+        super(nodeName, innerPublishEventProcessor);
         this.configFile = customConfig.getHazelcastConfigFile();
-        this.nodeName = nodeName;
 
         initHazelcastInstance();
 
@@ -66,7 +63,7 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
                     throw new MqttException("Hazelcast:config file path error. configFilePath=" + configFile);
                 }
 
-                log.info("Hazelcast:config file path={}", configFile);
+                log.info("Hazelcast:config file path={},config={}.", configFile, hzConfig);
                 hzInstance = Hazelcast.newHazelcastInstance(hzConfig);
 
             } catch (FileNotFoundException e) {
@@ -81,7 +78,7 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
      */
     @Override
     public void publish(CommonPublishMessage message) {
-        log.debug("HazelcastInnerTraffic-publish message={}", JSON.toJSONString(message));
+        log.info("HazelcastInnerTraffic-publish message={}", JSON.toJSONString(message));
 
         ITopic<CommonPublishMessage> topic = hzInstance.getTopic(Constants.HAZELCAST_INNER_TRAFFIC_TOPIC);
         topic.publish(message);
@@ -99,8 +96,8 @@ public class HazelcastInnerTraffic implements IInnerTraffic, MessageListener<Com
                 //集群间接收到消息 retain设置为false
                 commonPubMsg.setRetain(false);
 
-                log.info("Hazelcast:receive cluster message. message={}", commonPubMsg.toString());
-                innerPublishEventProcessor.publish2Subscribers(commonPubMsg);
+                log.info("Hazelcast:receive cluster message. nodeName={},message={}", nodeName, commonPubMsg.toString());
+                super.publish2Subscribers(commonPubMsg);
             }
         } catch (Exception ex) {
             log.error("Hazelcast:onMessage error. msg={}", msg, ex);
