@@ -157,7 +157,7 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 
 #### 压测工具
 >1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
->2. https://github.com/daoshenzzg/mqtt-mock ./mqtt-mock -broker "tcp://10.10.2.87:1883" -c 2000 -n 500000 -action sub -topic test -username local -password local
+>2. https://github.com/daoshenzzg/mqtt-mock ./mqtt-mock -broker "tcp://localhost:1883" -c 6000 -n 1000 -action sub -topic test -username local -password local -debug true
 
 #### 工具推荐
 >1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
