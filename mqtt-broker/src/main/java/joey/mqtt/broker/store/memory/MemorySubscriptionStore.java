@@ -51,7 +51,7 @@ public class MemorySubscriptionStore implements ISubscriptionStore {
 
         List<String> topicTokenList = TopicUtils.getTokenList(topic);
         if (CollUtil.isEmpty(topicTokenList)) {
-            log.error("MemorySubscriptionStore-addSub topic is not valid.topic={}", topic);
+            log.error("MemorySubscriptionStore-addSub topic is not valid. clientId={},topic={}", subscription.getClientId(), topic);
             return false;
         }
 

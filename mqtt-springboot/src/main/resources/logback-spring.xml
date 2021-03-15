@@ -75,15 +75,35 @@
         </encoder>
     </appender>
 
+    <!-- debug级别日志，按大小切分 -->
+    <appender name="ROLLING_FILE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <prudent>true</prudent>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.directory}${log.context.name}/${HOSTNAME}_debug.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <charset>${log.charset}</charset>
+        </encoder>
+    </appender>
+
     <logger name="org.springframework.web" level="INFO"/>
 
-    <root level="info">
+    <root level="debug">
         <springProfile name="local">
             <appender-ref ref="STDOUT"/>
-            <appender-ref ref="ROLLING_FILE_DEFAULT"/>
-            <appender-ref ref="ROLLING_FILE_ERROR"/>
         </springProfile>
+
         <springProfile name="!local">
+            <appender-ref ref="ROLLING_FILE_DEBUG"/>
             <appender-ref ref="ROLLING_FILE_DEFAULT"/>
             <appender-ref ref="ROLLING_FILE_ERROR"/>
         </springProfile>
