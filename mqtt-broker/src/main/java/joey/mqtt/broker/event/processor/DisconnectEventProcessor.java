@@ -54,11 +54,11 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
         String userName = NettyUtils.userName(channel);
         log.info("Process-disconnect. clientId={},userName={}", clientId, userName);
 
+        Channel sessionChannel = null;
         ClientSession clientSession = sessionStore.get(clientId);
         if (null != clientSession) {
             if (clientSession.isCleanSession()) {
-                Set<Subscription> subSet = clientSession.getAllSubInfo();
-
+                Set<Subscription> subSet = clientSession.findAllSubInfo();
                 if (CollectionUtil.isNotEmpty(subSet)) {
                     Iterator<Subscription> iterator = subSet.iterator();
 
@@ -73,10 +73,16 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
                 dupPubRelMessageStore.removeAllFor(clientId);
             }
 
+            sessionChannel = clientSession.getChannel();
+            clientSession.closeChannel();
+
             sessionStore.remove(clientId);
-            channel.close();
 
             eventListenerExecutor.execute(new DisconnectEventMessage(clientId, userName), IEventListener.Type.DISCONNECT);
+        }
+
+        if (channel != sessionChannel) {
+            channel.close();
         }
     }
 }

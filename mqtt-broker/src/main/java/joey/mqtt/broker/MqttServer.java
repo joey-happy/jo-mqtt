@@ -28,6 +28,7 @@ import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.NettyConfig;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.core.MqttMaster;
+import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.handler.MqttMainHandler;
 import joey.mqtt.broker.provider.IExtendProvider;
@@ -282,6 +283,14 @@ public class MqttServer {
      */
     public long sessionCount() {
         return mqttMaster.sessionCount();
+    }
+
+    /**
+     * 获取client信息
+     * @param clientId
+     */
+    public ClientSession getClientInfoFor(String clientId) {
+        return mqttMaster.getClientInfoFor(clientId);
     }
 
     /**

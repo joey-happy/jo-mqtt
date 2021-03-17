@@ -48,13 +48,11 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
 
             if (null != clientSession) {
                 log.info("Process-connectionLost. clientId={},userName={}", clientId, userName);
-                //session移除
-                sessionStore.remove(clientId);
 
-                MqttPublishMessage willMessage = clientSession.getWillMessage();
+                CommonPublishMessage willPubMsg = clientSession.getPubMsgForWillMessage();
                 //发送遗言消息
-                if (null != willMessage) {
-                    CommonPublishMessage willPubMsg = CommonPublishMessage.convert(willMessage, true, nodeName);
+                if (null != willPubMsg) {
+                    willPubMsg.setSourceNodeName(nodeName);
                     log.info("Process-connectionLost publish will message. clientId={},userName={},topic={}", clientId, userName, willPubMsg.getTopic());
 
                     //发布遗言消息到订阅者
@@ -63,6 +61,8 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
                     //存储retain遗言
                     publishEventProcessor.handleRetainMessage(willPubMsg);
                 }
+
+                clientSession.resetChannelAndWillMsg();
 
                 //处理监听连接丢失事件
                 eventListenerExecutor.execute(new ConnectionLostEventMessage(clientId, userName), IEventListener.Type.CONNECTION_LOST);

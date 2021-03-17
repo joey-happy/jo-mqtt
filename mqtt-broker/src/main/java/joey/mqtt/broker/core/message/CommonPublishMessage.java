@@ -1,5 +1,7 @@
 package joey.mqtt.broker.core.message;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import joey.mqtt.broker.util.MessageUtils;
@@ -9,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 通用发布消息
@@ -35,7 +38,7 @@ public class CommonPublishMessage implements Serializable {
 
     private boolean isWill = false;
 
-    private long createTimestamp;
+    private String createTimeStr;
 
     private String sourceNodeName;
 
@@ -50,7 +53,7 @@ public class CommonPublishMessage implements Serializable {
         convert.isRetain = msg.fixedHeader().isRetain();
         convert.isWill = isWill;
 
-        convert.createTimestamp = System.currentTimeMillis();
+        convert.createTimeStr = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
         convert.sourceNodeName = sourceNodeName;
 
         return convert;
@@ -58,8 +61,6 @@ public class CommonPublishMessage implements Serializable {
 
     public CommonPublishMessage copy() {
         CommonPublishMessage copy = new CommonPublishMessage();
-
-        copy.targetClientId = this.targetClientId;
 
         copy.topic = this.topic;
         copy.messageId = this.messageId;
@@ -69,7 +70,7 @@ public class CommonPublishMessage implements Serializable {
         copy.isRetain = this.isRetain;
         copy.isWill = this.isWill;
 
-        copy.createTimestamp = this.createTimestamp;
+        copy.createTimeStr = this.createTimeStr;
         copy.sourceNodeName = this.sourceNodeName;
 
         return copy;

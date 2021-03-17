@@ -1,9 +1,13 @@
 package joey.mqtt.broker.core.subscription;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -19,10 +23,13 @@ public class Subscription implements Serializable {
 
     private final MqttQoS qos;
 
+    private final String createTimeStr;
+
     public Subscription(String clientId, String topic, MqttQoS qos) {
         this.clientId = clientId;
         this.topic = topic;
         this.qos = qos;
+        this.createTimeStr = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
     }
 
     @Override
@@ -43,4 +50,8 @@ public class Subscription implements Serializable {
         return Objects.hash(clientId, topic);
     }
 
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
 }

@@ -9,6 +9,7 @@ import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.config.ServerConfig;
+import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.processor.*;
@@ -226,14 +227,6 @@ public class MqttMaster {
     }
 
     /**
-     * 获取session数量
-     * @return
-     */
-    public long sessionCount() {
-        return sessionStore.sessionCount();
-    }
-
-    /**
      * 资源关闭
      */
     public void close() {
@@ -248,5 +241,21 @@ public class MqttMaster {
         dupPubRelMessageStore.close();
 
         eventListenerExecutor.close();
+    }
+
+    /**
+     * 获取session数量
+     * @return
+     */
+    public long sessionCount() {
+        return sessionStore.sessionCount();
+    }
+
+    /**
+     * 获取client信息
+     * @param clientId
+     */
+    public ClientSession getClientInfoFor(String clientId) {
+        return sessionStore.get(clientId);
     }
 }

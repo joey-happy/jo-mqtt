@@ -73,6 +73,7 @@ public class MemorySubscriptionStore implements ISubscriptionStore {
                     }
 
                     subSet.add(subscription);
+                    log.debug("MemorySubscriptionStore-addSub success. subscription={}", subscription);
 
                     lockMap.remove(topic);
                     break;
@@ -114,6 +115,7 @@ public class MemorySubscriptionStore implements ISubscriptionStore {
                             subSet = commonSubCache.get(topic);
                             if (CollectionUtil.isEmpty(subSet)) {
                                 commonSubCache.remove(topic);
+                                log.debug("MemorySubscriptionStore-removeSub success. subscription={}", subscription);
                             }
 
                             //释放锁

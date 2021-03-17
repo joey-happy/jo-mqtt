@@ -1,5 +1,6 @@
 package joey.mqtt.broker.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -83,7 +84,6 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
             }
         } catch (Throwable ex) {
             log.error("MqttMainHandler handle message exception: " + ex.getCause(), ex);
-
             ctx.fireExceptionCaught(ex);
             ctx.close();
         }
@@ -95,6 +95,7 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
      * @param msg
      */
     private void handleDecoderFailure(ChannelHandlerContext ctx, MqttMessage msg) {
+        final Channel channel = ctx.channel();
         Throwable cause = msg.decoderResult().cause();
 
         if (cause instanceof MqttUnacceptableProtocolVersionException) {
@@ -102,22 +103,22 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
-            ctx.channel().writeAndFlush(connAckMessage);
+            channel.writeAndFlush(connAckMessage);
 
         } else if (cause instanceof MqttIdentifierRejectedException) {
             // 不合格的clientId
             MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
                     new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
-            ctx.channel().writeAndFlush(connAckMessage);
+            channel.writeAndFlush(connAckMessage);
         }
 
-        ctx.channel().close();
+        channel.close();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        log.debug("MqttMainHandler-channelInactive clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
+        log.warn("MqttMainHandler-channelInactive clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
 
         master.lostConnection(ctx);
 
@@ -126,18 +127,13 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.debug("MqttMainHandler-exceptionCaught clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()), cause);
+        log.warn("MqttMainHandler-exceptionCaught clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()), cause);
         ctx.close();
-    }
-
-    @Override
-    public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-        log.debug("MqttMainHandler-channelWritabilityChanged clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
-        ctx.fireChannelWritabilityChanged();
     }
 
     /**
      * 处理心跳超时
+     * 参考：https://github.com/moquette-io/moquette/blob/master/broker/src/main/java/io/moquette/broker/MoquetteIdleTimeoutHandler.java
      * @param ctx
      * @param evt
      * @throws Exception
@@ -148,12 +144,13 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
 
             if (idleStateEvent.state() == IdleState.ALL_IDLE) {
+                log.warn("MqttMainHandler-idleStateEvent clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
                 //fire a channelInactive to trigger publish of Will
                 ctx.fireChannelInactive();
                 ctx.close();
             }
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
-
-        super.userEventTriggered(ctx, evt);
     }
 }

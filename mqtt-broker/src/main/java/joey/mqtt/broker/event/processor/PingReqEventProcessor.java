@@ -24,7 +24,7 @@ public class PingReqEventProcessor implements IEventProcessor<MqttMessage> {
 
     @Override
     public void process(ChannelHandlerContext ctx, MqttMessage message) {
-        ctx.writeAndFlush(MessageUtils.buildPingRespMessage());
+        ctx.channel().writeAndFlush(MessageUtils.buildPingRespMessage());
 
         eventListenerExecutror.execute(new PingEventMessage(NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel())), IEventListener.Type.PING);
     }

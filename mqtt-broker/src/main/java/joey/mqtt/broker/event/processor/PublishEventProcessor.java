@@ -96,7 +96,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 break;
 
             case EXACTLY_ONCE:
-                //TODO 当Qos=2时 应该在收到pubRel事件的时候,才触发消息发送,此处简化处理
+                //TODO 当Qos=2时 应该在收到pubRel事件的时候,才应该触发触发消息发送,此处简化处理
                 publish2Subscribers(pubMsg);
                 //处理保留消息
                 handleRetainMessage(pubMsg);
@@ -110,7 +110,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 break;
         }
 
-        log.info("Process-publish end. pubClientId={},userName={},topic={},messageId={},message={},qos={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), stopwatch.elapsedMills());
+        log.info("Process-publish end. pubClientId={},userName={},topic={},messageId={},message={},qos={},nodeName={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName, stopwatch.elapsedMills());
 
         if (validQos) {
             //处理事件监听
@@ -128,17 +128,26 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         if (CollUtil.isNotEmpty(matchSubList)) {
             for (Subscription sub : matchSubList) {
-                Stopwatch start = Stopwatch.start();
-
-                try {
-                    if (publish2Subscriber(sub, pubMsg)) {
-                        log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
-                    }
-
-                } catch (Throwable ex) {
-                    log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
-                }
+                publish2Subscriber(sub, pubMsg);
             }
+        }
+    }
+
+    /**
+     * 发布消息到指定订阅者
+     * @param sub
+     * @param pubMsg
+     * @return
+     */
+    void publish2Subscriber(Subscription sub, CommonPublishMessage pubMsg) {
+        Stopwatch start = Stopwatch.start();
+
+        try {
+            if (doPublish2Subscriber(sub, pubMsg)) {
+                log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
+            }
+        } catch (Throwable ex) {
+            log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
         }
     }
 
@@ -148,7 +157,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
      * @param sub
      * @param commonPubMsg
      */
-    boolean publish2Subscriber(Subscription sub, CommonPublishMessage commonPubMsg) {
+    boolean doPublish2Subscriber(Subscription sub, CommonPublishMessage commonPubMsg) {
         String targetClientId = sub.getClientId();
         ClientSession targetSession = sessionStore.get(targetClientId);
 
@@ -162,23 +171,16 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
             switch (msgQoS) {
                 case AT_MOST_ONCE:
                     mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
-                    targetSession.getChannel().writeAndFlush(mqttPubMsg);
+                    targetSession.sendMsg(mqttPubMsg);
                     break;
 
                 case AT_LEAST_ONCE:
-                    messageId = messageIdStore.getNextMessageId(targetClientId);
-                    dupPubMessageStore.add(commonPubMsg.copy().setTargetClientId(targetClientId).setMessageId(messageId));
-
-                    mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
-                    targetSession.getChannel().writeAndFlush(mqttPubMsg);
-                    break;
-
                 case EXACTLY_ONCE:
                     messageId = messageIdStore.getNextMessageId(targetClientId);
                     dupPubMessageStore.add(commonPubMsg.copy().setTargetClientId(targetClientId).setMessageId(messageId));
 
                     mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
-                    targetSession.getChannel().writeAndFlush(mqttPubMsg);
+                    targetSession.sendMsg(mqttPubMsg);
                     break;
 
                 default:

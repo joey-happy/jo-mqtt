@@ -2,8 +2,6 @@ package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -27,7 +25,6 @@ import joey.mqtt.broker.util.NettyUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -106,11 +103,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             }
         }
 
-        //处理旧连接
-        handleOldSession(clientId);
-
         //重置keepAlive超时时间
         resetKeepAliveTimeout(channel, message);
+
+        boolean cleanSession = variableHeader.isCleanSession();
+        //处理旧连接
+        final ClientSession oldClientSession = handleOldSession(clientId, cleanSession);
 
         //设置遗言信息
         MqttPublishMessage willMessage = null;
@@ -122,8 +120,11 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         }
 
         //构建新session信息
-        boolean cleanSession = variableHeader.isCleanSession();
         ClientSession newClientSession = new ClientSession(channel, clientId, userName, cleanSession, willMessage);
+
+        if (null != oldClientSession) {
+
+        }
 
         //存储session信息
         sessionStore.add(newClientSession);
@@ -149,17 +150,17 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
     }
 
     /**
-     * 处理旧连接
+     * 处理旧连接并返回
      * @param clientId
      */
-    private void handleOldSession(String clientId) {
+    private ClientSession handleOldSession(String clientId, boolean cleanSession) {
         ClientSession oldClientSession = sessionStore.get(clientId);
         //存在旧连接
         if (null != oldClientSession) {
-            Boolean cleanSession = oldClientSession.isCleanSession();
+            sessionStore.remove(clientId);
 
             if (cleanSession) {
-                Set<Subscription> subSet = oldClientSession.getAllSubInfo();
+                Set<Subscription> subSet = oldClientSession.findAllSubInfo();
                 if (CollectionUtil.isNotEmpty(subSet)) {
                     Iterator<Subscription> iterator = subSet.iterator();
 
@@ -169,16 +170,18 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
                     }
                 }
 
-                sessionStore.remove(clientId);
+                oldClientSession.removeAllSub();
+
                 dupPubMessageStore.removeAllFor(clientId);
                 dupPubRelMessageStore.removeAllFor(clientId);
             }
 
             //关闭旧连接
-            Channel oldChannel = oldClientSession.getChannel();
-            oldChannel.close();
+            oldClientSession.closeChannel();
             log.info("Process-connect close old channel. clientId={}", clientId);
         }
+
+        return oldClientSession;
     }
 
     /**
@@ -197,7 +200,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
                 MqttPublishVariableHeader variableHeader = new MqttPublishVariableHeader(msg.getTopic(), msg.getMessageId());
 
                 channel.writeAndFlush(new MqttPublishMessage(fixedHeader, variableHeader, Unpooled.buffer().writeBytes(msg.getMessageBody().getBytes())));
-                log.info("Process-connect:send dup message. clientId={},topic={},createTime={}", clientId, msg.getTopic(), DateUtil.format(new Date(msg.getCreateTimestamp()), DatePattern.PURE_DATETIME_PATTERN));
+                log.info("Process-connect:send dup message. clientId={},topic={},createTime={}", clientId, msg.getTopic(), msg.getCreateTimeStr());
             });
         }
 
@@ -207,7 +210,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         if (CollUtil.isNotEmpty(pubRelMsgList)) {
             pubRelMsgList.forEach(msg -> {
                 channel.writeAndFlush(MessageUtils.buildPubRelMessage(msg.getMessageId(), true));
-                log.info("Process-connect:send dup publish release message. clientId={},messageId={},createTime={}", clientId, msg.getMessageId(), DateUtil.format(new Date(msg.getCreateTimestamp()), DatePattern.PURE_DATETIME_PATTERN));
+                log.info("Process-connect:send dup publish release message. clientId={},messageId={},createTime={}", clientId, msg.getMessageId(), msg.getCreateTimeStr());
             });
         }
     }
