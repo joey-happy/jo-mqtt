@@ -1,11 +1,9 @@
 package joey.mqtt.broker.event.processor;
 
-import cn.hutool.core.collection.CollectionUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import joey.mqtt.broker.core.client.ClientSession;
-import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.DisconnectEventMessage;
@@ -15,9 +13,6 @@ import joey.mqtt.broker.store.ISessionStore;
 import joey.mqtt.broker.store.ISubscriptionStore;
 import joey.mqtt.broker.util.NettyUtils;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * 断开连接事件处理
@@ -54,35 +49,27 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
         String userName = NettyUtils.userName(channel);
         log.info("Process-disconnect. clientId={},userName={}", clientId, userName);
 
-        Channel sessionChannel = null;
         ClientSession clientSession = sessionStore.get(clientId);
-        if (null != clientSession) {
-            if (clientSession.isCleanSession()) {
-                Set<Subscription> subSet = clientSession.findAllSubInfo();
-                if (CollectionUtil.isNotEmpty(subSet)) {
-                    Iterator<Subscription> iterator = subSet.iterator();
-
-                    //删除订阅关系
-                    while (iterator.hasNext())  {
-                        subStore.remove(iterator.next());
-                    }
-                }
-
-                //删除dup消息
-                dupPubMessageStore.removeAllFor(clientId);
-                dupPubRelMessageStore.removeAllFor(clientId);
-            }
-
-            sessionChannel = clientSession.getChannel();
-            clientSession.closeChannel();
-
-            sessionStore.remove(clientId);
-
-            eventListenerExecutor.execute(new DisconnectEventMessage(clientId, userName), IEventListener.Type.DISCONNECT);
-        }
-
-        if (channel != sessionChannel) {
+        if (null == clientSession) {
             channel.close();
+            return;
         }
+
+        if (!clientSession.isSameChannel(channel)) {
+            log.warn("Process-disconnect. Another client is using the session. Closing connection. clientId={},userName={}", clientId, userName);
+            clientSession.closeChannel();
+            return;
+        }
+
+        if (clientSession.isCleanSession()) {
+            subStore.removeAllBy(clientId);
+            dupPubMessageStore.removeAllFor(clientId);
+            dupPubRelMessageStore.removeAllFor(clientId);
+        }
+
+        clientSession.closeChannel();
+        sessionStore.remove(clientId);
+
+        eventListenerExecutor.execute(new DisconnectEventMessage(clientId, userName), IEventListener.Type.DISCONNECT);
     }
 }

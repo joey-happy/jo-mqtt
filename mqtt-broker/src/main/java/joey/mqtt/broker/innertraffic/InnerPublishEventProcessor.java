@@ -23,5 +23,4 @@ public class InnerPublishEventProcessor {
     public void publish2Subscribers(CommonPublishMessage pubMsg) {
         publishEventProcessor.publish2Subscribers(pubMsg);
     }
-
 }

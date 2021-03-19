@@ -10,6 +10,7 @@ import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.processor.*;
@@ -22,6 +23,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * mqtt逻辑处理核心
@@ -97,12 +99,12 @@ public class MqttMaster {
 
         publishEvent = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
 
-        connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, eventListenerExecutor, nodeName);
-
         InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEvent);
         innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
 
         publishEvent.setInnerTraffic(innerTraffic);
+
+        connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, innerTraffic, eventListenerExecutor, nodeName);
 
         pubAckEvent = new PubAckEventProcessor(dupPubMessageStore, eventListenerExecutor);
         pubRecEvent = new PubRecEventProcessor(dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
@@ -252,10 +254,19 @@ public class MqttMaster {
     }
 
     /**
-     * 获取client信息
+     * 获取client连接信息
      * @param clientId
      */
     public ClientSession getClientInfoFor(String clientId) {
         return sessionStore.get(clientId);
+    }
+
+    /**
+     * 获取client订阅信息
+     * @param clientId
+     * @return
+     */
+    public Set<Subscription> getClientSubInfoFor(String clientId) {
+        return subscriptionStore.findAllBy(clientId);
     }
 }

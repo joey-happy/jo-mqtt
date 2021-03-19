@@ -1,12 +1,10 @@
 package joey.mqtt.broker.store.memory;
 
+import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.store.IMessageIdStore;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static joey.mqtt.broker.Constants.INT_ONE;
-import static joey.mqtt.broker.Constants.INT_ZERO;
 
 /**
  * 内存消息id存储
@@ -31,10 +29,10 @@ public class MemoryMessageIdStore implements IMessageIdStore {
 
             if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
                 Integer currentMsgId = getCurrentMsgId(clientId);
-                Integer nextMsgId = (currentMsgId + INT_ONE) % 0xFFFF;
+                Integer nextMsgId = (currentMsgId + Constants.INT_ONE) % 0xFFFF;
 
-                if(INT_ZERO.equals(nextMsgId)) {
-                    nextMsgId = (nextMsgId + INT_ONE) % 0xFFFF;
+                if(Constants.INT_ZERO.equals(nextMsgId)) {
+                    nextMsgId = (nextMsgId + Constants.INT_ONE) % 0xFFFF;
                 }
 
                 clientMsgIdMap.put(clientId, nextMsgId);
@@ -49,7 +47,7 @@ public class MemoryMessageIdStore implements IMessageIdStore {
         Integer currentMsgId = clientMsgIdMap.get(clientId);
 
         if (null == currentMsgId) {
-            currentMsgId = INT_ZERO;
+            currentMsgId = Constants.INT_ZERO;
             clientMsgIdMap.putIfAbsent(clientId, currentMsgId);
             currentMsgId = clientMsgIdMap.get(clientId);
         }

@@ -2,33 +2,43 @@ package joey.mqtt.broker.provider;
 
 import com.hazelcast.core.HazelcastInstance;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.config.RedisConfig;
 import joey.mqtt.broker.hazelcast.HazelcastFactory;
 import joey.mqtt.broker.innertraffic.HazelcastInnerTraffic;
 import joey.mqtt.broker.innertraffic.IInnerTraffic;
 import joey.mqtt.broker.innertraffic.InnerPublishEventProcessor;
+import joey.mqtt.broker.redis.RedisClient;
+import joey.mqtt.broker.redis.RedisFactory;
 import joey.mqtt.broker.store.*;
-import joey.mqtt.broker.store.hazelcast.*;
-import lombok.extern.slf4j.Slf4j;
+import joey.mqtt.broker.store.redis.*;
 
 /**
- * hazelcast扩展实现
+ * redis与hazelcast混合实现
+ *
+ * redis实现qos所有等级要求 （有些redis集群不支持pub功能 例如:codis）
+ * hazelcast实现集群间通信功能
  *
  * @author Joey
- * @date 2020/04/09
+ * @date 2019/9/7
  */
-@Slf4j
-public class HazelcastExtendProvider extends ExtendProviderAdapter {
+public class RedisWithHzInnerTrafficExtendProvider extends ExtendProviderAdapter {
+    private RedisClient redisClient;
+
+    private final RedisConfig redisConfig;
+
     private final String configFile;
 
     private final HazelcastInstance hzInstance;
 
     /**
-     * 默认适配器 反射调用此构造方法
-     *
+     * 反射调用此构造方法
      * @param customConfig
      */
-    public HazelcastExtendProvider(CustomConfig customConfig) {
+    public RedisWithHzInnerTrafficExtendProvider(CustomConfig customConfig) {
         super(customConfig);
+
+        this.redisConfig = customConfig.getRedisConfig();
+        this.redisClient = RedisFactory.createRedisClient(this.redisConfig);
 
         this.configFile = customConfig.getHazelcastConfigFile();
         this.hzInstance = HazelcastFactory.createInstance(this.configFile);
@@ -36,27 +46,27 @@ public class HazelcastExtendProvider extends ExtendProviderAdapter {
 
     @Override
     public IMessageIdStore initMessageIdStore() {
-        return new HazelcastMessageIdStore(hzInstance, customConfig);
+        return new RedisMessageIdStore(redisClient);
     }
 
     @Override
     public ISubscriptionStore initSubscriptionStore(ISessionStore sessionStore) {
-        return new HazelcastSubscriptionStore(hzInstance, customConfig);
+        return new RedisSubscriptionStore(redisClient, customConfig);
     }
 
     @Override
     public IRetainMessageStore initRetainMessageStore() {
-        return new HazelcastRetainMessageStore(hzInstance, customConfig);
+        return new RedisRetainMessageStore(redisClient);
     }
 
     @Override
     public IDupPubMessageStore initDupPubMessageStore() {
-        return new HazelcastDupPubMessageStore(hzInstance, customConfig);
+        return new RedisDupPubMessageStore(redisClient);
     }
 
     @Override
     public IDupPubRelMessageStore initDupPubRelMessageStore() {
-        return new HazelcastDupPubRelMessageStore(hzInstance, customConfig);
+        return new RedisDupPubRelMessageStore(redisClient);
     }
 
     @Override

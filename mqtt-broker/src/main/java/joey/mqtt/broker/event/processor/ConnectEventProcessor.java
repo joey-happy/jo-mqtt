@@ -1,7 +1,6 @@
 package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -25,7 +24,6 @@ import joey.mqtt.broker.util.NettyUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -106,9 +104,9 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //重置keepAlive超时时间
         resetKeepAliveTimeout(channel, message);
 
-        boolean cleanSession = variableHeader.isCleanSession();
         //处理旧连接
-        final ClientSession oldClientSession = handleOldSession(clientId, cleanSession);
+        handleOldSession(clientId);
+        sessionStore.remove(clientId);
 
         //设置遗言信息
         MqttPublishMessage willMessage = null;
@@ -119,11 +117,22 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             log.info("Process-connect:store will message. clientId={},userName={}", clientId, payload.userName());
         }
 
+        boolean cleanSession = variableHeader.isCleanSession();
         //构建新session信息
-        ClientSession newClientSession = new ClientSession(channel, clientId, userName, cleanSession, willMessage);
+        ClientSession newClientSession = new ClientSession(channel, clientId, userName, cleanSession, willMessage,  message.variableHeader().keepAliveTimeSeconds());
+        if (cleanSession) {
+            subStore.removeAllBy(clientId);
+            dupPubMessageStore.removeAllFor(clientId);
+            dupPubRelMessageStore.removeAllFor(clientId);
 
-        if (null != oldClientSession) {
-
+            log.info("Process-connect remove all store for clean session. clientId={}", clientId);
+        } else {
+            Set<Subscription> clientSubSet = subStore.findAllBy(clientId);
+            if (CollUtil.isNotEmpty(clientSubSet)) {
+                for (Subscription sub : clientSubSet) {
+                    subStore.add(sub, true);
+                }
+            }
         }
 
         //存储session信息
@@ -153,35 +162,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
      * 处理旧连接并返回
      * @param clientId
      */
-    private ClientSession handleOldSession(String clientId, boolean cleanSession) {
+    private void handleOldSession(String clientId) {
         ClientSession oldClientSession = sessionStore.get(clientId);
-        //存在旧连接
         if (null != oldClientSession) {
-            sessionStore.remove(clientId);
-
-            if (cleanSession) {
-                Set<Subscription> subSet = oldClientSession.findAllSubInfo();
-                if (CollectionUtil.isNotEmpty(subSet)) {
-                    Iterator<Subscription> iterator = subSet.iterator();
-
-                    //删除订阅关系
-                    while (iterator.hasNext())  {
-                        subStore.remove(iterator.next());
-                    }
-                }
-
-                oldClientSession.removeAllSub();
-
-                dupPubMessageStore.removeAllFor(clientId);
-                dupPubRelMessageStore.removeAllFor(clientId);
-            }
-
-            //关闭旧连接
             oldClientSession.closeChannel();
             log.info("Process-connect close old channel. clientId={}", clientId);
         }
-
-        return oldClientSession;
     }
 
     /**

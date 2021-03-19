@@ -29,51 +29,51 @@ public class WildcardTreeMatchingTest {
     @Test
     public void testTopicFormat() {
         String topic = "/";
-        boolean addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        boolean addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "abc/";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = Constants.TOKEN_ROOT;
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "+";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertTrue(addSucc);
 
         topic = "+/";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "t1/++";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "#/11";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "+/";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "a/+";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertTrue(addSucc);
 
         topic = "a/c d";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertTrue(addSucc);
 
         topic = "a/+/#11";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
         topic = "a/+/#";
-        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE));
+        addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertTrue(addSucc);
     }
 
@@ -81,89 +81,89 @@ public class WildcardTreeMatchingTest {
     public void testMatchSimple() {
         String subTopic = "t1/+";
         Subscription s1 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        boolean addSucc = subStore.add(s1);
+        boolean addSucc = subStore.add(s1, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t1/+";
         Subscription s2 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s2);
+        addSucc = subStore.add(s2, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t1/+/a";
         Subscription s3 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s3);
+        addSucc = subStore.add(s3, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t1/+/+";
         Subscription s4 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s4);
+        addSucc = subStore.add(s4, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t1/#";
         Subscription s5 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s5);
+        addSucc = subStore.add(s5, false);
         Assert.assertTrue(addSucc);
 
         //================================
         subTopic = "t2";
         Subscription s6 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s6);
+        addSucc = subStore.add(s6, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/abc";
         Subscription s7 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s7);
+        addSucc = subStore.add(s7, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/ABC";
         Subscription s8 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s8);
+        addSucc = subStore.add(s8, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/ABC/#";
         Subscription s9 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s9);
+        addSucc = subStore.add(s9, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/ABC/+";
         Subscription s10 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s10);
+        addSucc = subStore.add(s10, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/ABC/+/D/+";
         Subscription s11 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s11);
+        addSucc = subStore.add(s11, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "t2/#";
         Subscription s12 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s12);
+        addSucc = subStore.add(s12, false);
         Assert.assertTrue(addSucc);
 
         //========================
         subTopic = "+/ABC/#";
         Subscription s13 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s13);
+        addSucc = subStore.add(s13, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "+";
         Subscription s14 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s14);
+        addSucc = subStore.add(s14, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "+/+";
         Subscription s15 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s15);
+        addSucc = subStore.add(s15, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "+/b/+";
         Subscription s16 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s16);
+        addSucc = subStore.add(s16, false);
         Assert.assertTrue(addSucc);
 
         subTopic = "#";
         Subscription s0 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
-        addSucc = subStore.add(s0);
+        addSucc = subStore.add(s0, false);
         Assert.assertTrue(addSucc);
 
         //=====================================================

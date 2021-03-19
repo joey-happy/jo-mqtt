@@ -23,7 +23,11 @@ public class MqttServerRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Stopwatch start = Stopwatch.start();
 
-        mqttServer.start();
+        try {
+            mqttServer.start();
+        } catch (Throwable t) {
+            log.error("MqttServerRunner start error.", t);
+        }
 
         log.info("MqttServer-start. timeCost={}ms", start.elapsedMills());
     }

@@ -70,7 +70,9 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         //集群间发送消息
         try {
+            long st = System.currentTimeMillis();
             innerTraffic.publish(pubMsg);
+            log.info("Process-publish publish message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), (System.currentTimeMillis() - st));
         } catch (Exception ex) {
             log.error("PublishEventProcessor-process inner traffic publish error.", ex);
         }
@@ -200,14 +202,21 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
      */
     void handleRetainMessage(CommonPublishMessage pubMsg) {
         if (pubMsg.isRetain()) {
-            //如果消息为空 则清除retain消息
-            if (StrUtil.isEmpty(pubMsg.getMessageBody())) {
-                retainMessageStore.remove(pubMsg.getTopic());
-
-            } else {
+            //遗言消息
+            if (pubMsg.isWill()) {
                 //覆盖retain消息
                 retainMessageStore.add(pubMsg.copy());
+                return;
             }
+
+            //正常pub消息 如果消息为空 则清除retain消息
+            if (StrUtil.isEmpty(pubMsg.getMessageBody())) {
+                retainMessageStore.remove(pubMsg.getTopic());
+                return;
+            }
+
+            //覆盖retain消息
+            retainMessageStore.add(pubMsg.copy());
         }
     }
 }

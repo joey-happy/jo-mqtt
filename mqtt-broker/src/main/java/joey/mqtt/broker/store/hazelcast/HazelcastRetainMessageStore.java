@@ -1,6 +1,9 @@
-package joey.mqtt.broker.store.memory;
+package joey.mqtt.broker.store.hazelcast;
 
 import cn.hutool.core.collection.CollUtil;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.store.IRetainMessageStore;
@@ -9,19 +12,20 @@ import joey.mqtt.broker.util.TopicUtils;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 内存retain消息存储
+ * hazelcast retain消息存储
  *
  * @author Joey
- * @date 2019/7/23
+ * @date 2021/03/18
  */
-public class MemoryRetainMessageStore implements IRetainMessageStore {
-    private ConcurrentHashMap<String, CommonPublishMessage> retainMsgMap = new ConcurrentHashMap<>();
+public class HazelcastRetainMessageStore extends HazelcastBaseStore implements IRetainMessageStore {
+    private final IMap<String, CommonPublishMessage> retainMsgMap;
 
-    public MemoryRetainMessageStore(CustomConfig customConfig) {
+    public HazelcastRetainMessageStore(HazelcastInstance hzInstance, CustomConfig customConfig) {
+        super(hzInstance, customConfig);
 
+        retainMsgMap = hzInstance.getMap(Constants.HAZELCAST_MSG_RETAIN);
     }
 
     @Override
@@ -47,6 +51,7 @@ public class MemoryRetainMessageStore implements IRetainMessageStore {
 
                 while (iterator.hasNext()) {
                     CommonPublishMessage retainMessage = iterator.next();
+
                     if (TopicUtils.match(subTokenList, TopicUtils.getTokenList(retainMessage.getTopic()))) {
                         retainMessageList.add(retainMessage);
                     }

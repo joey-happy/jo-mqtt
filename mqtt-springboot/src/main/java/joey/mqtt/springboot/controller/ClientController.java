@@ -1,8 +1,8 @@
 package joey.mqtt.springboot.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import joey.mqtt.broker.MqttServer;
-import joey.mqtt.broker.core.client.ClientSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +23,11 @@ public class ClientController {
 
     @GetMapping("/info")
     public Object getInfo(@RequestParam String clientId) {
-        ClientSession clientSession = mqttServer.getClientInfoFor(clientId);
+        JSONObject info = new JSONObject();
 
-        return JSON.toJSONString(clientSession);
+        info.put("clientSession", mqttServer.getClientInfoFor(clientId));
+        info.put("clientSubSet", mqttServer.getClientSubInfoFor(clientId));
+
+        return JSON.toJSONString(info);
     }
 }

@@ -1,21 +1,15 @@
 package joey.mqtt.broker.store.memory;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ConcurrentHashSet;
-import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.config.CustomConfig;
-import joey.mqtt.broker.core.subscription.SubWildcardTree;
 import joey.mqtt.broker.core.subscription.Subscription;
-import joey.mqtt.broker.store.ISubscriptionStore;
-import joey.mqtt.broker.util.TopicUtils;
+import joey.mqtt.broker.store.BaseSubscriptionStore;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 内存订阅存储
@@ -24,144 +18,70 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2019/7/22
  */
 @Slf4j
-public class MemorySubscriptionStore implements ISubscriptionStore {
+public class MemorySubscriptionStore extends BaseSubscriptionStore {
     /**
-     * 通配符订阅topic-sub tree
+     * clientId与其相关所有订阅map
      */
-    private SubWildcardTree wildcardSubCache;
-
-    /**
-     * 普通订阅topic-sub map
-     */
-    private ConcurrentHashMap<String, Set<Subscription>> commonSubCache = new ConcurrentHashMap<>();
-
-    /**
-     * topic并发操作锁map
-     */
-    private ConcurrentHashMap<String, AtomicBoolean> lockMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<Subscription>> clientSubMap = new ConcurrentHashMap<>();
 
     public MemorySubscriptionStore(CustomConfig config) {
-        wildcardSubCache = new SubWildcardTree();
-        wildcardSubCache.init();
+        super(config);
     }
 
     @Override
-    public boolean add(Subscription subscription) {
-        String topic = subscription.getTopic();
+    public boolean add(Subscription subscription, boolean onlyMemory) {
+        boolean addResult = super.add(subscription);
+        if(addResult && !onlyMemory) {
+            String clientId = subscription.getClientId();
+            Set<Subscription> subSet = clientSubMap.get(clientId);
 
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
-        if (CollUtil.isEmpty(topicTokenList)) {
-            log.error("MemorySubscriptionStore-addSub topic is not valid. clientId={},topic={}", subscription.getClientId(), topic);
-            return false;
-        }
-
-        if (SubWildcardTree.isWildcardTopic(topic)) {
-            wildcardSubCache.add(topicTokenList, subscription);
-
-        } else {
-            //解决添加和删除并发操作出现订阅失败问题
-            for(;;) {
-                lockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                AtomicBoolean atomicBoolean = lockMap.get(topic);
-
-                if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
-                    Set<Subscription> subSet = commonSubCache.get(topic);
-
-                    if (null == subSet) {
-                        commonSubCache.putIfAbsent(topic, new ConcurrentHashSet<>());
-                        subSet = commonSubCache.get(topic);
-                    }
-
-                    subSet.add(subscription);
-                    log.debug("MemorySubscriptionStore-addSub success. subscription={}", subscription);
-
-                    lockMap.remove(topic);
-                    break;
-                }
+            if (null == subSet) {
+                clientSubMap.putIfAbsent(clientId, new ConcurrentHashSet<>());
+                subSet = clientSubMap.get(clientId);
             }
+
+            subSet.add(subscription);
+            return true;
         }
 
-        return true;
+        return addResult;
     }
 
     @Override
-    public void remove(Subscription subscription) {
-        String topic = subscription.getTopic();
+    public boolean remove(Subscription subscription) {
+        boolean removeResult = super.remove(subscription);
+        if(removeResult) {
+            String clientId = subscription.getClientId();
+            Set<Subscription> subSet = clientSubMap.get(clientId);
 
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
-        if (CollUtil.isEmpty(topicTokenList)) {
-            log.error("MemorySubscriptionStore-removeSub topic is not valid.topic={}", topic);
-            return;
-        }
-
-        if (SubWildcardTree.isWildcardTopic(topic)) {
-            wildcardSubCache.remove(topicTokenList, subscription);
-
-        } else {
-            Set<Subscription> subSet = commonSubCache.get(topic);
-
-            if (CollectionUtil.isNotEmpty(subSet) && subSet.contains(subscription)) {
+            if (CollUtil.isNotEmpty(subSet) && subSet.contains(subscription)) {
                 subSet.remove(subscription);
-
-                //如果移除client的订阅关系后 此topic在无人订阅 则删除此topic 释放内存
-                if (CollectionUtil.isEmpty(subSet)) {
-                    //解决添加和删除并发操作出现订阅失败问题
-                    for(;;) {
-                        lockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                        AtomicBoolean atomicBoolean = lockMap.get(topic);
-
-                        if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
-                            //获取到锁
-                            subSet = commonSubCache.get(topic);
-                            if (CollectionUtil.isEmpty(subSet)) {
-                                commonSubCache.remove(topic);
-                                log.debug("MemorySubscriptionStore-removeSub success. subscription={}", subscription);
-                            }
-
-                            //释放锁
-                            lockMap.remove(topic);
-                            break;
-                        }
-                    }
-                }
             }
+
+            return true;
         }
+
+        return false;
     }
 
     @Override
-    public List<Subscription> match(String topic) {
-        List<Subscription> subscriptionList = new LinkedList<>();
-
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
-        if (CollUtil.isEmpty(topicTokenList)) {
-            log.error("MemorySubscriptionStore-match topic is not valid. topic={}", topic);
-            return subscriptionList;
-        }
-
-        if (StrUtil.isNotBlank(topic)) {
-            if (commonSubCache.containsKey(topic)) {
-                Set<Subscription> subSet = commonSubCache.get(topic);
-
-                if (CollectionUtil.isNotEmpty(subSet)) {
-                    subscriptionList.addAll(subSet);
-                }
-            }
-
-            List<Subscription> wildcardSubList = wildcardSubCache.getSubListFor(topic, topicTokenList);
-            if (CollectionUtil.isNotEmpty(wildcardSubList)) {
-                subscriptionList.addAll(wildcardSubList);
-            }
-        }
-
-        return subscriptionList;
-    }
-
-    public String dumpWildcardSubData() {
-        return wildcardSubCache.dumpTreeToJson();
+    public Set<Subscription> findAllBy(String clientId) {
+        return CollUtil.emptyIfNull(clientSubMap.get(clientId));
     }
 
     @Override
-    public void close() {
+    public void removeAllBy(String clientId) {
+        Set<Subscription> subSet = clientSubMap.get(clientId);
 
+        if (CollUtil.isNotEmpty(subSet)) {
+            Iterator<Subscription> iterator = subSet.iterator();
+
+            //删除订阅关系
+            while (iterator.hasNext()) {
+                super.remove(iterator.next());
+            }
+
+            subSet.clear();
+        }
     }
 }

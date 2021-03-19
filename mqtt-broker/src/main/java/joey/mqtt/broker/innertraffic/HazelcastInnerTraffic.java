@@ -1,21 +1,14 @@
 package joey.mqtt.broker.innertraffic;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
-import com.hazelcast.config.ClasspathXmlConfig;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.FileSystemXmlConfig;
-import com.hazelcast.core.*;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ITopic;
+import com.hazelcast.core.Message;
+import com.hazelcast.core.MessageListener;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
-import joey.mqtt.broker.exception.MqttException;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.FileNotFoundException;
-
-import static cn.hutool.core.util.URLUtil.CLASSPATH_URL_PREFIX;
-import static cn.hutool.core.util.URLUtil.FILE_URL_PREFIX;
 
 /**
  * hazelcast 实现集群间内部通信
@@ -25,51 +18,16 @@ import static cn.hutool.core.util.URLUtil.FILE_URL_PREFIX;
  */
 @Slf4j
 public class HazelcastInnerTraffic extends BaseInnerTraffic implements MessageListener<CommonPublishMessage> {
-    private final String configFile;
+    private final HazelcastInstance hzInstance;
 
-    private HazelcastInstance hzInstance;
-
-    public HazelcastInnerTraffic(InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
+    public HazelcastInnerTraffic(HazelcastInstance hzInstance, InnerPublishEventProcessor innerPublishEventProcessor, CustomConfig customConfig, String nodeName) {
         super(nodeName, innerPublishEventProcessor);
-        this.configFile = customConfig.getHazelcastConfigFile();
 
-        initHazelcastInstance();
+        this.hzInstance = hzInstance;
 
         //添加集群间topic监听
         ITopic<CommonPublishMessage> topic = hzInstance.getTopic(Constants.HAZELCAST_INNER_TRAFFIC_TOPIC);
         topic.addMessageListener(this);
-    }
-
-    /**
-     * 初始化hazelcast实例
-     */
-    private void initHazelcastInstance() {
-        if (StrUtil.isBlank(configFile)) {
-            log.info("Hazelcast:use empty config.");
-            hzInstance = Hazelcast.newHazelcastInstance();
-
-        } else {
-            try {
-                Config hzConfig = null;
-
-                if (configFile.startsWith(CLASSPATH_URL_PREFIX)) {
-                    hzConfig = new ClasspathXmlConfig(configFile.substring(CLASSPATH_URL_PREFIX.length()));
-
-                } else if (configFile.startsWith(FILE_URL_PREFIX)) {
-                    hzConfig = new FileSystemXmlConfig(configFile.substring(FILE_URL_PREFIX.length()));
-                }
-
-                if (null == hzConfig) {
-                    throw new MqttException("Hazelcast:config file path error. configFilePath=" + configFile);
-                }
-
-                log.info("Hazelcast:config file path={},config={}.", configFile, hzConfig);
-                hzInstance = Hazelcast.newHazelcastInstance(hzConfig);
-
-            } catch (FileNotFoundException e) {
-                throw new MqttException("Hazelcast:could not find hazelcast config file. configFilePath=" + configFile);
-            }
-        }
     }
 
     /**

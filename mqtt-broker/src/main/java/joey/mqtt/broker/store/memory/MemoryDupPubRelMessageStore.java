@@ -45,7 +45,6 @@ public class MemoryDupPubRelMessageStore implements IDupPubRelMessageStore {
 
                 msgMap.put(message.getMessageId(), message);
                 lockMap.remove(clientId);
-
                 break;
             }
         }
@@ -87,7 +86,6 @@ public class MemoryDupPubRelMessageStore implements IDupPubRelMessageStore {
                 }
 
                 lockMap.remove(clientId);
-
                 break;
             }
         }
@@ -103,7 +101,6 @@ public class MemoryDupPubRelMessageStore implements IDupPubRelMessageStore {
             if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
                 messageCache.remove(clientId);
                 lockMap.remove(clientId);
-
                 break;
             }
         }

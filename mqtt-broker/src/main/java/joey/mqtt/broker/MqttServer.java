@@ -29,6 +29,7 @@ import joey.mqtt.broker.config.NettyConfig;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.core.MqttMaster;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.handler.MqttMainHandler;
 import joey.mqtt.broker.provider.IExtendProvider;
@@ -38,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
+import java.util.Set;
 
 /**
  * mqtt server
@@ -291,6 +293,15 @@ public class MqttServer {
      */
     public ClientSession getClientInfoFor(String clientId) {
         return mqttMaster.getClientInfoFor(clientId);
+    }
+
+    /**
+     * 获取client订阅信息
+     * @param clientId
+     * @return
+     */
+    public Set<Subscription> getClientSubInfoFor(String clientId) {
+        return mqttMaster.getClientSubInfoFor(clientId);
     }
 
     /**

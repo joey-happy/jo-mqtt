@@ -53,7 +53,6 @@ public class UnsubscribeEventProcessor implements IEventProcessor<MqttUnsubscrib
                 topicList.forEach(topic -> {
                     Subscription sub = new Subscription(clientId, topic, null);
                     subStore.remove(sub);
-                    clientSession.removeSub(sub);
 
                     //处理监听事件
                     eventListenerExecutor.execute(new UnsubscribeEventMessage(topic, clientId, userName), IEventListener.Type.UNSUBSCRIBE);

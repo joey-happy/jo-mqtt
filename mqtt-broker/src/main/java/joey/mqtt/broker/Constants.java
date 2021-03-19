@@ -53,9 +53,24 @@ public class Constants {
     public static final String TOKEN_SINGLE = "+";
 
     /**
+     * hazelcast先关基本设置
+     */
+    public static final String HAZELCAST_KEY_PRE = "joHz:";
+
+    /**
      * 使用hazelcast作为集群通信时的topic
      */
-    public static final String HAZELCAST_INNER_TRAFFIC_TOPIC = "joMqtt";
+    public static final String HAZELCAST_INNER_TRAFFIC_TOPIC = HAZELCAST_KEY_PRE + "innerTraffic";
+
+    public static final String HAZELCAST_MSG_ID = HAZELCAST_KEY_PRE + "msgId";
+
+    public static final String HAZELCAST_SUB_STORE = HAZELCAST_KEY_PRE + "subStore";
+
+    public static final String HAZELCAST_MSG_RETAIN = HAZELCAST_KEY_PRE + "msgRetain";
+
+    public static final String HAZELCAST_MSG_DUP_PUB = HAZELCAST_KEY_PRE + "msgDupPub";
+
+    public static final String HAZELCAST_MSG_DUP_PUB_REL = HAZELCAST_KEY_PRE + "msgDupPubRel";
 
     /**
      * redis相关基本设置
@@ -68,6 +83,8 @@ public class Constants {
 
     public static final String REDIS_MSG_ID_FIELD = "id";
 
+    public static final String REDIS_SUB_STORE_KEY = REDIS_KEY_PRE + "subStore:";
+
     public static final String REDIS_MSG_RETAIN_KEY = REDIS_KEY_PRE + "msgRetain";
 
     public static final String REDIS_MSG_DUP_PUB_KEY_PRE = REDIS_KEY_PRE + "msgDupPub:";
@@ -75,15 +92,4 @@ public class Constants {
     public static final String REDIS_MSG_DUP_PUB_REL_KEY_PRE = REDIS_KEY_PRE + "msgDupPubRel:";
 
     public static final String REDIS_INNER_TRAFFIC_PUB_CHANNEL = REDIS_KEY_PRE + "innerTrafficChannel";
-
-    /**
-     * event listener executor 线程池基本属性设置
-     */
-    public static final String EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
-
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_CORE_SIZE = 10;
-
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_MAX_SIZE = 200;
-
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_QUEUE_SIZE = 1024;
 }

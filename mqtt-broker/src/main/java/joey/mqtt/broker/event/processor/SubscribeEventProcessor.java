@@ -65,16 +65,14 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
                 String topic = topicSub.topicName();
                 MqttQoS mqttQoS = topicSub.qualityOfService();
                 Subscription subscription = new Subscription(clientId, topic, mqttQoS);
-                boolean addSucc = subStore.add(subscription);
+                boolean addSuccess = subStore.add(subscription, false);
 
-                if (addSucc) {
-                    clientSession.addSub(subscription);
-
+                if (addSuccess) {
                     //处理监听事件
                     eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
                 }
 
-                mqttQoSList.add(addSucc ? mqttQoS.value() : MqttQoS.FAILURE.value());
+                mqttQoSList.add(addSuccess ? mqttQoS.value() : MqttQoS.FAILURE.value());
             });
 
             MqttMessage ackResp = MessageUtils.buildSubAckMessage(message.variableHeader().messageId(), mqttQoSList);
