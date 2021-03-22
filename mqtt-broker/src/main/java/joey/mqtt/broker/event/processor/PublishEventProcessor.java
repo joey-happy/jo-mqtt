@@ -149,7 +149,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
             }
         } catch (Throwable ex) {
-            log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
+            log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
         }
     }
 
