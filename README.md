@@ -9,7 +9,7 @@
 - 使用springboot提供依赖注入及属性配置,方便打包及快速部署
 - 支持ssl,wss协议
 - 自定义实现扩展
-    >1. RedisExtendProvider实现，支持集群间通信，支持Qos所有等级消息
+    >1. RedisExtendProvider实现，支持集群间通信(使用redis的pub sub实现)，支持Qos所有等级消息
     >2. HazelcastExtendProvider实现，支持集群间通信，只支持Qos为0等级的消息
     >3. ExtendProviderAdapter实现，不支持集群间通信，只支持Qos为0等级的消息
     >4. 以上3中不满足用户需求，可以自行扩展，修改配置文件mqtt.serverConfig.extendProviderClass=xxx.xxx.provider.XXXXProvider即可,可参考RedisExtendProvider实现
