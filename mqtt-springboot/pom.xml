@@ -65,6 +65,8 @@
     </dependencies>
 
     <build>
+        <finalName>jo-mqtt-broker</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
