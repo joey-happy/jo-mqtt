@@ -42,11 +42,10 @@ jo-mqtt
 - 本地运行
   - 代码clone到本地，启动MqttApplication程序即可，tcp端口1883，tcp-ssl端口1888，websocket端口2883，websocket-ssl端口2888，配置详情：application-local.properties
 - jar保运行（本地环境）
-  - 代码clone到本地，修改application-production.properties的相关配置，用maven达成jar包
-  - nohup java -jar -Dspring.profiles.active=local mqtt-springboot-1.0.0-SNAPSHOT.jar 2>&1 &
+  - 参考deploy文件加下的start.sh部署脚本
 
 #### 日志文件配置
-采用log4j2日志框架，可自行定义日志格式，修改log4j2.xml文件中相关配置即可
+采用logback框架
 
 #### 集群使用
 集群默认使用RedisExtendProvider实现扩展，则集群间通信依赖redis的pubsub功能
