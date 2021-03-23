@@ -16,8 +16,6 @@ import java.util.concurrent.atomic.LongAdder;
 public class MemorySessionStore implements ISessionStore {
     private ConcurrentHashMap<String, ClientSession> sessionCache = new ConcurrentHashMap<>();
 
-    private LongAdder counter = new LongAdder();
-
     public MemorySessionStore(CustomConfig config) {
 
     }
@@ -25,7 +23,6 @@ public class MemorySessionStore implements ISessionStore {
     @Override
     public void add(ClientSession clientSession) {
         sessionCache.put(clientSession.getClientId(), clientSession);
-        counter.increment();
     }
 
     @Override
@@ -36,12 +33,11 @@ public class MemorySessionStore implements ISessionStore {
     @Override
     public void remove(String clientId) {
         sessionCache.remove(clientId);
-        counter.decrement();
     }
 
     @Override
-    public long sessionCount() {
-        return counter.longValue();
+    public int getSessionCount() {
+        return sessionCache.size();
     }
 
     @Override

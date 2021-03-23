@@ -27,5 +27,5 @@ public interface ISessionStore extends IStore {
      * 当前连接session数量
      * @return
      */
-    long sessionCount();
+    int getSessionCount();
 }

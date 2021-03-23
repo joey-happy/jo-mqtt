@@ -283,8 +283,8 @@ public class MqttServer {
      * session数量
      * @return
      */
-    public long sessionCount() {
-        return mqttMaster.sessionCount();
+    public int getSessionCount() {
+        return mqttMaster.getSessionCount();
     }
 
     /**

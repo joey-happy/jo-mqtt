@@ -249,8 +249,8 @@ public class MqttMaster {
      * 获取session数量
      * @return
      */
-    public long sessionCount() {
-        return sessionStore.sessionCount();
+    public int getSessionCount() {
+        return sessionStore.getSessionCount();
     }
 
     /**

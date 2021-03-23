@@ -19,7 +19,7 @@ public class StatsController {
     private MqttServer mqttServer;
 
     @GetMapping("/sessionCount")
-    public Object count() {
-        return mqttServer.sessionCount();
+    public Object getSessionCount() {
+        return mqttServer.getSessionCount();
     }
 }
