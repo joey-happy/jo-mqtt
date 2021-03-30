@@ -26,7 +26,7 @@ import java.util.List;
  * @date 2019/7/23
  */
 public class ExtendProviderAdapter implements IExtendProvider {
-    protected CustomConfig customConfig;
+    protected final CustomConfig customConfig;
 
     /**
      * 默认适配器 反射调用此构造方法
