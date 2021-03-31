@@ -26,10 +26,14 @@ public class Subscription implements Serializable {
     private final String createTimeStr;
 
     public Subscription(String clientId, String topic, MqttQoS qos) {
+        this(clientId, topic, qos, DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN));
+    }
+
+    public Subscription(String clientId, String topic, MqttQoS qos, String createTimeStr) {
         this.clientId = clientId;
         this.topic = topic;
         this.qos = qos;
-        this.createTimeStr = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
+        this.createTimeStr = createTimeStr;
     }
 
     @Override

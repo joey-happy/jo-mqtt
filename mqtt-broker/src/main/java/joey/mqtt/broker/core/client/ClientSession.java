@@ -36,6 +36,10 @@ public class ClientSession implements Serializable {
     private final String createTimeStr;
 
     public ClientSession(Channel channel, String clientId, String userName, boolean cleanSession, MqttPublishMessage willMessage, int keepAliveTimeSeconds) {
+        this(channel, clientId, userName, cleanSession, willMessage, keepAliveTimeSeconds, DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN));
+    }
+
+    public ClientSession(Channel channel, String clientId, String userName, boolean cleanSession, MqttPublishMessage willMessage, int keepAliveTimeSeconds, String createTimeStr) {
         this.clientId = clientId;
         this.userName = userName;
         this.channel = channel;
@@ -43,7 +47,7 @@ public class ClientSession implements Serializable {
         this.willMessage = willMessage;
         this.keepAliveTimeSeconds = keepAliveTimeSeconds;
 
-        this.createTimeStr = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_PATTERN);
+        this.createTimeStr = createTimeStr;
     }
 
     public boolean isSameChannel(Channel comparedChannel) {
@@ -74,6 +78,6 @@ public class ClientSession implements Serializable {
             return null;
         }
 
-        return CommonPublishMessage.convert(willMessage, true, StrUtil.EMPTY);
+        return CommonPublishMessage.convert(willMessage, true, StrUtil.EMPTY).setCreateTimeStr(createTimeStr);
     }
 }
