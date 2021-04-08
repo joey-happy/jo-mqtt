@@ -2,6 +2,7 @@ package joey.mqtt.springboot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * spring-boot启动类
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @date 2019/09/02
  */
 @SpringBootApplication
+@EnableScheduling
 public class MqttApplication {
     public static void main(String[] args) {
         SpringApplication.run(MqttApplication.class, args);
