@@ -30,6 +30,12 @@ public class RedisExtendProvider extends ExtendProviderAdapter {
 
         this.redisConfig = customConfig.getRedisConfig();
         this.redisClient = RedisFactory.createRedisClient(this.redisConfig);
+
+        testConn();
+    }
+
+    private void testConn() {
+        redisClient.ping();
     }
 
     @Override
