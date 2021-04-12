@@ -14,6 +14,6 @@ JAVA_OTHER_OPTS="-Dfile.encoding=UTF-8 -Duser.timezone=GMT+08 -XX:+UseCompressed
 
 JAVA_OPTS="$JAVA_MEM_OPTS $JAVA_GC_OPTS $JAVA_DUMP_OPTS $JAVA_LOG_OPTS $JAVA_JMX_OPTS $JAVA_OTHER_OPTS "
 
-nohup java -jar $JAVA_OPTS -Dserver.port=7788 -Dspring.profiles.active=test -Dmqtt.nettyConfig.epoll=false jo-mqtt-broker.jar>console.log 2>&1 &
+nohup java -jar $JAVA_OPTS -Dserver.port=7788 -Dmqtt.serverConfig.tcpPort=1883 -Dspring.profiles.active=test -Dmqtt.nettyConfig.epoll=false jo-mqtt-broker.jar>console.log 2>&1 &
 echo "$!" > run.pid
 echo "mqtt启动完成!"
