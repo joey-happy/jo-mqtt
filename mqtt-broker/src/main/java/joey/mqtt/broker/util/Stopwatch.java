@@ -1,16 +1,18 @@
 package joey.mqtt.broker.util;
 
 /**
- * 2019-09-17 Joey
+ * 简单计时功能实现
  *
- * 简单计时
+ * @author Joey
+ * @date 2019-09-17
+ *
  */
 public class Stopwatch {
     private long startTime = 0L;
 
     private long elapsedMills = 0L;
 
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     private Stopwatch() {
     }

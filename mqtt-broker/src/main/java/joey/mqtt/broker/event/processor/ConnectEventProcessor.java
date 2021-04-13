@@ -107,6 +107,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //处理旧连接
         handleOldSession(clientId);
         sessionStore.remove(clientId);
+        log.info("Process-connect:handle and remove old session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
 
         //设置遗言信息
         MqttPublishMessage willMessage = null;
@@ -114,7 +115,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             willMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(variableHeader.willQos()), variableHeader.isWillRetain(), 0),
                     new MqttPublishVariableHeader(payload.willTopic(), 0), Unpooled.buffer().writeBytes(payload.willMessageInBytes()));
-            log.info("Process-connect:store will message. clientId={},userName={}", clientId, payload.userName());
+            log.info("Process-connect:store will message. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
         }
 
         boolean cleanSession = variableHeader.isCleanSession();
@@ -125,7 +126,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             dupPubMessageStore.removeAllFor(clientId);
             dupPubRelMessageStore.removeAllFor(clientId);
 
-            log.info("Process-connect remove all store for clean session. clientId={}", clientId);
+            log.info("Process-connect:remove all store info for clean session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
         } else {
             Set<Subscription> clientSubSet = subStore.findAllBy(clientId);
             if (CollUtil.isNotEmpty(clientSubSet)) {
@@ -133,11 +134,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
                     subStore.add(sub, true);
                 }
             }
+            log.info("Process-connect:add all sub info for no clean session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
         }
 
         //存储session信息
         sessionStore.add(newClientSession);
-        log.info("Process-connect:store new session. clientId={},userName={}", clientId, payload.userName());
+        log.info("Process-connect:store new session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
 
         //设置channel通用属性
         NettyUtils.clientInfo(channel, clientId, userName);
@@ -145,11 +147,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //发送ack回执
         MqttConnAckMessage connectResp = MessageUtils.buildConnectAckMessage(MqttConnectReturnCode.CONNECTION_ACCEPTED, !cleanSession);
         channel.writeAndFlush(connectResp);
-        log.info("Process-connect:ack successfully. clientId={},userName={}", clientId, payload.userName());
+        log.info("Process-connect:ack successfully. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
 
         //如果cleanSession为0,需要重发同一clientId存储的未完成的QoS1和QoS2的DUP消息
         if (!cleanSession) {
             sendDupMessage(channel, clientId);
+            log.info("Process-connect:send qos1&2 message for no ack. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
         }
 
         log.info("Process-connect:end. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
@@ -166,7 +169,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         ClientSession oldClientSession = sessionStore.get(clientId);
         if (null != oldClientSession) {
             oldClientSession.closeChannel();
-            log.info("Process-connect close old channel. clientId={}", clientId);
+            log.info("Process-connect:close old channel. clientId={}", clientId);
         }
     }
 
