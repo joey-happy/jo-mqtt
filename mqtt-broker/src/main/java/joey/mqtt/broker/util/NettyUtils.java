@@ -1,7 +1,10 @@
 package joey.mqtt.broker.util;
 
+import cn.hutool.core.util.StrUtil;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+
+import java.net.InetSocketAddress;
 
 /**
  * netty工具类
@@ -68,5 +71,21 @@ public final class NettyUtils {
      */
     public static String userName(Channel channel) {
         return channel.attr(ATTR_USER_NAME).get();
+    }
+
+    /**
+     * 获取远程连接ip
+     * @param channel
+     * @return
+     */
+    public static String getRemoteIp(Channel channel) {
+        try {
+            final InetSocketAddress socketAddr = (InetSocketAddress) channel.remoteAddress();
+            return socketAddr.getAddress().getHostAddress();
+        } catch (Throwable t) {
+            //TODO 暂时忽略
+        }
+
+        return StrUtil.EMPTY;
     }
 }

@@ -64,17 +64,18 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
     @Override
     public void process(ChannelHandlerContext ctx, MqttConnectMessage message) {
         Channel channel = ctx.channel();
-        MqttConnectPayload payload = message.payload();
+        String remoteIp = NettyUtils.getRemoteIp(channel);
 
+        MqttConnectPayload payload = message.payload();
         //检查clientId 必填项
         String clientId = payload.clientIdentifier();
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-connect:start. clientId={},userName={}", clientId, payload.userName());
+        log.info("Process-connect:start. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
 
         if (!validClientId(clientId)) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_IDENTIFIER_REJECTED));
             channel.close();
-            log.error("Process-connect:error. ClientId is empty.");
+            log.error("Process-connect:error. ClientId is empty. remoteIp={}", remoteIp);
             return;
         }
 
@@ -96,7 +97,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             if (!authManager.checkValid(userName, passwordInBytes)) {
                 channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD));
                 channel.close();
-                log.error("Process-connect:error. Unauthorized user. clientId={},userName={}", clientId, payload.userName());
+                log.error("Process-connect:error. Unauthorized user. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
                 return;
             }
         }
@@ -155,7 +156,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             log.info("Process-connect:send qos1&2 message for no ack. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
         }
 
-        log.info("Process-connect:end. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+        log.info("Process-connect:end. clientId={},userName={},remoteIp={},timeCost={}ms", clientId, payload.userName(), remoteIp, stopwatch.elapsedMills());
 
         //连接事件监听处理
         eventListenerExecutor.execute(new ConnectEventMessage(message), IEventListener.Type.CONNECT);
