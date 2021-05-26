@@ -5,9 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 自定义配置
- * 用户可根据自身需求继承此类并自定义任何配置
+ *
+ * 用户可以根据自身需求配置extConf
+ * 参考:test/resource/config.properties
  *
  * @author Joey
  * @date 2019/7/18
@@ -36,4 +41,9 @@ public class CustomConfig {
      * 节点名称 用于区分不同的服务实例
      */
     private String nodeName = IdUtil.fastSimpleUUID();
+
+    /**
+     * 用户自定义扩展配置map
+     */
+    private Map<String, Object> extConf = new HashMap<>();
 }

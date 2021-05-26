@@ -12,7 +12,7 @@
     >1. RedisExtendProvider实现，支持集群间通信(使用redis的pub sub实现)，支持Qos所有等级消息
     >2. HazelcastExtendProvider实现，支持集群间通信，只支持Qos为0等级的消息
     >3. ExtendProviderAdapter实现，不支持集群间通信，只支持Qos为0等级的消息
-    >4. 以上3中不满足用户需求，可以自行扩展，修改配置文件mqtt.serverConfig.extendProviderClass=xxx.xxx.provider.XXXXProvider即可,可参考RedisExtendProvider实现
+    >4. 若以上3种不满足用户需求，可以自行扩展，修改配置文件mqtt.serverConfig.extendProviderClass=xxx.xxx.provider.XXXXProvider即可,可参考RedisExtendProvider实现。同时也可以添加自定义变量，参考配置文件:用户自定义扩展配置
 
 #### 不支持
 不支持topic如下
@@ -127,10 +127,16 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 
 #自定义节点名称 可以不配置 默认是UUID
 #mqtt.customConfig.nodeName=jo_mqtt_1
+
+#用户自定义扩展配置
+mqtt.customConfig.extConf.k1=v1
+mqtt.customConfig.extConf.k2=v2
+mqtt.customConfig.extConf.k3.k31=v31
+mqtt.customConfig.extConf.k3.k32=v32
 ```
 
 #### 自定义扩展
-- 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法，同时也可以自己实现配置(继承CustomerConfig类,自定义参数)
+- 若当前功能不能满足用户需求可以自行扩展，使用者只需继承ExtendProviderAdapter复写相应的方法，同时也可以添加自定义变量，参考配置文件:用户自定义扩展配置
   > 修改配置文件mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.XXXXProvider
 - 扩展方法说明（扩展接口：IExtendProvider）
   >1. 获取messageId存储实现: IMessageIdStore initMessageIdStore();

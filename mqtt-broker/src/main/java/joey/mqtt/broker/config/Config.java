@@ -18,8 +18,5 @@ public class Config {
 
     private NettyConfig nettyConfig = new NettyConfig();
 
-    /**
-     * 用户可以继承CustomConfig 实现自定义任何配置
-     */
     private CustomConfig customConfig = new CustomConfig();
 }

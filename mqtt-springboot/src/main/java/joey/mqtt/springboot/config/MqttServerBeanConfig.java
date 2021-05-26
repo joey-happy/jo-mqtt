@@ -21,7 +21,6 @@ public class MqttServerBeanConfig {
     public MqttServer mqttServer() throws Exception {
         //读取配置文件 优先级：命令行启动配置>jar包配置文件
         Config config = ConfigUtils.loadFromSystemProps(Constants.MQTT_CONFIG, new Config(mqttConfig.getServerConfig(), mqttConfig.getNettyConfig(), mqttConfig.getCustomConfig()));
-
         return new MqttServer(config);
     }
 }
