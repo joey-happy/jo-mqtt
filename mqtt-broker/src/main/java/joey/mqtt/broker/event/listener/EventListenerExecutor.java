@@ -15,13 +15,13 @@ import java.util.concurrent.*;
  */
 @Slf4j
 public class EventListenerExecutor {
-    public static final String EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
+    public static final String THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
 
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_CORE_SIZE = 10;
+    public static final int THREAD_CORE_SIZE = 10;
 
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_MAX_SIZE = 200;
+    public static final int THREAD_MAX_SIZE = 200;
 
-    public static final int EVENT_LISTENER_EXECUTOR_THREAD_QUEUE_SIZE = 1024;
+    public static final int THREAD_QUEUE_SIZE = 1024;
 
     private final List<IEventListener> eventListenerList;
 
@@ -30,10 +30,10 @@ public class EventListenerExecutor {
     public EventListenerExecutor(List<IEventListener> eventListenerList) {
         this.eventListenerList = eventListenerList;
 
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNamePrefix(EVENT_LISTENER_EXECUTOR_THREAD_NAME_PRE).build();
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNamePrefix(THREAD_NAME_PRE).build();
 
-        this.executorService = new ThreadPoolExecutor(EVENT_LISTENER_EXECUTOR_THREAD_CORE_SIZE, EVENT_LISTENER_EXECUTOR_THREAD_MAX_SIZE,
-                10L, TimeUnit.MINUTES, new LinkedBlockingDeque<>(EVENT_LISTENER_EXECUTOR_THREAD_QUEUE_SIZE),
+        this.executorService = new ThreadPoolExecutor(THREAD_CORE_SIZE, THREAD_MAX_SIZE,
+                10L, TimeUnit.MINUTES, new LinkedBlockingDeque<>(THREAD_QUEUE_SIZE),
                 threadFactory, new RejectedExecutionHandler() {
             @Override
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {

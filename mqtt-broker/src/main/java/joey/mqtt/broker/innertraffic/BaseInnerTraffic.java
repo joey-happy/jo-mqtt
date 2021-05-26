@@ -20,11 +20,11 @@ public abstract class BaseInnerTraffic implements IInnerTraffic {
 
     private static final String THREAD_NAME_PRE = "joMqtt-innerTrafficExecutor-pool-";
 
-    private static final int CORE_SIZE = 20;
+    private static final int THREAD_CORE_SIZE = 20;
 
-    private static final int MAX_POOL_SIZE = 100;
+    private static final int THREAD_MAX_POOL_SIZE = 100;
 
-    private static final long KEEP_ALIVE_TIME = 1L;
+    private static final long THREAD_KEEP_ALIVE_TIME = 1L;
 
     private static final AtomicLong THREAD_IDX = new AtomicLong();
 
@@ -57,9 +57,9 @@ public abstract class BaseInnerTraffic implements IInnerTraffic {
         this.nodeName = nodeName;
         this.innerPublishEventProcessor = innerPublishEventProcessor;
 
-        executor = new ThreadPoolExecutor(CORE_SIZE,
-                                          MAX_POOL_SIZE,
-                                          KEEP_ALIVE_TIME,
+        executor = new ThreadPoolExecutor(THREAD_CORE_SIZE,
+                                          THREAD_MAX_POOL_SIZE,
+                                          THREAD_KEEP_ALIVE_TIME,
                                           TimeUnit.HOURS,
                                           new SynchronousQueue<>(),
                                           THREAD_FACTORY,
