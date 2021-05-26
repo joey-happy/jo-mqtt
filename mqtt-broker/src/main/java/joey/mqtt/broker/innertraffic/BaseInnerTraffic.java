@@ -4,7 +4,7 @@ import joey.mqtt.broker.core.message.CommonPublishMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 集群间通信基类
@@ -18,7 +18,7 @@ public abstract class BaseInnerTraffic implements IInnerTraffic {
 
     protected final InnerPublishEventProcessor innerPublishEventProcessor;
 
-    private static final String THREAD_NAME_PRE = "InnerTraffic-thread-";
+    private static final String THREAD_NAME_PRE = "joMqtt-innerTrafficExecutor-pool-";
 
     private static final int CORE_SIZE = 20;
 
@@ -26,13 +26,13 @@ public abstract class BaseInnerTraffic implements IInnerTraffic {
 
     private static final long KEEP_ALIVE_TIME = 1L;
 
-    private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
-        final AtomicInteger idx = new AtomicInteger();
+    private static final AtomicLong THREAD_IDX = new AtomicLong();
 
+    private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r);
-            thread.setName(THREAD_NAME_PRE + idx.incrementAndGet());
+            thread.setName(getThreadName());
             return thread;
         }
     };
@@ -42,9 +42,14 @@ public abstract class BaseInnerTraffic implements IInnerTraffic {
         public void rejectedExecution(Runnable runnable, ThreadPoolExecutor e) {
             // 继续执行任务
             Thread thread = new Thread(runnable);
+            thread.setName(getThreadName());
             thread.start();
         }
     };
+
+    private static String getThreadName() {
+        return THREAD_NAME_PRE + THREAD_IDX.incrementAndGet();
+    }
 
     private final ThreadPoolExecutor executor;
 
