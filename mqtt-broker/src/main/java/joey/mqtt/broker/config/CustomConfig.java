@@ -1,6 +1,8 @@
 package joey.mqtt.broker.config;
 
 import cn.hutool.core.util.IdUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -46,4 +48,15 @@ public class CustomConfig {
      * 用户自定义扩展配置map
      */
     private Map<String, Object> extConf = new HashMap<>();
+
+    /**
+     * 将自定义扩展配置 转换成用户定义的对象
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public <T> T convertExtConf(Class<T> clazz) {
+        return JSONObject.parseObject(JSON.toJSONString(extConf), clazz);
+    }
 }

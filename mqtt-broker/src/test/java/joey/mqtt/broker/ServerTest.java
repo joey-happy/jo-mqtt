@@ -17,7 +17,7 @@ public class ServerTest {
         Config config = props.toBean(Config.class, Constants.MQTT_CONFIG_PROPS_PRE);
 
         //用户自定义配置json 可以转换成自己的java对象
-        String extConfJsonStr = JSONObject.toJSONString(config.getCustomConfig().getExtConf());
+        JSONObject extConfJsonObj = config.getCustomConfig().convertExtConf(JSONObject.class);
 
         MqttServer mqttServer = new MqttServer(config);
         mqttServer.start();
