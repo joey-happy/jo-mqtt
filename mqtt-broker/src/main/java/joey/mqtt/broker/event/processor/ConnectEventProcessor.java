@@ -84,7 +84,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         if (!validVersion(variableHeader.version())) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION));
             channel.close();
-            log.error("Process-connect:error. Mqtt connect version not supported. clientId={},userName={},version={}", clientId, payload.userName(), variableHeader.version());
+            log.error("Process-connect:error. Mqtt connect version not supported. clientId={},userName={},version={},remoteIdp={}", clientId, payload.userName(), variableHeader.version(), remoteIp);
             return;
         }
 
