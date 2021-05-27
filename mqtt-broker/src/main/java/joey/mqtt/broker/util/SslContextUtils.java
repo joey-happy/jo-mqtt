@@ -12,9 +12,10 @@ import java.io.InputStream;
 import java.security.KeyStore;
 
 /**
- * 2020-04-03 Joey
- *
  * SslContext工具类
+ *
+ * @author Joey
+ * @date 2020-04-03
  */
 @Slf4j
 public class SslContextUtils {

@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * 消息工具类
+ *
  * @author Joey
  * @date 2019/7/25
  */
