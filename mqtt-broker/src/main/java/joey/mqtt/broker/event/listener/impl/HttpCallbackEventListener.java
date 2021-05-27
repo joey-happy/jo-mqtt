@@ -1,22 +1,20 @@
-package joey.mqtt.broker.event.listener.adapter;
+package joey.mqtt.broker.event.listener.impl;
 
 import joey.mqtt.broker.config.CustomConfig;
-import joey.mqtt.broker.event.listener.IEventListener;
+import joey.mqtt.broker.event.listener.adapter.EventListenerAdapter;
 import joey.mqtt.broker.event.message.*;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 事件监听适配器默认实现
+ * http回调事件监听器
  *
  * @author Joey
- * @date 2019/9/8
+ * @date 2021/05/27
  */
 @Slf4j
-public class EventListenerAdapter implements IEventListener {
-    protected final CustomConfig customConfig;
-
-    public EventListenerAdapter(CustomConfig customConfig) {
-        this.customConfig = customConfig;
+public class HttpCallbackEventListener extends EventListenerAdapter {
+    public HttpCallbackEventListener(CustomConfig customConfig) {
+        super(customConfig);
     }
 
     @Override

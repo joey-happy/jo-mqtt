@@ -1,7 +1,6 @@
 package joey.mqtt.broker.provider;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.UUID;
 import io.netty.handler.ssl.SslContext;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
@@ -87,7 +86,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     @Override
     public List<IEventListener> initEventListeners() {
-        return CollUtil.newArrayList(new EventListenerAdapter());
+        return CollUtil.newArrayList(new EventListenerAdapter(customConfig));
     }
 
     @Override
