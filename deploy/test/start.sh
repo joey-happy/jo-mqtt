@@ -6,7 +6,7 @@ JAVA_GC_OPTS="-XX:+ExplicitGCInvokesConcurrent -XX:MaxTenuringThreshold=6 -XX:+U
 
 JAVA_DUMP_OPTS="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/logs/jo-mqtt/ "
 
-JAVA_LOG_OPTS="-XX:+PrintCommandLineFlags -Xloggc:/home/logs/jo-mqtt/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:ErrorFile=/home/logs/jo-mqtt/errorPid.log "
+JAVA_LOG_OPTS="-XX:+PrintCommandLineFlags -Xloggc:/home/logs/jo-mqtt/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:ErrorFile=/home/logs/jo-mqtt/hs_err_pid_%p.log "
 
 JAVA_JMX_OPTS="-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1899 -Dcom.sun.management.jmxremote.ssl=false "
 
