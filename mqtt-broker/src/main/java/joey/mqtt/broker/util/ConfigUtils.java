@@ -1,5 +1,6 @@
 package joey.mqtt.broker.util;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.dialect.Props;
 import joey.mqtt.broker.Constants;
@@ -33,7 +34,7 @@ public class ConfigUtils {
         }
 
         //如果指定配置文件 则加载配置
-        Props props = Props.getProp(mqttConfigFilePath);
+        Props props = Props.getProp(mqttConfigFilePath, CharsetUtil.CHARSET_UTF_8);
         return props.toBean(Config.class, Constants.MQTT_CONFIG_PROPS_PRE);
     }
 }
