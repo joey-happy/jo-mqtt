@@ -47,7 +47,7 @@ public class CustomConfig {
     /**
      * 用户自定义扩展配置map
      */
-    private Map<String, Object> extConf = new HashMap<>();
+    private Map<String, Object> extConfig = new HashMap<>();
 
     /**
      * 将自定义扩展配置 转换成用户定义的对象
@@ -56,7 +56,7 @@ public class CustomConfig {
      * @param <T>
      * @return
      */
-    public <T> T convertExtConf(Class<T> clazz) {
-        return JSONObject.parseObject(JSON.toJSONString(extConf), clazz);
+    public <T> T convertExtConfig(Class<T> clazz) {
+        return JSONObject.parseObject(JSON.toJSONString(extConfig), clazz);
     }
 }

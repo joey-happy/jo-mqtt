@@ -129,10 +129,10 @@ mqtt.customConfig.sslContextConfig.sslStorePwd=jo_mqtt
 #mqtt.customConfig.nodeName=jo_mqtt_1
 
 #用户自定义扩展配置
-mqtt.customConfig.extConf.k1=v1
-mqtt.customConfig.extConf.k2=v2
-mqtt.customConfig.extConf.k3.k31=v31
-mqtt.customConfig.extConf.k3.k32=v32
+mqtt.customConfig.extConfig.k1=v1
+mqtt.customConfig.extConfig.k2=v2
+mqtt.customConfig.extConfig.k3.k31=v31
+mqtt.customConfig.extConfig.k3.k32=v32
 ```
 
 #### 自定义扩展
