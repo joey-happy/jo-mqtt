@@ -42,7 +42,7 @@ jo-mqtt
 - 本地运行
   - 代码clone到本地，启动MqttApplication程序即可，tcp端口1883，tcp-ssl端口1888，websocket端口2883，websocket-ssl端口2888，配置详情：application-local.properties
 - jar保运行（本地环境）
-  - 参考deploy文件加下的start.sh部署脚本
+  - 参考deploy文件夹下的start.sh部署脚本
 
 #### 日志文件配置
 采用logback框架
