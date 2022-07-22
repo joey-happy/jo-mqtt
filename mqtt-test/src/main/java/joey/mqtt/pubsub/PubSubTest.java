@@ -1,5 +1,6 @@
 package joey.mqtt.pubsub;
 
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.RandomUtil;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.pubsub.performance.MqttCounter;
@@ -41,7 +42,7 @@ public class PubSubTest {
 
         //定时查询统计数量
         while (true) {
-            System.out.println(MqttCounter.print());
+            Console.log(MqttCounter.print());
             TimeUnit.SECONDS.sleep(2);
         }
     }

@@ -1,5 +1,6 @@
 package joey.mqtt.pubsub.performance;
 
+import cn.hutool.core.lang.Console;
 import cn.hutool.system.SystemUtil;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
@@ -75,7 +76,7 @@ public class TestMqttClient implements MqttCallback {
 
             client.subscribe(topic, qos);
             boolean isSuccess = client.isConnected();
-            System.out.println("conn status:" + isSuccess);
+            Console.log("conn status:" + isSuccess);
 
             if (isSuccess) {
                 MqttCounter.addConnectCount();
@@ -95,7 +96,7 @@ public class TestMqttClient implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) {
-        System.out.println(new String(message.getPayload()));
+        Console.log(new String(message.getPayload()));
         MqttCounter.addReceiveCount();
     }
 

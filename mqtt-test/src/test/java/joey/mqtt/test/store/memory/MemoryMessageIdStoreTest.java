@@ -1,6 +1,7 @@
 package joey.mqtt.test.store.memory;
 
 import cn.hutool.core.collection.ConcurrentHashSet;
+import cn.hutool.core.lang.Console;
 import joey.mqtt.broker.store.memory.MemoryMessageIdStore;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class MemoryMessageIdStoreTest {
         for (int i = 0; i<100000; i++) {
             int nextMessageId = store.getNextMessageId(clientId);
 
-            System.out.println(nextMessageId);
+            Console.log(nextMessageId);
 
             if (nextMessageId <= 0) {
                 Assert.fail(nextMessageId + "");
@@ -54,7 +55,7 @@ public class MemoryMessageIdStoreTest {
 
                         //写入文件检测 cat tmp.txt| sort | uniq -c | sort -rn | wc -l
 //                        FileUtil.appendUtf8String(msgId+"\n", "/tmp.txt");
-                        System.out.println(msgId);
+                        Console.log(msgId);
 
                         boolean add = msgIdSet.add(msgId);
                         if (!add) {
