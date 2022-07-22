@@ -1,4 +1,4 @@
-package joey.mqtt.pubsub.base;
+package joey.mqtt.test.pubsub;
 
 import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.test.BaseTest;

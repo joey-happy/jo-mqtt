@@ -60,7 +60,7 @@ public class SubWildcardTree {
         if (tokenMatchIndex == (topicTokenList.size() - 1)) {
             SubNode oldSubNode = matchNodeWrapper.mainNode();
             SubNode updateSubNode = oldSubNode.copy();
-            updateSubNode.subscriptions.add(subscription);
+            updateSubNode.subscriptionSet.add(subscription);
 
             return matchNodeWrapper.compareAndSet(oldSubNode, updateSubNode) ? Action.OK : Action.REPEAT;
         }
@@ -73,7 +73,7 @@ public class SubWildcardTree {
         //4.替换新节点
         SubNode oldSubNode = matchNodeWrapper.mainNode();
         SubNode updateSubNode = oldSubNode.copy();
-        updateSubNode.children.add(newSubNodeWrapper);
+        updateSubNode.childrenTokenMap.put(newSubNodeWrapper.getMainNode().get().token, newSubNodeWrapper);
 
         return matchNodeWrapper.compareAndSet(oldSubNode, updateSubNode) ? Action.OK : Action.REPEAT;
     }
@@ -99,14 +99,14 @@ public class SubWildcardTree {
                 String pPath = currentNodeWrapper.mainNode().fullPath;
                 String fullPath = String.join(StrUtil.SLASH, pPath, remainToken);
                 SubNodeWrapper newNodeWrapper = new SubNodeWrapper(new SubNode(remainToken, fullPath));
-                currentNodeWrapper.mainNode().children.add(newNodeWrapper);
+                currentNodeWrapper.mainNode().childrenTokenMap.put(remainToken, newNodeWrapper);
 
                 currentNodeWrapper = newNodeWrapper;
             }
         }
 
         //尾部节点添加订阅关系
-        currentNodeWrapper.mainNode().subscriptions.add(subscription);
+        currentNodeWrapper.mainNode().subscriptionSet.add(subscription);
 
         return headNodeWrapper;
     }
@@ -131,14 +131,15 @@ public class SubWildcardTree {
         //3.找到匹配节点 删除订阅
         SubNode oldSubNode = matchNodeWrapper.mainNode();
         SubNode updateSubNode = oldSubNode.copy();
-        updateSubNode.subscriptions.remove(subscription);
+        updateSubNode.subscriptionSet.remove(subscription);
 
-        //TODO 只是简单删除订阅关系 节点仍然保留 没有考虑 节点订阅为空 删除节点等操作 (要处理 需要考虑并发问题)
+        //TODO 只是简单删除订阅关系 节点仍然保留 没有考虑 节点订阅为空 删除节点等操作 (要处理 需要考虑并发添加问题 现在的节点数据copy是浅拷贝)
         return matchNodeWrapper.compareAndSet(oldSubNode, updateSubNode) ? Action.OK : Action.REPEAT;
     }
 
     /**
      * 删除订阅
+     *
      * @param topicTokenList
      * @param subscription
      */
@@ -150,24 +151,23 @@ public class SubWildcardTree {
         } while (res == Action.REPEAT);
     }
 
-    public List<Subscription> getSubListFor(String topic, List<String> topicTokenList) {
-        return new ArrayList<>(match(topic, topicTokenList));
+    public List<Subscription> getSubListFor(List<String> topicTokenList) {
+        return new ArrayList<>(match(topicTokenList));
     }
 
     /**
      * 查找符合topic的所有订阅
-     * @param topic
+     *
      * @param topicTokenList
      * @return
      */
-    private Set<Subscription> match(String topic, List<String> topicTokenList) {
-        Set<Subscription> subSet = recursiveMatch(topicTokenList, this.root);
-
-        return subSet;
+    private Set<Subscription> match(List<String> topicTokenList) {
+        return recursiveMatch(topicTokenList, this.root);
     }
 
     /**
      * 递归查找匹配节点的订阅集合
+     *
      * @param topicTokenList
      * @param subNodeWrapper
      * @return
@@ -177,7 +177,7 @@ public class SubWildcardTree {
 
         //匹配'#' 则返回当前节点的所有订阅者
         if (TOKEN_MULTI.equals(currentNode.token)) {
-            return currentNode.subscriptions;
+            return currentNode.subscriptionSet;
         }
 
         int tokenSize = topicTokenList.size();
@@ -201,19 +201,19 @@ public class SubWildcardTree {
                 subIndex = -1;
             }
 
-            Set<Subscription> subscriptions = new HashSet<>();
+            Set<Subscription> finalSubscriptionSet = new HashSet<>();
             //如果下一个token为空 则证明当前token是最后一个token
             if (StrUtil.EMPTY.equals(nextToken)) {
-                subscriptions.addAll(currentNode.subscriptions);
+                finalSubscriptionSet.addAll(currentNode.subscriptionSet);
 
             } else {
-                for (SubNodeWrapper childSubNode : currentNode.children) {
-                    List<String> remainTopicTokenList = topicTokenList.subList(subIndex + 1, topicTokenList.size());
-                    subscriptions.addAll(recursiveMatch(remainTopicTokenList, childSubNode));
+                for (SubNodeWrapper childSubNode : currentNode.childrenTokenMap.values()) {
+                    List<String> remainTopicTokenList = topicTokenList.subList(subIndex + 1, tokenSize);
+                    finalSubscriptionSet.addAll(recursiveMatch(remainTopicTokenList, childSubNode));
                 }
             }
 
-            return subscriptions;
+            return finalSubscriptionSet;
         }
 
         return Collections.emptySet();
@@ -237,7 +237,6 @@ public class SubWildcardTree {
         return StrUtil.containsAny(topic, TOKEN_MULTI) || StrUtil.containsAny(topic, TOKEN_SINGLE);
     }
 
-    //=================================================================
     private enum Action {
         OK, REPEAT
     }
@@ -274,43 +273,38 @@ public class SubWildcardTree {
         private String token;
 
         @JSONField(ordinal = 3)
-        private Set<Subscription> subscriptions = new ConcurrentHashSet<>();
+        private Set<Subscription> subscriptionSet = new ConcurrentHashSet<>();
 
         @JSONField(ordinal = 4)
-        private Set<SubNodeWrapper> children = new ConcurrentHashSet<>();
+        private TreeMap<String, SubNodeWrapper> childrenTokenMap = new TreeMap<>();
 
         SubNode(String token, String fullPath) {
             this.token = token;
             this.fullPath = fullPath;
         }
 
-        SubNode(String token, String fullPath, Set<Subscription> subscriptions, Set<SubNodeWrapper> children) {
+        SubNode(String token, String fullPath, Set<Subscription> subscriptionSet, TreeMap<String, SubNodeWrapper> childrenTokenMap) {
             this.token = token;
             this.fullPath = fullPath;
-            this.subscriptions = subscriptions;
-            this.children = children;
+            this.subscriptionSet = subscriptionSet;
+            this.childrenTokenMap = childrenTokenMap;
         }
 
         /**
          * 对象拷贝
          */
         SubNode copy() {
-            return new SubNode(this.token, this.fullPath, this.subscriptions, this.children);
+            return new SubNode(this.token, this.fullPath, this.subscriptionSet, this.childrenTokenMap);
         }
 
         /**
          * 根据token找到匹配节点
+         *
          * @param token
          * @return
          */
         SubNodeWrapper matchChild(String token) {
-            for (SubNodeWrapper child : children) {
-                if (child.mainNode().token.equals(token)) {
-                    return child;
-                }
-            }
-
-            return null;
+            return childrenTokenMap.get(token);
         }
 
         @Override

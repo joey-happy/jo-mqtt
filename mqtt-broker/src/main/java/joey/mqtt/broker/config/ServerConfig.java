@@ -2,6 +2,7 @@ package joey.mqtt.broker.config;
 
 import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.auth.AuthUser;
+import joey.mqtt.broker.provider.ExtendProviderAdapter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -53,7 +54,7 @@ public class ServerConfig {
     /**
      * extendProvider接口实现的类全路径名称
      */
-    private String extendProviderClass = "joey.mqtt.broker.provider.adapter.ExtendProviderAdapter";
+    private String extendProviderClass = ExtendProviderAdapter.class.getName();
 
     /**
      * 开启用户名密码认证

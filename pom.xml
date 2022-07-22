@@ -20,7 +20,7 @@
         <mqtt.springboot.version>1.0.0-SNAPSHOT</mqtt.springboot.version>
         <mqtt.test.version>1.0.0-SNAPSHOT</mqtt.test.version>
 
-        <springboot.version>2.2.8.RELEASE</springboot.version>
+        <springboot.version>2.4.10</springboot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -33,7 +33,13 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.28</version>
+                <version>1.7.36</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.7.36</version>
             </dependency>
 
             <dependency>

@@ -2,9 +2,9 @@ package joey.mqtt.broker.innertraffic;
 
 import com.alibaba.fastjson.JSON;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ITopic;
-import com.hazelcast.core.Message;
-import com.hazelcast.core.MessageListener;
+import com.hazelcast.topic.ITopic;
+import com.hazelcast.topic.Message;
+import com.hazelcast.topic.MessageListener;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;

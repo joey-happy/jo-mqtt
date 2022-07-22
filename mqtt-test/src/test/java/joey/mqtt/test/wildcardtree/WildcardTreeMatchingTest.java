@@ -1,12 +1,14 @@
 package joey.mqtt.test.wildcardtree;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Console;
 import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.store.memory.MemorySubscriptionStore;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +20,7 @@ import java.util.UUID;
  * @author Joey
  * @date 2019/8/29
  */
+@Slf4j
 public class WildcardTreeMatchingTest {
     private MemorySubscriptionStore subStore;
 
@@ -79,6 +82,8 @@ public class WildcardTreeMatchingTest {
 
     @Test
     public void testMatchSimple() {
+        log.info("Topic match start.");
+
         String subTopic = "t1/+";
         Subscription s1 = new Subscription(UUID.randomUUID().toString(), subTopic, null);
         boolean addSucc = subStore.add(s1, false);
@@ -169,86 +174,86 @@ public class WildcardTreeMatchingTest {
         //=====================================================
         String matchTopic = "t1/a";
         List<Subscription> matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s1, s2, s5, s15), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t1/b/a";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s3, s4, s5, s16), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t1/b/c";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s4, s5, s16), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t1/b/c/d";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s5), CollUtil.newHashSet(matchSubList));
 
         //================================================================
         matchTopic = "t2";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s6, s14), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/abc";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s7, s12, s15), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/abc/dd";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s12), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/ABC";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s8, s12, s15), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/ABC/aaa";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s9, s10, s12, s13), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/ABC/aaa/D";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s9, s12, s13), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t2/ABC/BBB/D/CC";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s9, s11, s12, s13), CollUtil.newHashSet(matchSubList));
 
         matchTopic = "t3/A";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s0, s15), CollUtil.newHashSet(matchSubList));
 
-        System.out.println();
-        System.out.println("===================================");
-        System.out.println(subStore.dumpWildcardSubData());
+        Console.log();
+        Console.log("===================================");
+        Console.log(subStore.dumpWildcardSubData());
 
         //====================================================
         subStore.remove(s0);
         matchTopic = "t1/a";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s1, s2, s5, s15), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s3);
         matchTopic = "t1/b/a";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s4, s5, s16), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s5);
         matchTopic = "t1/b/c/d";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s1);
@@ -259,30 +264,30 @@ public class WildcardTreeMatchingTest {
         subStore.remove(s8);
         matchTopic = "t2/ABC";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s12, s15), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s10);
         matchTopic = "t2/ABC/aaa";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s9, s12, s13), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s12);
         subStore.remove(s13);
         matchTopic = "t2/ABC/BBB/D/CC";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(s9, s11), CollUtil.newHashSet(matchSubList));
 
         subStore.remove(s9);
         matchTopic = "t2/ABC/aaa/D";
         matchSubList = subStore.match(matchTopic);
-        System.out.println("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
+        Console.log("topic:" +  matchTopic + ",matchSubSet:" + JSON.toJSONString(matchSubList));
         Assert.assertEquals(CollUtil.newHashSet(), CollUtil.newHashSet(matchSubList));
 
-        System.out.println();
-        System.out.println("===================================");
-        System.out.println(subStore.dumpWildcardSubData());
+        Console.log();
+        Console.log("===================================");
+        Console.log(subStore.dumpWildcardSubData());
     }
 }

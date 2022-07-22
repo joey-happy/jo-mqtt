@@ -12,6 +12,7 @@ import java.util.Objects;
 
 /**
  * topic订阅对象
+ *
  * @author Joey
  * @date 2019/7/22
  */

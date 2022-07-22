@@ -142,7 +142,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
                 }
             }
 
-            List<Subscription> wildcardSubList = wildcardTopicSubCache.getSubListFor(topic, topicTokenList);
+            List<Subscription> wildcardSubList = wildcardTopicSubCache.getSubListFor(topicTokenList);
             if (CollectionUtil.isNotEmpty(wildcardSubList)) {
                 subscriptionList.addAll(wildcardSubList);
             }

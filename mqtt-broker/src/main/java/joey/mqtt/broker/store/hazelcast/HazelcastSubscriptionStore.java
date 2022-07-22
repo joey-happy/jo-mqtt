@@ -2,7 +2,7 @@ package joey.mqtt.broker.store.hazelcast;
 
 import cn.hutool.core.collection.CollUtil;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MultiMap;
+import com.hazelcast.multimap.MultiMap;
 import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.subscription.Subscription;
