@@ -4,9 +4,10 @@ import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.MqttServer;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.util.ConfigUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
 
 /**
  * @author Joey
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MqttServerBeanConfig {
-    @Autowired
+    @Resource
     private MqttConfig mqttConfig;
 
     @Bean

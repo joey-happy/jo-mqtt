@@ -18,14 +18,16 @@
     <properties>
         <mqtt.broker.version>1.1.0-SNAPSHOT</mqtt.broker.version>
         <mqtt.springboot.version>1.0.0-SNAPSHOT</mqtt.springboot.version>
-        <mqtt.test.version>1.0.0-SNAPSHOT</mqtt.test.version>
 
         <springboot.version>2.4.10</springboot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.version>3.5.1</maven.compiler.version>
         <java.version>1.8</java.version>
         <generateGitPropertiesFile>true</generateGitPropertiesFile>
+
+        <hutool.version>5.8.4</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -56,29 +58,34 @@
                 <version>1.18.8</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-core -->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-core</artifactId>
-                <version>5.5.9</version>
+                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-setting</artifactId>
-                <version>5.5.9</version>
+                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-crypto</artifactId>
-                <version>5.5.9</version>
+                <version>${hutool.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-system</artifactId>
-                <version>5.5.9</version>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.30</version>
             </dependency>
 
             <dependency>
@@ -137,9 +144,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.reporting.outputEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>

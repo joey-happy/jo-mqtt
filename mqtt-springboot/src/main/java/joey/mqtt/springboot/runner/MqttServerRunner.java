@@ -3,9 +3,10 @@ package joey.mqtt.springboot.runner;
 import joey.mqtt.broker.MqttServer;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * mqtt-server 启动
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class MqttServerRunner implements CommandLineRunner {
-    @Autowired
+    @Resource
     private MqttServer mqttServer;
 
     @Override

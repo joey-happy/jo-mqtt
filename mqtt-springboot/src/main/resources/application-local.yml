@@ -1,0 +1,69 @@
+logging:
+    config: classpath:logback-local.xml
+
+mqtt:
+    serverConfig: # server配置
+        tcpPort: 1883 # tcp端口配置 -1表示不开启
+        tcpSslPort: -1 # tcp-ssl端口配置 -1表示不开启
+        webSocketPath: /joMqtt # webSocket连接路径
+        webSocketPort: -1 # webSocket端口配置 -1表示不开启
+        webSocketSslPort: -1 # webSocket-ssl端口配置 -1表示不开启
+        enableClientCA: false # 是否开启客户端认证
+        hostname: ''
+        # provider配置 默认有如下3中实现
+        extendProviderClass: joey.mqtt.broker.provider.RedisExtendProvider # 支持集群间通信 支持消息持久化
+        #        extendProviderClass: joey.mqtt.broker.provider.ExtendProviderAdapter # 不支持集群间通信 不支持消息持久化
+        # hazelcastProvider相关配置 支持集群间通信 不支持消息持久化
+        # 需要配置mqtt.customConfig.hazelcastConfigFile和mqtt.customConfig.hazelcastConfigFile
+        #        extendProviderClass: joey.mqtt.broker.provider.HazelcastExtendProvider
+
+        enableUserAuth: true # 是否开启用户授权
+        authUsers: # 用户授权配置 password采用sha256hex加密 例子中密码明文和用户名一致
+            - password: 25bf8e1a2393f1108d37029b3df5593236c755742ec93465bbafa9b290bddcf6
+              userName: local
+            - password: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+              userName: admin
+    nettyConfig: # netty配置
+        bossThreads: 0
+        workerThreads: 0
+        epoll: false
+        soBacklog: 1024
+        soReuseAddress: true
+        tcpNoDelay: true
+        soSndBuf: 65536
+        soRcvBuf: 65536
+        soKeepAlive: true
+        channelTimeoutSeconds: 200
+    customConfig: # 自定义配置
+        redisConfig: # 如果使用了RedisExtendProvider 则必须配置redisConfig
+            host: localhost
+            password: ''
+            port: 6379
+            database: 0
+            timeout: 3000
+            pool:
+                maxActive: 50
+                maxWait: 1000
+                maxIdle: 50
+                minIdle: 20
+        # 如果开启ssl 则必须配置如下信息
+        # 建议使用：keytool -genkey -alias <desired certificate alias>
+        #                         -keystore <path to keystore.pfx>
+        #                         -storetype PKCS12
+        #                         -keyalg RSA
+        #                         -storepass <password>
+        #                         -validity 730
+        #                         -keysize 2048
+        sslContextConfig:
+            sslKeyFilePath: ssl/jomqtt-server.pfx
+            sslKeyStoreType: PKCS12
+            sslManagerPwd: jo_mqtt
+            sslStorePwd: jo_mqtt
+        #        nodeName: jo_mqtt_1 # 自定义节点名称 可以不配置 默认是UUID
+        extConfig: # 用户扩展配置
+            k1: v1-测试
+            k2: v2
+            k3:
+                k31: v31
+                k32: v32-中文
+

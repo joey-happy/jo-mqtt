@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author Joey
  * @date 2019/09/02
  */
-@SpringBootApplication
 @EnableScheduling
+@SpringBootApplication
 public class MqttApplication {
     public static void main(String[] args) {
         SpringApplication.run(MqttApplication.class, args);

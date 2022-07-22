@@ -47,15 +47,11 @@ public class RedisFactory {
         //逐出扫描的时间间隔(毫秒) 如果为负数,则不运行逐出线程, 默认-1
         config.setTimeBetweenEvictionRunsMillis(redisConfig.getPool().getTimeBetweenEvictionRunsMillis());
 
-        JedisPool jedisPool = null;
-        String password = redisConfig.getPassword();
-        if (StrUtil.isNotBlank(password)) {
-            jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getTimeout(), password, redisConfig.getDatabase());
-        } else {
-            jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getTimeout(), null, redisConfig.getDatabase());
-        }
+        String password = StrUtil.trimToNull(redisConfig.getPassword());
+        JedisPool jedisPool = new JedisPool(config, redisConfig.getHost(),
+                                            redisConfig.getPort(),
+                                            redisConfig.getTimeout(),
+                                            password, redisConfig.getDatabase());
 
         return new RedisClient(jedisPool);
     }

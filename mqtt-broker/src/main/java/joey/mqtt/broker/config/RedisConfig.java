@@ -4,9 +4,11 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import redis.clients.jedis.Protocol;
 
 /**
  * redis配置
+ *
  * @author Joey
  * @date 2019/9/7
  */
@@ -22,13 +24,12 @@ public class RedisConfig {
 
     private int database;
 
-    private int timeout = 3000;
+    private int timeout = Protocol.DEFAULT_TIMEOUT;
 
     private Pool pool;
 
     @Data
     public static class Pool {
-
         /**
          * Max number of "idle" connections in the pool. Use a negative value to indicate
          * an unlimited number of idle connections.
