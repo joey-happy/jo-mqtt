@@ -1,6 +1,7 @@
 package joey.mqtt.broker.store.memory;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.store.IDupPubRelMessageStore;
@@ -37,12 +38,7 @@ public class MemoryDupPubRelMessageStore implements IDupPubRelMessageStore {
             AtomicBoolean atomicBoolean = lockMap.get(clientId);
 
             if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
-                ConcurrentHashMap<Integer, CommonPublishMessage> msgMap = messageCache.get(clientId);
-                if (null == msgMap) {
-                    messageCache.putIfAbsent(clientId, new ConcurrentHashMap<>());
-                    msgMap = messageCache.get(clientId);
-                }
-
+                ConcurrentHashMap<Integer, CommonPublishMessage> msgMap = messageCache.computeIfAbsent(clientId, m -> new ConcurrentHashMap<>());
                 msgMap.put(message.getMessageId(), message);
                 lockMap.remove(clientId);
                 break;
@@ -81,7 +77,7 @@ public class MemoryDupPubRelMessageStore implements IDupPubRelMessageStore {
 
             if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
                 ConcurrentHashMap<Integer, CommonPublishMessage> msgMap = messageCache.get(clientId);
-                if (null != msgMap) {
+                if (MapUtil.isNotEmpty(msgMap)) {
                     msgMap.remove(messageId);
                 }
 

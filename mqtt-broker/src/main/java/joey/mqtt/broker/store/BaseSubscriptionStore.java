@@ -37,7 +37,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
     /**
      * topic并发操作锁map
      */
-    private ConcurrentHashMap<String, AtomicBoolean> lockMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, AtomicBoolean> topicLockMap = new ConcurrentHashMap<>();
 
     protected BaseSubscriptionStore(CustomConfig config) {
         wildcardTopicSubCache = new SubWildcardTree();
@@ -59,21 +59,15 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
         } else {
             //解决添加和删除并发操作出现订阅失败问题
             for(;;) {
-                lockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                AtomicBoolean atomicBoolean = lockMap.get(topic);
+                topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
+                AtomicBoolean atomicBoolean = topicLockMap.get(topic);
 
                 if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
-                    Set<Subscription> subSet = commonTopicSubCache.get(topic);
-
-                    if (null == subSet) {
-                        commonTopicSubCache.putIfAbsent(topic, new ConcurrentHashSet<>());
-                        subSet = commonTopicSubCache.get(topic);
-                    }
-
+                    Set<Subscription> subSet = commonTopicSubCache.computeIfAbsent(topic, s -> new ConcurrentHashSet<>());
                     subSet.add(subscription);
                     log.debug("MemorySubscriptionStore-addSub success. subscription={}", subscription);
 
-                    lockMap.remove(topic);
+                    topicLockMap.remove(topic);
                     break;
                 }
             }
@@ -99,25 +93,26 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
             Set<Subscription> subSet = commonTopicSubCache.get(topic);
 
             if (CollectionUtil.isNotEmpty(subSet) && subSet.contains(subscription)) {
+                //移除请阅关系
                 subSet.remove(subscription);
 
                 //如果移除client的订阅关系后 此topic在无人订阅 则删除此topic 释放内存
-                if (CollectionUtil.isEmpty(subSet)) {
+                if (CollUtil.isEmpty(subSet)) {
                     //解决添加和删除并发操作出现订阅失败问题
                     for(;;) {
-                        lockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                        AtomicBoolean atomicBoolean = lockMap.get(topic);
+                        topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
+                        AtomicBoolean atomicBoolean = topicLockMap.get(topic);
 
                         if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
                             //获取到锁
                             subSet = commonTopicSubCache.get(topic);
-                            if (CollectionUtil.isEmpty(subSet)) {
+                            if (CollUtil.isEmpty(subSet)) {
                                 commonTopicSubCache.remove(topic);
                                 log.debug("MemorySubscriptionStore-removeSub success. subscription={}", subscription);
                             }
 
                             //释放锁
-                            lockMap.remove(topic);
+                            topicLockMap.remove(topic);
                             break;
                         }
                     }
