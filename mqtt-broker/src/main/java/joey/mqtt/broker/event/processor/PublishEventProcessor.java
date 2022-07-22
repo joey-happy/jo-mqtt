@@ -165,6 +165,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         if (null != targetSession) {
             //订阅者收到MQTT消息的QoS级别, 最终取决于发布消息的QoS和主题订阅的QoS
+            //参考说明：https://www.emqx.com/zh/blog/mqtt-qos-design-for-internet-of-vehicles
             MqttQoS msgQoS = MqttQoS.valueOf(MessageUtils.getMinQos(commonPubMsg.getMqttQoS(), sub.getQos().value()));
 
             MqttPublishMessage mqttPubMsg = null;
