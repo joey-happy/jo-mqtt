@@ -7,9 +7,9 @@ package joey.mqtt.broker.store;
  * @date 2019/9/3
  */
 public interface IMessageIdStore {
-
     /**
      * 获取messageId
+     *
      * @param clientId
      * @return
      */

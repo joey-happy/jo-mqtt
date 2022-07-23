@@ -12,6 +12,7 @@ import joey.mqtt.broker.event.message.ConnectionLostEventMessage;
 import joey.mqtt.broker.innertraffic.IInnerTraffic;
 import joey.mqtt.broker.store.ISessionStore;
 import joey.mqtt.broker.util.NettyUtils;
+import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -57,13 +58,13 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
                 if (null != willPubMsg) {
                     willPubMsg.setSourceNodeName(nodeName);
 
-                    long st = System.currentTimeMillis();
+                    Stopwatch stopwatch = Stopwatch.start();
                     log.info("Process-connectionLost publish will message. clientId={},userName={},topic={}", clientId, userName, willPubMsg.getTopic());
 
                     //集群间发送消息
                     try {
                         innerTraffic.publish(willPubMsg);
-                        log.info("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), (System.currentTimeMillis() - st));
+                        log.info("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), stopwatch.elapsedMills());
                     } catch (Exception ex) {
                         log.error("Process-connectionLost publish will message with inner traffic error.", ex);
                     }

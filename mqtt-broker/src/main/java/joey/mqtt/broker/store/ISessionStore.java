@@ -10,16 +10,23 @@ import joey.mqtt.broker.core.client.ClientSession;
 public interface ISessionStore extends IStore {
     /**
      * 存储会话
+     *
+     * @param clientSession
      */
     void add(ClientSession clientSession);
 
     /**
      * 获取会话
+     *
+     * @param clientId
+     * @return
      */
     ClientSession get(String clientId);
 
     /**
      * 删除会话
+     *
+     * @param clientId
      */
     void remove(String clientId);
 

@@ -18,98 +18,98 @@ public class TopicUtilsTest {
     @Test
     public void testGetTokenList() {
         String topic = "/";
-        List<String> tokenList = TopicUtils.getTokenList(topic);
+        List<String> tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "abc/";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = Constants.TOKEN_ROOT;
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "+";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(tokenList.size() == 1 && topic.equals(tokenList.get(0)));
 
         topic = "+/";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "t1/++";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "#/11";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "+/";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "a/+";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertEquals(topic, StrUtil.join(StrUtil.SLASH, tokenList));
 
         topic = "a/c d";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertEquals(topic, StrUtil.join(StrUtil.SLASH, tokenList));
 
         topic = "a/+/#11";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
         topic = "a/+/#";
-        tokenList = TopicUtils.getTokenList(topic);
+        tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertEquals(topic, StrUtil.join(StrUtil.SLASH, tokenList));
     }
 
     @Test
     public void testMatch() {
-        List<String> subTokenList = TopicUtils.getTokenList("a/+");
-        List<String> matchTokenList = TopicUtils.getTokenList("a/b");
+        List<String> subTokenList = TopicUtils.getTopicTokenList("a/+");
+        List<String> matchTokenList = TopicUtils.getTopicTokenList("a/b");
         boolean match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertTrue(match);
 
-        subTokenList = TopicUtils.getTokenList("a/b");
-        matchTokenList = TopicUtils.getTokenList("a/+");
+        subTokenList = TopicUtils.getTopicTokenList("a/b");
+        matchTokenList = TopicUtils.getTopicTokenList("a/+");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertFalse(match);
 
-        subTokenList = TopicUtils.getTokenList("a/+/+");
-        matchTokenList = TopicUtils.getTokenList("a/b");
+        subTokenList = TopicUtils.getTopicTokenList("a/+/+");
+        matchTokenList = TopicUtils.getTopicTokenList("a/b");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertFalse(match);
 
-        subTokenList = TopicUtils.getTokenList("a/+/+");
-        matchTokenList = TopicUtils.getTokenList("a/b/+");
+        subTokenList = TopicUtils.getTopicTokenList("a/+/+");
+        matchTokenList = TopicUtils.getTopicTokenList("a/b/+");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertTrue(match);
 
-        subTokenList = TopicUtils.getTokenList("a/#");
-        matchTokenList = TopicUtils.getTokenList("a/b/+");
+        subTokenList = TopicUtils.getTopicTokenList("a/#");
+        matchTokenList = TopicUtils.getTopicTokenList("a/b/+");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertTrue(match);
 
-        subTokenList = TopicUtils.getTokenList("a/b/+");
-        matchTokenList = TopicUtils.getTokenList("a/#");
+        subTokenList = TopicUtils.getTopicTokenList("a/b/+");
+        matchTokenList = TopicUtils.getTopicTokenList("a/#");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertFalse(match);
 
-        subTokenList = TopicUtils.getTokenList("a/b/+/c/+");
-        matchTokenList = TopicUtils.getTokenList("a/b/d/c/e");
+        subTokenList = TopicUtils.getTopicTokenList("a/b/+/c/+");
+        matchTokenList = TopicUtils.getTopicTokenList("a/b/d/c/e");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertTrue(match);
 
-        subTokenList = TopicUtils.getTokenList("+/b");
-        matchTokenList = TopicUtils.getTokenList("c/b");
+        subTokenList = TopicUtils.getTopicTokenList("+/b");
+        matchTokenList = TopicUtils.getTopicTokenList("c/b");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertTrue(match);
 
-        subTokenList = TopicUtils.getTokenList("+/b");
-        matchTokenList = TopicUtils.getTokenList("c/c");
+        subTokenList = TopicUtils.getTopicTokenList("+/b");
+        matchTokenList = TopicUtils.getTopicTokenList("c/c");
         match = TopicUtils.match(subTokenList, matchTokenList);
         Assert.assertFalse(match);
     }

@@ -12,6 +12,7 @@ import io.netty.handler.codec.mqtt.MqttMessage;
 public interface IEventProcessor<T extends MqttMessage> {
     /**
      * 处理事件
+     *
      * @param ctx
      * @param message
      */

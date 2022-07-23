@@ -13,21 +13,31 @@ import java.util.Set;
 public interface ISubscriptionStore extends IStore {
     /**
      * 添加订阅
+     *
+     * @param subscription
+     * @param onlyMemory
+     * @return
      */
     boolean add(Subscription subscription, boolean onlyMemory);
 
     /**
      * 删除订阅
+     *
+     * @param subscription
      */
     boolean remove(Subscription subscription);
 
     /**
      * 匹配满足topic的所有订阅关系
+     *
+     * @param topic
+     * @return
      */
     List<Subscription> match(String topic);
 
     /**
      * 根据clientId查找所有订阅
+     *
      * @param clientId
      * @return
      */
@@ -35,6 +45,7 @@ public interface ISubscriptionStore extends IStore {
 
     /**
      * 根据clientId删除所有订阅
+     *
      * @param clientId
      */
     void removeAllBy(String clientId);

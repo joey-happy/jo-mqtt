@@ -30,7 +30,7 @@ public class TopicUtils {
      * @param topic
      * @return
      */
-    public static List<String> getTokenList(String topic) {
+    public static List<String> getTopicTokenList(String topic) {
         //topic为空 则不合法
         if (StrUtil.isBlank(topic)) {
             return CollUtil.newArrayList();

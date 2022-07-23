@@ -47,7 +47,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
     protected boolean add(Subscription subscription) {
         String topic = subscription.getTopic();
 
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
+        List<String> topicTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isEmpty(topicTokenList)) {
             log.error("MemorySubscriptionStore-addSub topic is not valid. clientId={},topic={}", subscription.getClientId(), topic);
             return false;
@@ -80,7 +80,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
     public boolean remove(Subscription subscription) {
         String topic = subscription.getTopic();
 
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
+        List<String> topicTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isEmpty(topicTokenList)) {
             log.error("MemorySubscriptionStore-removeSub topic is not valid.topic={}", topic);
             return false;
@@ -127,7 +127,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
     public List<Subscription> match(String topic) {
         List<Subscription> subscriptionList = new LinkedList<>();
 
-        List<String> topicTokenList = TopicUtils.getTokenList(topic);
+        List<String> topicTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isEmpty(topicTokenList)) {
             log.error("MemorySubscriptionStore-match topic is not valid. topic={}", topic);
             return subscriptionList;

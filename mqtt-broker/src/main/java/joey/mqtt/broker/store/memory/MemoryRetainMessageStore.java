@@ -38,7 +38,7 @@ public class MemoryRetainMessageStore implements IRetainMessageStore {
     public List<CommonPublishMessage> match(String topic) {
         List<CommonPublishMessage> retainMessageList = CollUtil.newLinkedList();
 
-        List<String> subTokenList = TopicUtils.getTokenList(topic);
+        List<String> subTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isNotEmpty(subTokenList)) {
             Collection<CommonPublishMessage> msgCollection = retainMsgMap.values();
 
@@ -47,7 +47,7 @@ public class MemoryRetainMessageStore implements IRetainMessageStore {
 
                 while (iterator.hasNext()) {
                     CommonPublishMessage retainMessage = iterator.next();
-                    if (TopicUtils.match(subTokenList, TopicUtils.getTokenList(retainMessage.getTopic()))) {
+                    if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(retainMessage.getTopic()))) {
                         retainMessageList.add(retainMessage);
                     }
                 }

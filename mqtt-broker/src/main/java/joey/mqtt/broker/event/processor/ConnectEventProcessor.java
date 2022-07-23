@@ -70,7 +70,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //检查clientId 必填项
         String clientId = payload.clientIdentifier();
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-connect:start. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
+        log.info("Process-connect:start. ClientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
 
         if (!validClientId(clientId)) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_IDENTIFIER_REJECTED));

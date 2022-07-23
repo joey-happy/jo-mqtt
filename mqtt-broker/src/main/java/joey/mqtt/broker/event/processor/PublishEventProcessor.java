@@ -1,6 +1,7 @@
 package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -18,6 +19,7 @@ import joey.mqtt.broker.store.*;
 import joey.mqtt.broker.util.MessageUtils;
 import joey.mqtt.broker.util.NettyUtils;
 import joey.mqtt.broker.util.Stopwatch;
+import joey.mqtt.broker.util.TopicUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,14 +67,18 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         CommonPublishMessage pubMsg = CommonPublishMessage.convert(message, false, nodeName);
 
+        String publishTopic = pubMsg.getTopic();
+        if (CollUtil.isEmpty(TopicUtils.getTopicTokenList(publishTopic))) {
+            throw new RuntimeException("Publish invalid topic=" + publishTopic);
+        }
+
         Stopwatch stopwatch = Stopwatch.start();
         log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName={}", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
 
         //集群间发送消息
         try {
-            long st = System.currentTimeMillis();
             innerTraffic.publish(pubMsg);
-            log.info("Process-publish publish message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), (System.currentTimeMillis() - st));
+            log.info("Process-publish publish message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), stopwatch.elapsedMills());
         } catch (Exception ex) {
             log.error("PublishEventProcessor-process inner traffic publish error.", ex);
         }

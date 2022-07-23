@@ -13,12 +13,14 @@ import java.util.List;
 public interface IDupPubMessageStore extends IStore {
     /**
      * 存储消息
+     *
      * @param message
      */
     void add(CommonPublishMessage message);
 
     /**
      * 获取消息
+     *
      * @param clientId
      * @return
      */
@@ -26,6 +28,7 @@ public interface IDupPubMessageStore extends IStore {
 
     /**
      * 获取消息
+     *
      * @param clientId
      * @param messageId
      * @return
@@ -34,6 +37,7 @@ public interface IDupPubMessageStore extends IStore {
 
     /**
      * 删除指定消息
+     *
      * @param clientId
      * @param messageId
      */
@@ -41,6 +45,7 @@ public interface IDupPubMessageStore extends IStore {
 
     /**
      * 删除用户所有消息
+     *
      * @param clientId
      */
     void removeAllFor(String clientId);

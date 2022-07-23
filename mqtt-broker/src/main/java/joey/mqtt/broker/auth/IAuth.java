@@ -8,6 +8,7 @@ package joey.mqtt.broker.auth;
 public interface IAuth {
     /**
      * 检查用户名和密码
+     *
      * @param userName
      * @param password
      * @return

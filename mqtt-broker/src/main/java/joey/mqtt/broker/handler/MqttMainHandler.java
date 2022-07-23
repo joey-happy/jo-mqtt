@@ -119,9 +119,7 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         log.warn("MqttMainHandler-channelInactive clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
-
         master.lostConnection(ctx);
-
         ctx.close();
     }
 
@@ -134,6 +132,7 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
     /**
      * 处理心跳超时
      * 参考：https://github.com/moquette-io/moquette/blob/master/broker/src/main/java/io/moquette/broker/MoquetteIdleTimeoutHandler.java
+     *
      * @param ctx
      * @param evt
      * @throws Exception
