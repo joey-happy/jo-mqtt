@@ -4,8 +4,7 @@
 轻量级物联网MQTT服务器, 快速部署, 支持集群.
 
 #### 软件架构说明
-基于netty+springboot+redis+hazelcast技术栈实现
-- java8+
+基于java8+netty+springboot+redis+hazelcast技术栈实现
 - 使用netty实现通信及协议解析
 - 使用springboot提供依赖注入及属性配置,方便打包及快速部署
 - 支持ssl,wss协议
