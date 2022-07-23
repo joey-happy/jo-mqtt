@@ -33,8 +33,6 @@ import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.handler.MqttMainHandler;
 import joey.mqtt.broker.provider.IExtendProvider;
-import joey.mqtt.broker.util.ConfigUtils;
-import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLEngine;
@@ -302,18 +300,5 @@ public class MqttServer {
      */
     public Set<Subscription> getClientSubInfoFor(String clientId) {
         return mqttMaster.getClientSubInfoFor(clientId);
-    }
-
-    /**
-     * mqtt-server main方法
-     * @param args
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        Stopwatch start = Stopwatch.start();
-
-        new MqttServer(ConfigUtils.loadFromSystemProps(Constants.MQTT_CONFIG, new Config())).start();
-
-        log.info("MqttServer-start. timeCost={}ms", start.elapsedMills());
     }
 }

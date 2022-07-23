@@ -57,9 +57,9 @@ public class ServerConfig {
     private String extendProviderClass = ExtendProviderAdapter.class.getName();
 
     /**
-     * 开启用户名密码认证
+     * 是否开启用户名密码认证
      */
-    private boolean enableUserAuth = true;
+    private boolean enableUserAuth = false;
 
     /**
      * 授权用户名和密码list

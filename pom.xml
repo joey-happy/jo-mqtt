@@ -27,7 +27,12 @@
         <java.version>1.8</java.version>
         <generateGitPropertiesFile>true</generateGitPropertiesFile>
 
+        <netty.version>4.1.77.Final</netty.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <lombok.version>1.18.24</lombok.version>
         <hutool.version>5.8.4</hutool.version>
+        <fastjson.version>1.2.83</fastjson.version>
+        <jedis.version>3.8.0</jedis.version>
     </properties>
 
     <dependencyManagement>
@@ -35,13 +40,13 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.36</version>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.7.36</version>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
@@ -55,7 +60,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.8</version>
+                <version>${lombok.version}</version>
             </dependency>
 
             <dependency>
@@ -91,26 +96,25 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-mqtt</artifactId>
-                <version>4.1.39.Final</version>
+                <version>${netty.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.77.Final</version>
+                <version>${netty.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-epoll</artifactId>
-                <version>4.1.39.Final</version>
-                <scope>compile</scope>
+                <version>${netty.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.46.Final</version>
+                <version>${netty.version}</version>
             </dependency>
 
             <dependency>
@@ -122,13 +126,13 @@
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
-                <version>3.1.0</version>
+                <version>${jedis.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.83</version>
+                <version>${fastjson.version}</version>
             </dependency>
 
             <dependency>

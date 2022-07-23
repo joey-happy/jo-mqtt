@@ -160,6 +160,9 @@ mqtt.customConfig.extConfig.k3.k32=v32
 >6. https://github.com/1ssqq1lxr/iot_push
 >7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
 
+#### 客户端工具
+1. https://mqttfx.jensd.de/index.php/download 客户端工具下载 
+
 #### 压测工具
 >1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
 >2. https://github.com/daoshenzzg/mqtt-mock ./mqtt-mock -broker "tcp://localhost:1883" -c 6000 -n 1000 -action sub -topic test -username local -password local -debug true
