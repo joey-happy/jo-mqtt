@@ -5,10 +5,12 @@ import cn.hutool.core.util.StrUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.handler.timeout.IdleStateHandler;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.auth.IAuth;
+import joey.mqtt.broker.constant.BusinessConstants;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
@@ -25,6 +27,7 @@ import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
@@ -70,9 +73,9 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //检查clientId 必填项
         String clientId = payload.clientIdentifier();
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-connect:start. ClientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
+        log.info("Process-connect:start. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
 
-        if (!validClientId(clientId)) {
+        if (!checkClientId(clientId)) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_IDENTIFIER_REJECTED));
             channel.close();
             log.error("Process-connect:error. ClientId is empty. remoteIp={}", remoteIp);
@@ -81,7 +84,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
         //校验版本信息
         MqttConnectVariableHeader variableHeader = message.variableHeader();
-        if (!validVersion(variableHeader.version())) {
+        if (!checkVersion(variableHeader.version())) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION));
             channel.close();
             log.error("Process-connect:error. Mqtt connect version not supported. clientId={},userName={},version={},remoteIdp={}", clientId, payload.userName(), variableHeader.version(), remoteIp);
@@ -94,7 +97,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             userName = payload.userName();
             byte[] passwordInBytes = payload.passwordInBytes();
 
-            if (!authManager.checkValid(userName, passwordInBytes)) {
+            if (!authManager.checkAuth(userName, passwordInBytes)) {
                 channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD));
                 channel.close();
                 log.error("Process-connect:error. Unauthorized user. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
@@ -164,14 +167,15 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
     /**
      * 处理旧连接并返回
+     *
      * @param clientId
      */
     private void handleOldSession(String clientId) {
-        ClientSession oldClientSession = sessionStore.get(clientId);
-        if (null != oldClientSession) {
-            oldClientSession.closeChannel();
-            log.info("Process-connect:close old channel. clientId={}", clientId);
-        }
+        Optional.ofNullable(sessionStore.get(clientId))
+                .ifPresent(oldClientSession -> {
+                    oldClientSession.closeChannel();
+                    log.info("Process-connect:close old channel. clientId={}", clientId);
+                });
     }
 
     /**
@@ -213,21 +217,22 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
     private void resetKeepAliveTimeout(Channel channel, MqttConnectMessage msg) {
         int keepAliveTimeSeconds = msg.variableHeader().keepAliveTimeSeconds();
 
-        if (keepAliveTimeSeconds > 0) {
-            if (channel.pipeline().names().contains(Constants.HANDLER_IDLE_STATE)) {
-                channel.pipeline().remove(Constants.HANDLER_IDLE_STATE);
+        if (keepAliveTimeSeconds > NumConstants.INT_0) {
+            ChannelPipeline pipeline = channel.pipeline();
+            if (pipeline.names().contains(BusinessConstants.HANDLER_IDLE_STATE)) {
+                pipeline.remove(BusinessConstants.HANDLER_IDLE_STATE);
             }
 
-            int finalKeepAliveTimeSeconds = Math.round(keepAliveTimeSeconds * 1.5f);
-            channel.pipeline().addFirst(Constants.HANDLER_IDLE_STATE, new IdleStateHandler(0, 0, finalKeepAliveTimeSeconds));
+            int finalKeepAliveTimeSeconds = Math.round(keepAliveTimeSeconds * NumConstants.FLOAT_1_5);
+            pipeline.addFirst(BusinessConstants.HANDLER_IDLE_STATE, new IdleStateHandler(NumConstants.INT_0, NumConstants.INT_0, finalKeepAliveTimeSeconds));
         }
     }
 
-    private boolean validClientId(String clientId) {
+    private boolean checkClientId(String clientId) {
         return StrUtil.isNotBlank(clientId);
     }
 
-    private boolean validVersion(int version) {
+    private boolean checkVersion(int version) {
         boolean valid = false;
 
         for (MqttVersion mqttVersion : MqttVersion.values()) {

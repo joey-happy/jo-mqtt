@@ -1,6 +1,8 @@
 package joey.mqtt.broker.config;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * mqtt-broker-yaml文件配置
@@ -8,9 +10,7 @@ import lombok.*;
  * @author Joey
  * @date 2019/7/18
  */
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class YamlWrapperConfig {

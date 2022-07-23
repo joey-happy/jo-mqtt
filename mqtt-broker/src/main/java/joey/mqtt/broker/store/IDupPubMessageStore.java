@@ -33,7 +33,7 @@ public interface IDupPubMessageStore extends IStore {
      * @param messageId
      * @return
      */
-    CommonPublishMessage get(String clientId, String messageId);
+    CommonPublishMessage get(String clientId, int messageId);
 
     /**
      * 删除指定消息

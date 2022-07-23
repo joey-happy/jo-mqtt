@@ -18,6 +18,7 @@ public class InnerPublishEventProcessor {
 
     /**
      * 发布消息到所有订阅者
+     *
      * @param pubMsg
      */
     public void publish2Subscribers(CommonPublishMessage pubMsg) {

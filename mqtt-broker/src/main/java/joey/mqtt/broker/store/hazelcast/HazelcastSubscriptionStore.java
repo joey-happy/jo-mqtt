@@ -1,15 +1,16 @@
 package joey.mqtt.broker.store.hazelcast;
 
-import cn.hutool.core.collection.CollUtil;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.multimap.MultiMap;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.store.BaseSubscriptionStore;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * hazelcast订阅存储
@@ -31,13 +32,13 @@ public class HazelcastSubscriptionStore extends BaseSubscriptionStore {
         this.hzInstance = hzInstance;
         this.customConfig = customConfig;
 
-        clientSubMultiMap = hzInstance.getMultiMap(Constants.HAZELCAST_SUB_STORE);
+        this.clientSubMultiMap = hzInstance.getMultiMap(BusinessConstants.HAZELCAST_SUB_STORE);
     }
 
     @Override
     public boolean add(Subscription subscription, boolean onlyMemory) {
         boolean addResult = super.add(subscription);
-        if(addResult && !onlyMemory) {
+        if (addResult && !onlyMemory) {
             clientSubMultiMap.put(subscription.getClientId(), subscription);
             return true;
         }
@@ -48,7 +49,7 @@ public class HazelcastSubscriptionStore extends BaseSubscriptionStore {
     @Override
     public boolean remove(Subscription subscription) {
         boolean removeResult = super.remove(subscription);
-        if(removeResult) {
+        if (removeResult) {
             clientSubMultiMap.remove(subscription.getClientId(), subscription);
             return true;
         }
@@ -58,28 +59,21 @@ public class HazelcastSubscriptionStore extends BaseSubscriptionStore {
 
     @Override
     public Set<Subscription> findAllBy(String clientId) {
-        Collection<Subscription> subCollection = clientSubMultiMap.get(clientId);
-
-        if (CollUtil.isEmpty(subCollection)) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(subCollection);
+        return Optional.ofNullable(clientSubMultiMap.get(clientId))
+                       .map(subCollection -> new HashSet<>(subCollection))
+                       .orElse(new HashSet<>());
     }
 
     @Override
     public void removeAllBy(String clientId) {
-        Collection<Subscription> subSet = clientSubMultiMap.get(clientId);
+        Optional.ofNullable(clientSubMultiMap.get(clientId))
+                .ifPresent(subSet -> {
+                    subSet.forEach(sub -> {
+                        //删除订阅关系
+                        super.remove(sub);
+                    });
 
-        if (CollUtil.isNotEmpty(subSet)) {
-            Iterator<Subscription> iterator = subSet.iterator();
-
-            //删除订阅关系
-            while (iterator.hasNext()) {
-                super.remove(iterator.next());
-            }
-
-            clientSubMultiMap.remove(clientId);
-        }
+                    clientSubMultiMap.remove(clientId);
+                });
     }
 }

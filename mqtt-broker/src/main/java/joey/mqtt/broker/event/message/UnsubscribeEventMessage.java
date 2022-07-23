@@ -10,8 +10,8 @@ import lombok.Getter;
  * @author Joey
  * @date 2019/9/8
  */
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public class UnsubscribeEventMessage implements EventMessage {
     private final String topic;
 

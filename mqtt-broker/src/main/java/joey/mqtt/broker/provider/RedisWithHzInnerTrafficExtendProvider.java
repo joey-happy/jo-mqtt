@@ -32,6 +32,7 @@ public class RedisWithHzInnerTrafficExtendProvider extends ExtendProviderAdapter
 
     /**
      * 反射调用此构造方法
+     *
      * @param customConfig
      */
     public RedisWithHzInnerTrafficExtendProvider(CustomConfig customConfig) {

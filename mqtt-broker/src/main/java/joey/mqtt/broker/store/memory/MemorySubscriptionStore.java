@@ -1,13 +1,13 @@
 package joey.mqtt.broker.store.memory;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ConcurrentHashSet;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.store.BaseSubscriptionStore;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,15 +31,9 @@ public class MemorySubscriptionStore extends BaseSubscriptionStore {
     @Override
     public boolean add(Subscription subscription, boolean onlyMemory) {
         boolean addResult = super.add(subscription);
-        if(addResult && !onlyMemory) {
+        if (addResult && !onlyMemory) {
             String clientId = subscription.getClientId();
-            Set<Subscription> subSet = clientSubMap.get(clientId);
-
-            if (null == subSet) {
-                clientSubMap.putIfAbsent(clientId, new ConcurrentHashSet<>());
-                subSet = clientSubMap.get(clientId);
-            }
-
+            Set<Subscription> subSet = clientSubMap.computeIfAbsent(clientId, s -> new ConcurrentHashSet<>());
             subSet.add(subscription);
             return true;
         }
@@ -50,13 +44,12 @@ public class MemorySubscriptionStore extends BaseSubscriptionStore {
     @Override
     public boolean remove(Subscription subscription) {
         boolean removeResult = super.remove(subscription);
-        if(removeResult) {
+        if (removeResult) {
             String clientId = subscription.getClientId();
-            Set<Subscription> subSet = clientSubMap.get(clientId);
-
-            if (CollUtil.isNotEmpty(subSet) && subSet.contains(subscription)) {
-                subSet.remove(subscription);
-            }
+            Optional.ofNullable(clientSubMap.get(clientId))
+                    .ifPresent(subSet -> {
+                        subSet.remove(subscription);
+                    });
 
             return true;
         }
@@ -66,22 +59,21 @@ public class MemorySubscriptionStore extends BaseSubscriptionStore {
 
     @Override
     public Set<Subscription> findAllBy(String clientId) {
-        return CollUtil.emptyIfNull(clientSubMap.get(clientId));
+        return Optional.ofNullable(clientSubMap.get(clientId))
+                       .map(subCollection -> new HashSet<>(subCollection))
+                       .orElse(new HashSet<>());
     }
 
     @Override
     public void removeAllBy(String clientId) {
-        Set<Subscription> subSet = clientSubMap.get(clientId);
+        Optional.ofNullable(clientSubMap.get(clientId))
+                .ifPresent(subSet -> {
+                    subSet.forEach(sub -> {
+                        //删除订阅关系
+                        super.remove(sub);
+                    });
 
-        if (CollUtil.isNotEmpty(subSet)) {
-            Iterator<Subscription> iterator = subSet.iterator();
-
-            //删除订阅关系
-            while (iterator.hasNext()) {
-                super.remove(iterator.next());
-            }
-
-            subSet.clear();
-        }
+                    subSet.clear();
+                });
     }
 }

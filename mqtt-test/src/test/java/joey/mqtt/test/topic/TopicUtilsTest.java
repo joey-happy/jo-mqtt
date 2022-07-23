@@ -2,7 +2,7 @@ package joey.mqtt.test.topic;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import joey.mqtt.broker.Constants;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.util.TopicUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class TopicUtilsTest {
         tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 
-        topic = Constants.TOKEN_ROOT;
+        topic = BusinessConstants.TOKEN_ROOT;
         tokenList = TopicUtils.getTopicTokenList(topic);
         Assert.assertTrue(CollUtil.isEmpty(tokenList));
 

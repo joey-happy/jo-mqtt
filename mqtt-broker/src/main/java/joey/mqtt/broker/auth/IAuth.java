@@ -2,8 +2,9 @@ package joey.mqtt.broker.auth;
 
 /**
  * 连接授权
+ *
  * @author Joey
- * @date 2019/7/22
+ * @date 2022/7/22
  */
 public interface IAuth {
     /**
@@ -13,5 +14,5 @@ public interface IAuth {
      * @param password
      * @return
      */
-    boolean checkValid(String userName, byte[] password);
+    boolean checkAuth(String userName, byte[] password);
 }

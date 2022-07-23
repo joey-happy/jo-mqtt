@@ -5,7 +5,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
-import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PubRecEventMessage;
@@ -14,6 +13,8 @@ import joey.mqtt.broker.store.IDupPubRelMessageStore;
 import joey.mqtt.broker.util.MessageUtils;
 import joey.mqtt.broker.util.NettyUtils;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 /**
  * pubRec事件处理
@@ -45,11 +46,11 @@ public class PubRecEventProcessor implements IEventProcessor<MqttMessage> {
         int messageId = variableHeader.messageId();
 
         if (StrUtil.isNotBlank(clientId)) {
-            CommonPublishMessage pubMsg = dupPubMessageStore.get(clientId, String.valueOf(messageId));
-            if (null != pubMsg) {
-                dupPubMessageStore.remove(clientId, messageId);
-                dupPubRelMessageStore.add(pubMsg.copy());
-            }
+            Optional.ofNullable(dupPubMessageStore.get(clientId, messageId))
+                    .ifPresent(pubMsg -> {
+                        dupPubMessageStore.remove(clientId, messageId);
+                        dupPubRelMessageStore.add(pubMsg.copy());
+                    });
         }
 
         MqttMessage pubRelResp = MessageUtils.buildPubRelMessage(messageId, false);

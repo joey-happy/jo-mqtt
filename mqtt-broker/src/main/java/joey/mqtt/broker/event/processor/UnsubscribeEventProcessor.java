@@ -5,7 +5,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
-import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -17,6 +16,7 @@ import joey.mqtt.broker.util.NettyUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 取消订阅事件处理
@@ -47,20 +47,19 @@ public class UnsubscribeEventProcessor implements IEventProcessor<MqttUnsubscrib
 
         log.info("Process-unsubscribe. clientId={},userName={},topicList={}", clientId, userName, topicList);
         if (CollectionUtil.isNotEmpty(topicList)) {
-            ClientSession clientSession = sessionStore.get(clientId);
+            Optional.ofNullable(sessionStore.get(clientId))
+                    .ifPresent(clientSession -> {
+                        topicList.forEach(topic -> {
+                            Subscription sub = new Subscription(clientId, topic, null);
+                            subStore.remove(sub);
 
-            if (null != clientSession) {
-                topicList.forEach(topic -> {
-                    Subscription sub = new Subscription(clientId, topic, null);
-                    subStore.remove(sub);
+                            //处理监听事件
+                            eventListenerExecutor.execute(new UnsubscribeEventMessage(topic, clientId, userName), IEventListener.Type.UNSUBSCRIBE);
+                        });
 
-                    //处理监听事件
-                    eventListenerExecutor.execute(new UnsubscribeEventMessage(topic, clientId, userName), IEventListener.Type.UNSUBSCRIBE);
-                });
-
-                MqttUnsubAckMessage unsubAckResp = MessageUtils.buildUnsubAckMessage(message.variableHeader().messageId());
-                channel.writeAndFlush(unsubAckResp);
-            }
+                        MqttUnsubAckMessage unsubAckResp = MessageUtils.buildUnsubAckMessage(message.variableHeader().messageId());
+                        channel.writeAndFlush(unsubAckResp);
+                    });
         }
     }
 }

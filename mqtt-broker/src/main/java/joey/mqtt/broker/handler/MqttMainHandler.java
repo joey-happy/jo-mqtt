@@ -1,6 +1,5 @@
 package joey.mqtt.broker.handler;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,11 +27,7 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) throws Exception {
-        // 消息解码器出现异常
-        if (msg.decoderResult().isFailure()) {
-            handleDecoderFailure(ctx, msg);
-            return;
-        }
+        NettyUtils.checkMessage(msg);
 
         MqttMessageType messageType = msg.fixedHeader().messageType();
         try {
@@ -87,33 +82,6 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
             ctx.fireExceptionCaught(ex);
             ctx.close();
         }
-    }
-
-    /**
-     * 处理解码错误
-     * @param ctx
-     * @param msg
-     */
-    private void handleDecoderFailure(ChannelHandlerContext ctx, MqttMessage msg) {
-        final Channel channel = ctx.channel();
-        Throwable cause = msg.decoderResult().cause();
-
-        if (cause instanceof MqttUnacceptableProtocolVersionException) {
-            // 不支持的协议版本
-            MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                    new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION, false), null);
-            channel.writeAndFlush(connAckMessage);
-
-        } else if (cause instanceof MqttIdentifierRejectedException) {
-            // 不合格的clientId
-            MqttConnAckMessage connAckMessage = (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                    new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                    new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED, false), null);
-            channel.writeAndFlush(connAckMessage);
-        }
-
-        channel.close();
     }
 
     @Override

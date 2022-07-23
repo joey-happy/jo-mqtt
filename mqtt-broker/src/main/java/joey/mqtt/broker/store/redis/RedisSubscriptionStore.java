@@ -2,16 +2,16 @@ package joey.mqtt.broker.store.redis;
 
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.redis.RedisClient;
 import joey.mqtt.broker.store.BaseSubscriptionStore;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -35,13 +35,13 @@ public class RedisSubscriptionStore extends BaseSubscriptionStore {
     }
 
     private String getRedisKey(String clientId) {
-        return Constants.REDIS_SUB_STORE_KEY + clientId;
+        return BusinessConstants.REDIS_SUB_STORE_KEY + clientId;
     }
 
     @Override
     public boolean add(Subscription subscription, boolean onlyMemory) {
         boolean addResult = super.add(subscription);
-        if(addResult && !onlyMemory) {
+        if (addResult && !onlyMemory) {
             redisClient.hset(getRedisKey(subscription), subscription.getTopic(), JSON.toJSONString(subscription));
             return true;
         }
@@ -52,7 +52,7 @@ public class RedisSubscriptionStore extends BaseSubscriptionStore {
     @Override
     public boolean remove(Subscription subscription) {
         boolean removeResult = super.remove(subscription);
-        if(removeResult) {
+        if (removeResult) {
             redisClient.hdel(getRedisKey(subscription), subscription.getTopic());
             return true;
         }
@@ -76,16 +76,13 @@ public class RedisSubscriptionStore extends BaseSubscriptionStore {
 
     @Override
     public void removeAllBy(String clientId) {
-        Set<Subscription> subSet = findAllBy(clientId);
-
-        if (CollUtil.isNotEmpty(subSet)) {
-            Iterator<Subscription> iterator = subSet.iterator();
-
-            //删除订阅关系
-            while (iterator.hasNext()) {
-                super.remove(iterator.next());
-            }
-        }
+        Optional.ofNullable(findAllBy(clientId))
+                .ifPresent(subSet -> {
+                    subSet.forEach(sub -> {
+                        //删除订阅关系
+                        super.remove(sub);
+                    });
+                });
 
         redisClient.del(getRedisKey(clientId));
     }

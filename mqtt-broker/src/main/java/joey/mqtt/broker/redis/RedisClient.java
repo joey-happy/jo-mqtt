@@ -1,6 +1,9 @@
 package joey.mqtt.broker.redis;
 
 import cn.hutool.core.collection.CollUtil;
+import joey.mqtt.broker.constant.NumConstants;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import redis.clients.jedis.*;
 
 import java.util.HashMap;
@@ -13,17 +16,12 @@ import java.util.Map;
  * @author Joey
  * @date 2019/9/7
  */
+@NoArgsConstructor
+@AllArgsConstructor
 public class RedisClient {
     private static final String OK_STR = "OK";
 
     private JedisPool jedisPool;
-
-    public RedisClient() {
-    }
-
-    public RedisClient(JedisPool jedisPool) {
-        this.jedisPool = jedisPool;
-    }
 
     public void set(String key, String value) {
         try (Jedis jedis = jedisPool.getResource()) {
@@ -101,7 +99,7 @@ public class RedisClient {
         Map<String, String> resultMap = new HashMap<>();
 
         try (Jedis jedis = jedisPool.getResource()) {
-            int cursor = 0;
+            int cursor = NumConstants.INT_0;
 
             ScanParams scanParams = new ScanParams();
             scanParams.count(eachScanCount);

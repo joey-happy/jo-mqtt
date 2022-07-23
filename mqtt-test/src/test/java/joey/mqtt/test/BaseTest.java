@@ -3,7 +3,7 @@ package joey.mqtt.test;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.util.ConfigUtils;
 
-import static joey.mqtt.broker.Constants.MQTT_CONFIG;
+import static joey.mqtt.broker.constant.BusinessConstants.MQTT_CONFIG;
 
 /**
  * @author Joey

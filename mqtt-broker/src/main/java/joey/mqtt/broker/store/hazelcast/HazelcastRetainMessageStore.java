@@ -3,15 +3,14 @@ package joey.mqtt.broker.store.hazelcast;
 import cn.hutool.core.collection.CollUtil;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.store.IRetainMessageStore;
 import joey.mqtt.broker.util.TopicUtils;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * hazelcast retain消息存储
@@ -25,7 +24,7 @@ public class HazelcastRetainMessageStore extends HazelcastBaseStore implements I
     public HazelcastRetainMessageStore(HazelcastInstance hzInstance, CustomConfig customConfig) {
         super(hzInstance, customConfig);
 
-        retainMsgMap = hzInstance.getMap(Constants.HAZELCAST_MSG_RETAIN);
+        retainMsgMap = hzInstance.getMap(BusinessConstants.HAZELCAST_MSG_RETAIN);
     }
 
     @Override
@@ -44,19 +43,14 @@ public class HazelcastRetainMessageStore extends HazelcastBaseStore implements I
 
         List<String> subTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isNotEmpty(subTokenList)) {
-            Collection<CommonPublishMessage> msgCollection = retainMsgMap.values();
-
-            if (CollUtil.isNotEmpty(msgCollection)) {
-                Iterator<CommonPublishMessage> iterator = msgCollection.iterator();
-
-                while (iterator.hasNext()) {
-                    CommonPublishMessage retainMessage = iterator.next();
-
-                    if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(retainMessage.getTopic()))) {
-                        retainMessageList.add(retainMessage);
-                    }
-                }
-            }
+            Optional.ofNullable(retainMsgMap.values())
+                    .ifPresent(msgCollection -> {
+                        msgCollection.forEach(retainMessage -> {
+                            if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(retainMessage.getTopic()))) {
+                                retainMessageList.add(retainMessage);
+                            }
+                        });
+                    });
         }
 
         return retainMessageList;

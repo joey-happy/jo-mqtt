@@ -1,8 +1,12 @@
 package joey.mqtt.broker.util;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.DecoderResult;
+import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.util.AttributeKey;
+import joey.mqtt.broker.exception.MqttException;
 
 import java.net.InetSocketAddress;
 
@@ -27,6 +31,7 @@ public final class NettyUtils {
 
     /**
      * 设置clientId属性
+     *
      * @param channel
      * @param clientId
      * @param userName
@@ -39,6 +44,7 @@ public final class NettyUtils {
 
     /**
      * 设置clientId属性
+     *
      * @param channel
      * @param clientId
      */
@@ -48,6 +54,7 @@ public final class NettyUtils {
 
     /**
      * 获取clientId属性
+     *
      * @param channel
      * @return
      */
@@ -57,6 +64,7 @@ public final class NettyUtils {
 
     /**
      * 设置userName属性
+     *
      * @param channel
      * @param userName
      */
@@ -66,6 +74,7 @@ public final class NettyUtils {
 
     /**
      * 获取userName属性
+     *
      * @param channel
      * @return
      */
@@ -75,17 +84,35 @@ public final class NettyUtils {
 
     /**
      * 获取远程连接ip
+     *
      * @param channel
      * @return
      */
     public static String getRemoteIp(Channel channel) {
         try {
-            final InetSocketAddress socketAddr = (InetSocketAddress) channel.remoteAddress();
-            return socketAddr.getAddress().getHostAddress();
+            InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
+            return socketAddress.getAddress().getHostAddress();
         } catch (Throwable t) {
-            //TODO 暂时忽略
+            //ignore
         }
 
         return StrUtil.EMPTY;
+    }
+
+    /**
+     * 检查消息合法性
+     *
+     * @param msg
+     * @return
+     */
+    public static void checkMessage(MqttMessage msg) {
+        DecoderResult decoderResult = msg.decoderResult();
+        if (ObjectUtil.isNotNull(decoderResult) && decoderResult.isFailure()) {
+            throw new MqttException("Invalid massage", decoderResult.cause());
+        }
+
+        if (ObjectUtil.isNull(msg.fixedHeader())) {
+            throw new MqttException("Unknown packet, no fixedHeader present, no cause provided");
+        }
     }
 }

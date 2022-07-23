@@ -7,7 +7,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.dialect.Props;
 import cn.hutool.setting.yaml.YamlUtil;
-import joey.mqtt.broker.Constants;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.config.YamlWrapperConfig;
 
@@ -60,7 +60,7 @@ public class ConfigUtils {
      */
     public static Config loadFromPropertiesFile(String mqttConfigFile) {
         Props props = Props.getProp(mqttConfigFile, CharsetUtil.CHARSET_UTF_8);
-        return props.toBean(Config.class, Constants.MQTT_CONFIG_PROPS_PRE);
+        return props.toBean(Config.class, BusinessConstants.MQTT_CONFIG_PROPS_PRE);
     }
 
     /**
@@ -75,7 +75,7 @@ public class ConfigUtils {
     }
 
     public static void main(String[] args) {
-        Config config = ConfigUtils.loadFromSystemProps(Constants.MQTT_CONFIG, new Config());
+        Config config = ConfigUtils.loadFromSystemProps(BusinessConstants.MQTT_CONFIG, new Config());
         Console.log(config);
     }
 }

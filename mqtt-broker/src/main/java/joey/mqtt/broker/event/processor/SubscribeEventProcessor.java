@@ -1,6 +1,7 @@
 package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -57,37 +58,37 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
         String clientId = NettyUtils.clientId(channel);
         ClientSession clientSession = sessionStore.get(clientId);
 
-        if (null != clientSession) {
-            List<Integer> mqttQoSList = new ArrayList<>();
-
-            //添加订阅关系
-            topicSubList.forEach(topicSub -> {
-                String topic = topicSub.topicName();
-                MqttQoS mqttQoS = topicSub.qualityOfService();
-                Subscription subscription = new Subscription(clientId, topic, mqttQoS);
-                boolean addSuccess = subStore.add(subscription, false);
-
-                if (addSuccess) {
-                    //处理监听事件
-                    eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
-                }
-
-                mqttQoSList.add(addSuccess ? mqttQoS.value() : MqttQoS.FAILURE.value());
-            });
-
-            MqttMessage ackResp = MessageUtils.buildSubAckMessage(message.variableHeader().messageId(), mqttQoSList);
-            channel.writeAndFlush(ackResp);
-
-            //发布retained消息
-            topicSubList.forEach(topicSub -> {
-                String topic = topicSub.topicName();
-                MqttQoS mqttQoS = topicSub.qualityOfService();
-
-                sendRetainMessage(new Subscription(clientId, topic, mqttQoS));
-            });
-        } else {
+        if (ObjectUtil.isNull(clientSession)) {
             channel.close();
+            return;
         }
+
+        List<Integer> mqttQoSList = new ArrayList<>();
+
+        //添加订阅关系
+        topicSubList.forEach(topicSub -> {
+            String topic = topicSub.topicName();
+            MqttQoS mqttQoS = topicSub.qualityOfService();
+            Subscription subscription = new Subscription(clientId, topic, mqttQoS);
+            boolean addSuccess = subStore.add(subscription, false);
+            if (addSuccess) {
+                //处理监听事件
+                eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
+            }
+
+            mqttQoSList.add(addSuccess ? mqttQoS.value() : MqttQoS.FAILURE.value());
+        });
+
+        MqttMessage ackResp = MessageUtils.buildSubAckMessage(message.variableHeader().messageId(), mqttQoSList);
+        channel.writeAndFlush(ackResp);
+
+        //发布retained消息
+        topicSubList.forEach(topicSub -> {
+            String topic = topicSub.topicName();
+            MqttQoS mqttQoS = topicSub.qualityOfService();
+
+            sendRetainMessage(new Subscription(clientId, topic, mqttQoS));
+        });
     }
 
     /**

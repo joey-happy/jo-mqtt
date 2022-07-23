@@ -15,6 +15,8 @@ import joey.mqtt.broker.util.NettyUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 /**
  * 连接事件丢失处理
  *
@@ -48,40 +50,39 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
         String userName = NettyUtils.userName(channel);
 
         if (StrUtil.isNotBlank(clientId)) {
-            ClientSession clientSession = sessionStore.get(clientId);
+            Optional.ofNullable(sessionStore.get(clientId))
+                    .ifPresent(clientSession -> {
+                        log.info("Process-connectionLost. clientId={},userName={}", clientId, userName);
 
-            if (null != clientSession) {
-                log.info("Process-connectionLost. clientId={},userName={}", clientId, userName);
+                        //发送遗言消息
+                        Optional.ofNullable(clientSession.getPubMsgForWillMessage())
+                                .ifPresent(willPubMsg -> {
+                                    willPubMsg.setSourceNodeName(nodeName);
 
-                CommonPublishMessage willPubMsg = clientSession.getPubMsgForWillMessage();
-                //发送遗言消息
-                if (null != willPubMsg) {
-                    willPubMsg.setSourceNodeName(nodeName);
+                                    Stopwatch stopwatch = Stopwatch.start();
+                                    log.info("Process-connectionLost publish will message. clientId={},userName={},topic={}", clientId, userName, willPubMsg.getTopic());
 
-                    Stopwatch stopwatch = Stopwatch.start();
-                    log.info("Process-connectionLost publish will message. clientId={},userName={},topic={}", clientId, userName, willPubMsg.getTopic());
+                                    //集群间发送消息
+                                    try {
+                                        innerTraffic.publish(willPubMsg);
+                                        log.info("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), stopwatch.elapsedMills());
+                                    } catch (Exception ex) {
+                                        log.error("Process-connectionLost publish will message with inner traffic error.", ex);
+                                    }
 
-                    //集群间发送消息
-                    try {
-                        innerTraffic.publish(willPubMsg);
-                        log.info("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), stopwatch.elapsedMills());
-                    } catch (Exception ex) {
-                        log.error("Process-connectionLost publish will message with inner traffic error.", ex);
-                    }
+                                    //发布遗言消息到订阅者
+                                    publishEventProcessor.publish2Subscribers(willPubMsg);
 
-                    //发布遗言消息到订阅者
-                    publishEventProcessor.publish2Subscribers(willPubMsg);
+                                    //存储retain遗言
+                                    publishEventProcessor.handleRetainMessage(willPubMsg);
+                                });
 
-                    //存储retain遗言
-                    publishEventProcessor.handleRetainMessage(willPubMsg);
-                }
+                        //移除session
+                        sessionStore.remove(clientId);
 
-                //移除session
-                sessionStore.remove(clientId);
-
-                //处理监听连接丢失事件
-                eventListenerExecutor.execute(new ConnectionLostEventMessage(clientId, userName), IEventListener.Type.CONNECTION_LOST);
-            }
+                        //处理监听连接丢失事件
+                        eventListenerExecutor.execute(new ConnectionLostEventMessage(clientId, userName), IEventListener.Type.CONNECTION_LOST);
+                    });
         }
     }
 }

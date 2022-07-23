@@ -9,10 +9,10 @@ import joey.mqtt.broker.store.IRetainMessageStore;
 import joey.mqtt.broker.util.TopicUtils;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import static joey.mqtt.broker.Constants.REDIS_EACH_SCAN_COUNT;
-import static joey.mqtt.broker.Constants.REDIS_MSG_RETAIN_KEY;
+import static joey.mqtt.broker.constant.BusinessConstants.REDIS_EACH_SCAN_COUNT;
+import static joey.mqtt.broker.constant.BusinessConstants.REDIS_MSG_RETAIN_KEY;
 
 /**
  * redis retain消息存储
@@ -40,20 +40,19 @@ public class RedisRetainMessageStore implements IRetainMessageStore {
     @Override
     public List<CommonPublishMessage> match(String topic) {
         List<CommonPublishMessage> retainMessageList = CollUtil.newLinkedList();
+
         List<String> subTokenList = TopicUtils.getTopicTokenList(topic);
-
         if (CollUtil.isNotEmpty(subTokenList)) {
-            Map<String, String> retainMessageMap = redisClient.hgetAllWithScan(REDIS_MSG_RETAIN_KEY, REDIS_EACH_SCAN_COUNT);
-
-            if (CollUtil.isNotEmpty(retainMessageMap)) {
-                retainMessageMap.forEach((matchTopic, retainMessageStr) -> {
-                    if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(matchTopic))) {
-                        if (StrUtil.isNotBlank(retainMessageStr)) {
-                            retainMessageList.add(JSONObject.parseObject(retainMessageStr, CommonPublishMessage.class));
-                        }
-                    }
-                });
-            }
+            Optional.ofNullable(redisClient.hgetAllWithScan(REDIS_MSG_RETAIN_KEY, REDIS_EACH_SCAN_COUNT))
+                    .ifPresent(retainMessageMap -> {
+                        retainMessageMap.forEach((matchTopic, retainMessageStr) -> {
+                            if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(matchTopic))) {
+                                if (StrUtil.isNotBlank(retainMessageStr)) {
+                                    retainMessageList.add(JSONObject.parseObject(retainMessageStr, CommonPublishMessage.class));
+                                }
+                            }
+                        });
+                    });
         }
 
         return retainMessageList;

@@ -1,5 +1,7 @@
 package joey.mqtt.broker.util;
 
+import joey.mqtt.broker.constant.NumConstants;
+
 /**
  * 简单计时功能实现
  *
@@ -8,11 +10,11 @@ package joey.mqtt.broker.util;
  *
  */
 public class Stopwatch {
-    private long startTime = 0L;
+    private Long startTime = NumConstants.LONG_0;
 
-    private long elapsedMills = 0L;
+    private Long elapsedMills = NumConstants.LONG_0;
 
-    private volatile boolean isRunning;
+    private volatile Boolean isRunning;
 
     private Stopwatch() {
     }
@@ -38,7 +40,7 @@ public class Stopwatch {
     }
 
     public Stopwatch reset() {
-        this.elapsedMills = 0L;
+        this.elapsedMills = NumConstants.LONG_0;
         this.isRunning = false;
 
         return this;
@@ -49,6 +51,6 @@ public class Stopwatch {
     }
 
     public long elapsedSeconds() {
-        return this.isRunning ? ((System.currentTimeMillis() - startTime) /1000) : (this.elapsedMills / 1000);
+        return this.isRunning ? ((System.currentTimeMillis() - startTime) / NumConstants.INT_1000) : (this.elapsedMills / NumConstants.INT_1000);
     }
 }

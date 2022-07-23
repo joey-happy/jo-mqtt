@@ -1,7 +1,8 @@
 package joey.mqtt.broker;
 
-
 import cn.hutool.core.util.ClassLoaderUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.ServerBootstrap;
@@ -21,15 +22,17 @@ import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.internal.StringUtil;
 import joey.mqtt.broker.codec.MqttWebSocketCodec;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.config.NettyConfig;
 import joey.mqtt.broker.config.ServerConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.MqttMaster;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.subscription.Subscription;
+import joey.mqtt.broker.enums.ServerProtocolTypeEnum;
 import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.handler.MqttMainHandler;
 import joey.mqtt.broker.provider.IExtendProvider;
@@ -97,29 +100,29 @@ public class MqttServer {
 
         //tcp启动
         int tcpPort = serverConfig.getTcpPort();
-        if (tcpPort > Constants.INT_ZERO) {
-            tcpChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.TCP, tcpPort, false);
+        if (tcpPort > NumConstants.INT_0) {
+            tcpChannel = startServer(mqttMainHandler, ServerProtocolTypeEnum.TCP, tcpPort, false);
             startedFlag = true;
         }
 
         //tcp-ssl启动
         int tcpSslPort = serverConfig.getTcpSslPort();
-        if (tcpSslPort > Constants.INT_ZERO) {
-            tcpSslChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.TCP, tcpSslPort, true);
+        if (tcpSslPort > NumConstants.INT_0) {
+            tcpSslChannel = startServer(mqttMainHandler, ServerProtocolTypeEnum.TCP, tcpSslPort, true);
             startedFlag = true;
         }
 
         //websocket启动
         int webSocketPort = serverConfig.getWebSocketPort();
-        if (webSocketPort > Constants.INT_ZERO) {
-            webSocketChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.WEB_SOCKET, webSocketPort, false);
+        if (webSocketPort > NumConstants.INT_0) {
+            webSocketChannel = startServer(mqttMainHandler, ServerProtocolTypeEnum.WEB_SOCKET, webSocketPort, false);
             startedFlag = true;
         }
 
         //websocket-ssl启动
         int webSocketSslPort = serverConfig.getWebSocketSslPort();
-        if (webSocketSslPort > Constants.INT_ZERO) {
-            webSocketSslChannel = startServer(mqttMainHandler, Constants.ServerProtocolType.WEB_SOCKET, webSocketSslPort, true);
+        if (webSocketSslPort > NumConstants.INT_0) {
+            webSocketSslChannel = startServer(mqttMainHandler, ServerProtocolTypeEnum.WEB_SOCKET, webSocketSslPort, true);
             startedFlag = true;
         }
 
@@ -134,7 +137,7 @@ public class MqttServer {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
-    private Channel startServer(MqttMainHandler mqttMainHandler, Constants.ServerProtocolType protocolType, int port, boolean useSsl) {
+    private Channel startServer(MqttMainHandler mqttMainHandler, ServerProtocolTypeEnum protocolType, int port, boolean useSsl) {
         ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
                                                         .channel(channelClass)
                                         //              .handler(new LoggingHandler(LogLevel.INFO))
@@ -144,52 +147,78 @@ public class MqttServer {
                                                                 ChannelPipeline pipeline = channel.pipeline();
 
                                                                 //心跳检测
-                                                                pipeline.addFirst(Constants.HANDLER_IDLE_STATE, new IdleStateHandler(0, 0, nettyConfig.getChannelTimeoutSeconds()));
+                                                                pipeline.addFirst(BusinessConstants.HANDLER_IDLE_STATE, new IdleStateHandler(NumConstants.INT_0, NumConstants.INT_0, nettyConfig.getChannelTimeoutSeconds()));
 
-                                                                //使用ssl
-                                                                if (useSsl) {
-                                                                    boolean enableClientCA = serverConfig.isEnableClientCA();
-                                                                    pipeline.addLast("ssl", buildSslHandler(channel.alloc(), extendProvider.initSslContext(enableClientCA), enableClientCA));
-                                                                }
+                                                                //添加ssl handler
+                                                                addSslHandler(channel, pipeline, useSsl);
 
-                                                                //webSocket协议
-                                                                if (Constants.ServerProtocolType.WEB_SOCKET == protocolType) {
-                                                                    // 将请求和应答消息编码或解码为HTTP消息
-                                                                    pipeline.addLast("http-codec", new HttpServerCodec());
-                                                                    // 将HTTP消息的多个部分合成一条完整的HTTP消息
-                                                                    pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
-                                                                    // 将HTTP消息进行压缩编码
-                                                                    pipeline.addLast("compressor ", new HttpContentCompressor());
-                                                                    pipeline.addLast("protocol", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPath(), Constants.MQTT_SUB_PROTOCOL_CSV_LIST, true, 65536));
-                                                                    pipeline.addLast("mqttWebSocketCodec", new MqttWebSocketCodec());
-                                                                }
+                                                                //添加webSocket handler
+                                                                addWebSocketHandler(pipeline, protocolType);
 
                                                                 //mqtt解码编码
-                                                                pipeline.addLast(Constants.HANDLER_MQTT_DECODER, new MqttDecoder());
-                                                                pipeline.addLast(Constants.HANDLER_MQTT_ENCODER, MqttEncoder.INSTANCE);
+                                                                pipeline.addLast(BusinessConstants.HANDLER_MQTT_DECODER, new MqttDecoder());
+                                                                pipeline.addLast(BusinessConstants.HANDLER_MQTT_ENCODER, MqttEncoder.INSTANCE);
 
                                                                 //mqtt操作handler
-                                                                pipeline.addLast(Constants.HANDLER_MQTT_MAIN, mqttMainHandler);
+                                                                pipeline.addLast(BusinessConstants.HANDLER_MQTT_MAIN, mqttMainHandler);
                                                             }
                                                         });
 
         initConnectionOptions(bootstrap);
 
         InetSocketAddress socketAddress = new InetSocketAddress(port);
-        if (!StringUtil.isNullOrEmpty(serverConfig.getHostname())) {
+        if (StrUtil.isNotBlank(serverConfig.getHostname())) {
             socketAddress = new InetSocketAddress(serverConfig.getHostname(), port);
         }
 
-        ChannelFuture channelFuture = bootstrap.bind(socketAddress).addListener((future) -> {
-                                            if (future.isSuccess()) {
-                                                log.info(protocolType.name + " server started at port={} useSsl={}", port, useSsl);
+        ChannelFuture channelFuture = bootstrap.bind(socketAddress)
+                                               .addListener(future -> {
+                                                    if (future.isSuccess()) {
+                                                        log.info(protocolType.name + " server started at port={} useSsl={}", port, useSsl);
 
-                                            } else {
-                                                log.error(protocolType.name + " server start failed at port={} useSsl={} errMsg={}", port, useSsl, future.cause().getMessage());
-                                            }
-                                      });
+                                                    } else {
+                                                        log.error(protocolType.name + " server start failed at port={} useSsl={} errMsg={}", port, useSsl, future.cause().getMessage());
+                                                    }
+                                              });
 
         return channelFuture.channel();
+    }
+
+    /**
+     * 添加ssl handler
+     *
+     * @param channel
+     * @param pipeline
+     * @param useSsl
+     * @throws Exception
+     */
+    private void addSslHandler(Channel channel, ChannelPipeline pipeline, boolean useSsl) throws Exception {
+        if (useSsl) {
+            boolean enableClientCA = serverConfig.isEnableClientCA();
+            pipeline.addLast(BusinessConstants.HANDLER_SSL, buildSslHandler(channel.alloc(), extendProvider.initSslContext(enableClientCA), enableClientCA));
+        }
+    }
+
+    /**
+     * 添加webSocket handler
+     *
+     * @param pipeline
+     * @param serverProtocolType
+     */
+    private void addWebSocketHandler(ChannelPipeline pipeline, ServerProtocolTypeEnum serverProtocolType) {
+        if (ObjectUtil.equal(ServerProtocolTypeEnum.WEB_SOCKET, serverProtocolType)) {
+            // 将请求和应答消息编码或解码为HTTP消息
+            pipeline.addLast(BusinessConstants.HANDLER_HTTP_CODEC, new HttpServerCodec());
+
+            // 将HTTP消息的多个部分合成一条完整的HTTP消息
+            pipeline.addLast(BusinessConstants.HANDLER_HTTP_AGGREGATOR, new HttpObjectAggregator(NumConstants.INT_1048576));
+
+            // 将HTTP消息进行压缩编码
+            pipeline.addLast(BusinessConstants.HANDLER_HTTP_COMPRESSOR, new HttpContentCompressor());
+
+            pipeline.addLast(BusinessConstants.HANDLER_WEB_SOCKET_SERVER_PROTOCOL, new WebSocketServerProtocolHandler(serverConfig.getWebSocketPath(), BusinessConstants.MQTT_SUB_PROTOCOL_CSV_LIST, true, NumConstants.INT_65536));
+            pipeline.addLast(BusinessConstants.HANDLER_MQTT_WEB_SOCKET_CODEC, new MqttWebSocketCodec());
+        }
     }
 
     /**
@@ -210,6 +239,7 @@ public class MqttServer {
 
     /**
      * 初始化socket连接参数
+     *
      * @param bootstrap
      */
     protected void initConnectionOptions(ServerBootstrap bootstrap) {
@@ -224,7 +254,6 @@ public class MqttServer {
 
     /**
      * 构建ssl-handler
-     *
      *
      * @param alloc
      * @param sslContext
@@ -252,33 +281,33 @@ public class MqttServer {
         bossGroup.shutdownGracefully().syncUninterruptibly();
         workerGroup.shutdownGracefully().syncUninterruptibly();
 
-        if (null != tcpChannel) {
+        if (ObjectUtil.isNotNull(tcpChannel)) {
             log.info("Close tcp channel.");
             tcpChannel.closeFuture().syncUninterruptibly();
         }
 
-        if (null != tcpSslChannel) {
+        if (ObjectUtil.isNotNull(tcpSslChannel)) {
             log.info("Close tcp ssl channel.");
             tcpSslChannel.closeFuture().syncUninterruptibly();
         }
 
-        if (null != webSocketChannel) {
+        if (ObjectUtil.isNotNull(webSocketChannel)) {
             log.info("Close web socket channel.");
             webSocketChannel.closeFuture().syncUninterruptibly();
         }
 
-        if (null != webSocketSslChannel) {
+        if (ObjectUtil.isNotNull(webSocketSslChannel)) {
             log.info("Close web socket ssl channel.");
             webSocketSslChannel.closeFuture().syncUninterruptibly();
         }
 
         mqttMaster.close();
-
         log.info("Server stopped.");
     }
 
     /**
      * session数量
+     *
      * @return
      */
     public int getSessionCount() {
@@ -287,6 +316,7 @@ public class MqttServer {
 
     /**
      * 获取client信息
+     *
      * @param clientId
      */
     public ClientSession getClientInfoFor(String clientId) {
@@ -295,6 +325,7 @@ public class MqttServer {
 
     /**
      * 获取client订阅信息
+     *
      * @param clientId
      * @return
      */

@@ -1,41 +1,34 @@
-package joey.mqtt.broker;
+package joey.mqtt.broker.constant;
 
 /**
- * 通用常量类
+ * 业务常量类
+ *
  * @author Joey
  * @date 2019/7/18
  */
-public class Constants {
-    public enum ServerProtocolType {
-        TCP("tcp"),
-        WEB_SOCKET("webSocket"),
-        ;
-
-        public final String name;
-
-        ServerProtocolType(String name) {
-            this.name = name;
-        }
-    }
-
+public class BusinessConstants {
     public static final String MQTT_CONFIG = "mqtt.conf";
 
     public static final String MQTT_CONFIG_PROPS_PRE = "mqtt";
 
     public static final String MQTT_SUB_PROTOCOL_CSV_LIST = "mqtt, mqttv3.1, mqttv3.1.1";
 
-    public static final Integer INT_ZERO = 0;
-
-    public static final Integer INT_ONE = 1;
-
-    public static final Long LONG_ZERO = 0L;
-
-    public static final Long LONG_ONE = 1L;
-
     /**
      * netty handler名称常量
      */
     public static final String HANDLER_IDLE_STATE = "idleStateHandler";
+
+    public static final String HANDLER_SSL = "sslHandler";
+
+    public static final String HANDLER_HTTP_CODEC = "httpCodecHandler";
+
+    public static final String HANDLER_HTTP_AGGREGATOR = "httpAggregatorHandler";
+
+    public static final String HANDLER_HTTP_COMPRESSOR = "httpCompressorHandler";
+
+    public static final String HANDLER_WEB_SOCKET_SERVER_PROTOCOL = "webSocketServerProtocolHandler";
+
+    public static final String HANDLER_MQTT_WEB_SOCKET_CODEC = "mqttWebSocketCodecHandler";
 
     public static final String HANDLER_MQTT_ENCODER = "mqttEncoderHandler";
 
@@ -75,7 +68,7 @@ public class Constants {
     /**
      * redis相关基本设置
      */
-    public static final int REDIS_EACH_SCAN_COUNT = 500;
+    public static final Integer REDIS_EACH_SCAN_COUNT = NumConstants.INT_500;
 
     public static final String REDIS_KEY_PRE = "joMqtt:";
 

@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Console;
 import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import joey.mqtt.broker.Constants;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.config.CustomConfig;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.store.memory.MemorySubscriptionStore;
@@ -39,7 +39,7 @@ public class WildcardTreeMatchingTest {
         addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 
-        topic = Constants.TOKEN_ROOT;
+        topic = BusinessConstants.TOKEN_ROOT;
         addSucc = subStore.add(new Subscription(UUID.randomUUID().toString(), topic, MqttQoS.AT_LEAST_ONCE), false);
         Assert.assertFalse(addSucc);
 

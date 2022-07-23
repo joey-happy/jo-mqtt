@@ -1,6 +1,7 @@
 package joey.mqtt.broker;
 
 import joey.mqtt.broker.config.Config;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.util.ConfigUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +17,9 @@ public class MqttServerMain {
     public static void main(String[] args) throws Exception {
         Stopwatch start = Stopwatch.start();
 
-        MqttServer server = new MqttServer(ConfigUtils.loadFromSystemProps(Constants.MQTT_CONFIG, new Config()));
+        MqttServer server = new MqttServer(ConfigUtils.loadFromSystemProps(BusinessConstants.MQTT_CONFIG, new Config()));
         server.start();
 
-        log.info("MqttServer-start. timeCost={}ms", start.elapsedMills());
+        log.info("MqttServer start. timeCost={}ms", start.elapsedMills());
     }
 }

@@ -23,6 +23,7 @@ public class RedisExtendProvider extends ExtendProviderAdapter {
 
     /**
      * 反射调用此构造方法
+     *
      * @param customConfig
      */
     public RedisExtendProvider(CustomConfig customConfig) {

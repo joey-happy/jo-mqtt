@@ -1,16 +1,18 @@
 package joey.mqtt.broker.core.subscription;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import joey.mqtt.broker.constant.NumConstants;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static joey.mqtt.broker.Constants.*;
+import static joey.mqtt.broker.constant.BusinessConstants.*;
 
 /**
  * 订阅通配符tree
@@ -45,8 +47,8 @@ public class SubWildcardTree {
     private Action insert(List<String> topicTokenList, Subscription subscription) {
         //1.找到匹配的节点
         SubNodeWrapper matchNodeWrapper = this.root;
-        int tokenMatchIndex = -1;
-        for (int i = 0; i < topicTokenList.size(); i++) {
+        int tokenMatchIndex = NumConstants.INT_NEGATIVE_1;
+        for (int i = NumConstants.INT_0; i < topicTokenList.size(); i++) {
             SubNodeWrapper subNodeWrapper = matchNodeWrapper.mainNode().matchChild(topicTokenList.get(i));
             if (null == subNodeWrapper) {
                 break;
@@ -57,7 +59,7 @@ public class SubWildcardTree {
         }
 
         //2.如果节点完全匹配topic 即:所订阅的topic在当前树中存在 则在当前节点添加订阅信息
-        if (tokenMatchIndex == (topicTokenList.size() - 1)) {
+        if (tokenMatchIndex == (topicTokenList.size() - NumConstants.INT_1)) {
             SubNode oldSubNode = matchNodeWrapper.mainNode();
             SubNode updateSubNode = oldSubNode.copy();
             updateSubNode.subscriptionSet.add(subscription);
@@ -183,22 +185,22 @@ public class SubWildcardTree {
         int tokenSize = topicTokenList.size();
         String currentToken = StrUtil.EMPTY;
         String nextToken = StrUtil.EMPTY;
-        if (tokenSize > 0) {
-            currentToken = topicTokenList.get(0);
+        if (tokenSize > NumConstants.INT_0) {
+            currentToken = CollUtil.getFirst(topicTokenList);
         }
 
-        if (tokenSize > 1) {
-            nextToken = topicTokenList.get(1);
+        if (tokenSize > NumConstants.INT_1) {
+            nextToken = topicTokenList.get(NumConstants.INT_1);
         }
 
         //匹配'+' 或者 匹配当前节点token 或者 匹配root节点 则继续遍历子节点
         if (TOKEN_ROOT.equals(currentNode.token) || TOKEN_SINGLE.equals(currentNode.token) || currentNode.token.equals(currentToken)) {
-            int subIndex = 0;
+            int subIndex = NumConstants.INT_0;
 
             //如果当前节点是根节点 则下一个token为当前token
             if (TOKEN_ROOT.equals(currentNode.token)) {
                 nextToken = currentToken;
-                subIndex = -1;
+                subIndex = NumConstants.INT_NEGATIVE_1;
             }
 
             Set<Subscription> finalSubscriptionSet = new HashSet<>();
@@ -220,6 +222,7 @@ public class SubWildcardTree {
     }
 
     /**
+     * 下载订阅tree json数据
      *
      * @return
      */

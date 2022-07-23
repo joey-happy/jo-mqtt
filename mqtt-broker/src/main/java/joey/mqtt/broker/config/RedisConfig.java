@@ -1,9 +1,6 @@
 package joey.mqtt.broker.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import redis.clients.jedis.Protocol;
 
 /**
@@ -12,9 +9,7 @@ import redis.clients.jedis.Protocol;
  * @author Joey
  * @date 2019/9/7
  */
-@Getter
-@Setter
-@ToString
+@Data
 public class RedisConfig {
     private String host;
 

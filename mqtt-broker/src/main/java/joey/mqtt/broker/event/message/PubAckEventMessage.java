@@ -10,8 +10,8 @@ import lombok.Getter;
  * @author Joey
  * @date 2019/9/17
  */
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public class PubAckEventMessage implements EventMessage {
     private final String clientId;
 

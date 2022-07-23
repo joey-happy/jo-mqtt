@@ -1,6 +1,7 @@
 package joey.mqtt.broker.store.memory;
 
-import joey.mqtt.broker.Constants;
+import cn.hutool.core.util.ObjectUtil;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.store.IMessageIdStore;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,26 +14,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2019/9/3
  */
 public class MemoryMessageIdStore implements IMessageIdStore {
-    private ConcurrentHashMap<String, Integer> clientMsgIdMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Integer> clientMsgIdMap = new ConcurrentHashMap<>();
 
     /**
      * 并发操作锁map
      */
-    private ConcurrentHashMap<String, AtomicBoolean> lockMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, AtomicBoolean> lockMap = new ConcurrentHashMap<>();
 
     @Override
     public int getNextMessageId(String clientId) {
         //解决并发操作获取相同id问题
-        for(;;) {
+        for (;;) {
             lockMap.putIfAbsent(clientId, new AtomicBoolean(false));
             AtomicBoolean atomicBoolean = lockMap.get(clientId);
 
             if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
-                Integer currentMsgId = getCurrentMsgId(clientId);
-                Integer nextMsgId = (currentMsgId + Constants.INT_ONE) % 0xFFFF;
+                int currentMsgId = getCurrentMsgId(clientId);
+                int nextMsgId = (currentMsgId + NumConstants.INT_1) % 0xFFFF;
 
-                if(Constants.INT_ZERO.equals(nextMsgId)) {
-                    nextMsgId = (nextMsgId + Constants.INT_ONE) % 0xFFFF;
+                if (ObjectUtil.equals(NumConstants.INT_0, nextMsgId)) {
+                    nextMsgId = (nextMsgId + NumConstants.INT_1) % 0xFFFF;
                 }
 
                 clientMsgIdMap.put(clientId, nextMsgId);
@@ -47,7 +48,7 @@ public class MemoryMessageIdStore implements IMessageIdStore {
         Integer currentMsgId = clientMsgIdMap.get(clientId);
 
         if (null == currentMsgId) {
-            currentMsgId = Constants.INT_ZERO;
+            currentMsgId = NumConstants.INT_0;
             clientMsgIdMap.putIfAbsent(clientId, currentMsgId);
             currentMsgId = clientMsgIdMap.get(clientId);
         }

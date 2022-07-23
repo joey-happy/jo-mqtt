@@ -1,17 +1,13 @@
 package joey.mqtt.broker.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * sslContext配置
  * @author Joey
  * @date 2020/4/3
  */
-@Getter
-@Setter
-@ToString
+@Data
 public class SslContextConfig {
     /**
      * Key文件路径

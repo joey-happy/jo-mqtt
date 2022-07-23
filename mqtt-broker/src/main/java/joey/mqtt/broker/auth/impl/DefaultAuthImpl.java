@@ -1,6 +1,7 @@
 package joey.mqtt.broker.auth.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import joey.mqtt.broker.auth.AuthUser;
@@ -32,7 +33,7 @@ public class DefaultAuthImpl implements IAuth {
     }
 
     @Override
-    public boolean checkValid(String userName, byte[] password) {
+    public boolean checkAuth(String userName, byte[] password) {
         if (StrUtil.isBlank(userName) || null == password) {
             return false;
         }
@@ -43,7 +44,7 @@ public class DefaultAuthImpl implements IAuth {
         }
 
         String encodedPass = SecureUtil.sha256(new String(password));
-        if (!encodedPass.equals(authPass)) {
+        if (ObjectUtil.notEqual(authPass, encodedPass)) {
             return false;
         }
 

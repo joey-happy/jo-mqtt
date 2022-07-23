@@ -11,6 +11,7 @@ import joey.mqtt.broker.core.message.CommonPublishMessage;
 public interface IInnerTraffic {
     /**
      * 发布消息
+     *
      * @param message
      */
     void publish(CommonPublishMessage message);

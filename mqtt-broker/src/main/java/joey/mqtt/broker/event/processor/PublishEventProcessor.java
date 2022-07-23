@@ -1,19 +1,21 @@
 package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PublishEventMessage;
+import joey.mqtt.broker.exception.MqttException;
 import joey.mqtt.broker.innertraffic.IInnerTraffic;
 import joey.mqtt.broker.store.*;
 import joey.mqtt.broker.util.MessageUtils;
@@ -69,7 +71,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         String publishTopic = pubMsg.getTopic();
         if (CollUtil.isEmpty(TopicUtils.getTopicTokenList(publishTopic))) {
-            throw new RuntimeException("Publish invalid topic=" + publishTopic);
+            throw new MqttException("Publish invalid topic. topic=" + publishTopic);
         }
 
         Stopwatch stopwatch = Stopwatch.start();
@@ -169,13 +171,13 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         String targetClientId = sub.getClientId();
         ClientSession targetSession = sessionStore.get(targetClientId);
 
-        if (null != targetSession) {
+        if (ObjectUtil.isNotNull(targetSession)) {
             //订阅者收到MQTT消息的QoS级别, 最终取决于发布消息的QoS和主题订阅的QoS
             //参考说明：https://www.emqx.com/zh/blog/mqtt-qos-design-for-internet-of-vehicles
             MqttQoS msgQoS = MqttQoS.valueOf(MessageUtils.getMinQos(commonPubMsg.getMqttQoS(), sub.getQos().value()));
 
             MqttPublishMessage mqttPubMsg = null;
-            int messageId = 0;
+            int messageId = NumConstants.INT_0;
 
             switch (msgQoS) {
                 case AT_MOST_ONCE:
@@ -205,6 +207,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
     /**
      * 处理retainMessage
+     *
      * @param pubMsg
      */
     void handleRetainMessage(CommonPublishMessage pubMsg) {

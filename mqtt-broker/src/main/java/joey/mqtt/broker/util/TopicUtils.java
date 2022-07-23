@@ -1,15 +1,17 @@
 package joey.mqtt.broker.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import joey.mqtt.broker.constant.NumConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static joey.mqtt.broker.Constants.*;
+import static joey.mqtt.broker.constant.BusinessConstants.*;
 
 /**
- * topic 工具类
+ * topic工具类
  *
  * @author Joey
  * @date 2019/8/29
@@ -48,12 +50,12 @@ public class TopicUtils {
 
         //分隔后长度为0 则不合法
         String[] tokenArray = topic.split(StrUtil.SLASH);
-        if (null == tokenArray || tokenArray.length == 0) {
+        if (ArrayUtil.isEmpty(tokenArray)) {
             return CollUtil.newArrayList();
         }
 
         List<String> tokenList = CollUtil.newArrayList();
-        for (int i = 0; i < tokenArray.length; i++) {
+        for (int i = NumConstants.INT_0; i < tokenArray.length; i++) {
             String token = tokenArray[i];
 
             //token为空 则不合法
@@ -89,7 +91,7 @@ public class TopicUtils {
      * @return
      */
     public static boolean match(List<String> subTokenList, List<String> matchTokenList) {
-        int i = 0;
+        int i = NumConstants.INT_0;
 
         for (; i < subTokenList.size(); i++) {
             String subToken = subTokenList.get(i);

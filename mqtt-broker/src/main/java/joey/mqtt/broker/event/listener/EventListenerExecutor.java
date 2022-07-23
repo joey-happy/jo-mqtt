@@ -1,6 +1,7 @@
 package joey.mqtt.broker.event.listener;
 
 import cn.hutool.core.thread.ThreadFactoryBuilder;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.event.message.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,11 +18,11 @@ import java.util.concurrent.*;
 public class EventListenerExecutor {
     public static final String THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
 
-    public static final int THREAD_CORE_SIZE = 10;
+    public static final int THREAD_CORE_SIZE = NumConstants.INT_10;
 
-    public static final int THREAD_MAX_SIZE = 200;
+    public static final int THREAD_MAX_SIZE = NumConstants.INT_200;
 
-    public static final int THREAD_QUEUE_SIZE = 1024;
+    public static final int THREAD_QUEUE_SIZE = NumConstants.INT_1024;
 
     private final List<IEventListener> eventListenerList;
 
@@ -32,24 +33,27 @@ public class EventListenerExecutor {
 
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNamePrefix(THREAD_NAME_PRE).build();
 
-        this.executorService = new ThreadPoolExecutor(THREAD_CORE_SIZE, THREAD_MAX_SIZE,
-                10L, TimeUnit.MINUTES, new LinkedBlockingDeque<>(THREAD_QUEUE_SIZE),
-                threadFactory, new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                if (r instanceof EventTask) {
-                    EventTask task = (EventTask)r;
-                    log.warn("EventListenerExecutor-execute reject execution. messageInfo={},type={}", task.message.info(), task.type);
-                }
-            }
-        });
+        this.executorService = new ThreadPoolExecutor(THREAD_CORE_SIZE,
+                                                      THREAD_MAX_SIZE,
+                                                      NumConstants.LONG_10,
+                                                      TimeUnit.MINUTES,
+                                                      new LinkedBlockingDeque<>(THREAD_QUEUE_SIZE),
+                                                      threadFactory,
+                                                      new RejectedExecutionHandler() {
+                                                        @Override
+                                                        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                                                            if (r instanceof EventTask) {
+                                                                EventTask task = (EventTask)r;
+                                                                log.warn("EventListenerExecutor-execute reject execution. messageInfo={},type={}", task.message.info(), task.type);
+                                                            }
+                                                        }
+                                                     });
     }
 
     public void execute(EventMessage eventMessage, IEventListener.Type eventType) {
         eventListenerList.forEach(eventListener -> {
             try {
                 executorService.execute(new EventTask(eventListener, eventMessage, eventType));
-
             } catch (Throwable ex) {
                 log.error("EventListenerExecutor-execute error.", ex);
             }

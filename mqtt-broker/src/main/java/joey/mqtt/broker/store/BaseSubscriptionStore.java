@@ -58,7 +58,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
 
         } else {
             //解决添加和删除并发操作出现订阅失败问题
-            for(;;) {
+            for (;;) {
                 topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
                 AtomicBoolean atomicBoolean = topicLockMap.get(topic);
 
@@ -99,7 +99,7 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
                 //如果移除client的订阅关系后 此topic在无人订阅 则删除此topic 释放内存
                 if (CollUtil.isEmpty(subSet)) {
                     //解决添加和删除并发操作出现订阅失败问题
-                    for(;;) {
+                    for (;;) {
                         topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
                         AtomicBoolean atomicBoolean = topicLockMap.get(topic);
 

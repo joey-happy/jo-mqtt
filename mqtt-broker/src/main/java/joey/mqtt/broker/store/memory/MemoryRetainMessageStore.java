@@ -6,9 +6,8 @@ import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.store.IRetainMessageStore;
 import joey.mqtt.broker.util.TopicUtils;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,18 +39,14 @@ public class MemoryRetainMessageStore implements IRetainMessageStore {
 
         List<String> subTokenList = TopicUtils.getTopicTokenList(topic);
         if (CollUtil.isNotEmpty(subTokenList)) {
-            Collection<CommonPublishMessage> msgCollection = retainMsgMap.values();
-
-            if (CollUtil.isNotEmpty(msgCollection)) {
-                Iterator<CommonPublishMessage> iterator = msgCollection.iterator();
-
-                while (iterator.hasNext()) {
-                    CommonPublishMessage retainMessage = iterator.next();
-                    if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(retainMessage.getTopic()))) {
-                        retainMessageList.add(retainMessage);
-                    }
-                }
-            }
+            Optional.ofNullable(retainMsgMap.values())
+                    .ifPresent(msgCollection -> {
+                        msgCollection.forEach(retainMessage -> {
+                            if (TopicUtils.match(subTokenList, TopicUtils.getTopicTokenList(retainMessage.getTopic()))) {
+                                retainMessageList.add(retainMessage);
+                            }
+                        });
+                    });
         }
 
         return retainMessageList;

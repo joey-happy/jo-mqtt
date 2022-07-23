@@ -1,12 +1,13 @@
 package joey.mqtt.broker.innertraffic;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.topic.ITopic;
 import com.hazelcast.topic.Message;
 import com.hazelcast.topic.MessageListener;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +27,7 @@ public class HazelcastInnerTraffic extends BaseInnerTraffic implements MessageLi
         this.hzInstance = hzInstance;
 
         //添加集群间topic监听
-        ITopic<CommonPublishMessage> topic = hzInstance.getTopic(Constants.HAZELCAST_INNER_TRAFFIC_TOPIC);
+        ITopic<CommonPublishMessage> topic = hzInstance.getTopic(BusinessConstants.HAZELCAST_INNER_TRAFFIC_TOPIC);
         topic.addMessageListener(this);
     }
 
@@ -38,7 +39,7 @@ public class HazelcastInnerTraffic extends BaseInnerTraffic implements MessageLi
     public void publish(CommonPublishMessage message) {
         log.info("HazelcastInnerTraffic-publish message={}", JSON.toJSONString(message));
 
-        ITopic<CommonPublishMessage> topic = hzInstance.getTopic(Constants.HAZELCAST_INNER_TRAFFIC_TOPIC);
+        ITopic<CommonPublishMessage> topic = hzInstance.getTopic(BusinessConstants.HAZELCAST_INNER_TRAFFIC_TOPIC);
         topic.publish(message);
     }
 
@@ -49,7 +50,7 @@ public class HazelcastInnerTraffic extends BaseInnerTraffic implements MessageLi
     @Override
     public void onMessage(Message<CommonPublishMessage> msg) {
         try {
-            if (!msg.getPublishingMember().equals(hzInstance.getCluster().getLocalMember())) {
+            if (ObjectUtil.notEqual(hzInstance.getCluster().getLocalMember(), msg.getPublishingMember())) {
                 CommonPublishMessage commonPubMsg = msg.getMessageObject();
                 //集群间接收到消息 retain设置为false
                 commonPubMsg.setRetain(false);

@@ -11,6 +11,7 @@ import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * 用户session对象
@@ -63,6 +64,7 @@ public class ClientSession implements Serializable {
 
     /**
      * 发送消息
+     *
      * @param msg
      */
     public void sendMsg(Object msg) {
@@ -71,13 +73,16 @@ public class ClientSession implements Serializable {
 
     /**
      * 获取遗言
+     *
      * @return
      */
     public CommonPublishMessage getPubMsgForWillMessage() {
-        if (null == willMessage) {
-            return null;
-        }
-
-        return CommonPublishMessage.convert(willMessage, true, StrUtil.EMPTY).setCreateTimeStr(createTimeStr);
+        return Optional.ofNullable(willMessage)
+                       .map(msg -> {
+                                return CommonPublishMessage.convert(msg, true, StrUtil.EMPTY)
+                                                           .setCreateTimeStr(createTimeStr);
+                                }
+                            )
+                        .orElse(null);
     }
 }

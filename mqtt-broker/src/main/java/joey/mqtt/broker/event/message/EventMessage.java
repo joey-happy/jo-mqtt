@@ -9,6 +9,7 @@ package joey.mqtt.broker.event.message;
 public interface EventMessage {
     /**
      * 消息信息
+     *
      * @return
      */
     String info();

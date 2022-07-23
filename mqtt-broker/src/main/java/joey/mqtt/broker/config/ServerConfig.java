@@ -3,9 +3,7 @@ package joey.mqtt.broker.config;
 import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.provider.ExtendProviderAdapter;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +13,7 @@ import java.util.List;
  * @author Joey
  * @date 2019/7/18
  */
-@Getter
-@Setter
-@ToString
+@Data
 public class ServerConfig {
     /**
      * tcp端口 -1表示不启动

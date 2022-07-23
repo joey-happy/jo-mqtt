@@ -29,6 +29,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
 
     /**
      * 默认适配器 反射调用此构造方法
+     *
      * @param customConfig
      */
     public ExtendProviderAdapter(CustomConfig customConfig) {

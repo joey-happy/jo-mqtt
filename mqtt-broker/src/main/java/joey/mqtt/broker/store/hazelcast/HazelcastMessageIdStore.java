@@ -1,9 +1,11 @@
 package joey.mqtt.broker.store.hazelcast;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import joey.mqtt.broker.Constants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.store.IMessageIdStore;
 
 /**
@@ -20,21 +22,22 @@ public class HazelcastMessageIdStore extends HazelcastBaseStore implements IMess
     public HazelcastMessageIdStore(HazelcastInstance hzInstance, CustomConfig customConfig) {
         super(hzInstance, customConfig);
 
-        clientMsgIdMap = hzInstance.getMap(Constants.HAZELCAST_MSG_ID);
+        clientMsgIdMap = hzInstance.getMap(BusinessConstants.HAZELCAST_MSG_ID);
     }
 
     @Override
     public int getNextMessageId(String clientId) {
         clientMsgIdMap.lock(clientId);
+
         try {
             Integer currentMsgId = clientMsgIdMap.get(clientId);
             if (null == currentMsgId) {
-                currentMsgId = Constants.INT_ZERO;
+                currentMsgId = NumConstants.INT_0;
             }
 
-            Integer nextMsgId = (currentMsgId + Constants.INT_ONE) % 0xFFFF;
-            if(Constants.INT_ZERO.equals(nextMsgId)) {
-                nextMsgId = (nextMsgId + Constants.INT_ONE) % 0xFFFF;
+            Integer nextMsgId = (currentMsgId + NumConstants.INT_1) % 0xFFFF;
+            if (ObjectUtil.equal(NumConstants.INT_0, nextMsgId)) {
+                nextMsgId = (nextMsgId + NumConstants.INT_1) % 0xFFFF;
             }
 
             clientMsgIdMap.put(clientId, nextMsgId);

@@ -4,7 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import joey.mqtt.broker.Constants;
+import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class RedisInnerTraffic extends BaseInnerTraffic {
                                     CommonPublishMessage pubMsg = JSONObject.parseObject(message, CommonPublishMessage.class);
 
                                     //消息来源不是同一个node时候才会继续发布
-                                    if (null != pubMsg && ObjectUtil.notEqual(nodeName, pubMsg.getSourceNodeName())) {
+                                    if (ObjectUtil.isNotNull(pubMsg) && ObjectUtil.notEqual(nodeName, pubMsg.getSourceNodeName())) {
                                         publish2Subscribers(pubMsg);
                                     }
                                 }
@@ -59,7 +59,7 @@ public class RedisInnerTraffic extends BaseInnerTraffic {
                         public void onUnsubscribe(String channel, int subscribedChannels) {
                             log.info("RedisInnerTraffic-onUnsubscribe. nodeName={},channel={},subscribedChannels={}", nodeName, channel, subscribedChannels);
                         }
-                    }, Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL);
+                    }, BusinessConstants.REDIS_INNER_TRAFFIC_PUB_CHANNEL);
                 } catch (Exception ex) {
                     log.error("RedisInnerTraffic-subTopic error. nodeName={}", nodeName, ex);
                 }
@@ -76,6 +76,6 @@ public class RedisInnerTraffic extends BaseInnerTraffic {
         String jsonMsg = JSON.toJSONString(message);
         log.debug("RedisInnerTraffic-publish message={}", jsonMsg);
 
-        redisClient.publish(Constants.REDIS_INNER_TRAFFIC_PUB_CHANNEL, jsonMsg);
+        redisClient.publish(BusinessConstants.REDIS_INNER_TRAFFIC_PUB_CHANNEL, jsonMsg);
     }
 }

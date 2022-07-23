@@ -3,9 +3,7 @@ package joey.mqtt.broker.config;
 import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,9 +17,7 @@ import java.util.Map;
  * @author Joey
  * @date 2019/7/18
  */
-@Getter
-@Setter
-@ToString
+@Data
 public class CustomConfig {
     /**
      * 若使用hazelcastExtendProvider集群间通信
