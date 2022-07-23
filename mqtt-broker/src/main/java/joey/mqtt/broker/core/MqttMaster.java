@@ -58,33 +58,43 @@ public class MqttMaster {
 
     private final String nodeName;
 
-    private final ConnectEventProcessor connectEvent;
-    private final ConnectionLostEventProcessor connectionLostEvent;
-    private final SubscribeEventProcessor subscribeEvent;
-    private final UnsubscribeEventProcessor unsubscribeEvent;
-    private final PublishEventProcessor publishEvent;
-    private final PubRecEventProcessor pubRecEvent;
-    private final PubCompEventProcessor pubCompEvent;
-    private final PubRelEventProcessor pubRelEvent;
-    private final DisconnectEventProcessor disconnectEvent;
-    private final PubAckEventProcessor pubAckEvent;
-    private final PingReqEventProcessor pingReqEvent;
+    private final ConnectEventProcessor connectEventProcessor;
+
+    private final ConnectionLostEventProcessor connectionLostEventProcessor;
+
+    private final SubscribeEventProcessor subscribeEventProcessor;
+
+    private final UnsubscribeEventProcessor unsubscribeEventProcessor;
+
+    private final PublishEventProcessor publishEventProcessor;
+
+    private final PubRecEventProcessor pubRecEventProcessor;
+
+    private final PubCompEventProcessor pubCompEventProcessor;
+
+    private final PubRelEventProcessor pubRelEventProcessor;
+
+    private final DisconnectEventProcessor disconnectEventProcessor;
+
+    private final PubAckEventProcessor pubAckEventProcessor;
+
+    private final PingReqEventProcessor pingReqEventProcessor;
 
     public MqttMaster(Config config, IExtendProvider extendProvider) {
         this.config = config;
         log.info("Mqtt config info:{}", JSON.toJSONString(config));
 
-        messageIdStore = extendProvider.initMessageIdStore();
-        sessionStore = extendProvider.initSessionStore();
-        subscriptionStore = extendProvider.initSubscriptionStore(sessionStore);
-        retainMessageStore = extendProvider.initRetainMessageStore();
-        dupPubMessageStore = extendProvider.initDupPubMessageStore();
-        dupPubRelMessageStore = extendProvider.initDupPubRelMessageStore();
+        this.messageIdStore = extendProvider.initMessageIdStore();
+        this.sessionStore = extendProvider.initSessionStore();
+        this.subscriptionStore = extendProvider.initSubscriptionStore(sessionStore);
+        this.retainMessageStore = extendProvider.initRetainMessageStore();
+        this.dupPubMessageStore = extendProvider.initDupPubMessageStore();
+        this.dupPubRelMessageStore = extendProvider.initDupPubRelMessageStore();
 
-        eventListenerList = extendProvider.initEventListeners();
-        eventListenerExecutor = new EventListenerExecutor(eventListenerList);
+        this.eventListenerList = extendProvider.initEventListeners();
+        this.eventListenerExecutor = new EventListenerExecutor(eventListenerList);
 
-        nodeName = extendProvider.getNodeName();
+        this.nodeName = extendProvider.getNodeName();
         if (StrUtil.isBlank(nodeName)) {
             throw new MqttException("Node name is empty.nodeName=" + nodeName);
         }
@@ -92,31 +102,31 @@ public class MqttMaster {
         ServerConfig serverConfig = config.getServerConfig();
         if (serverConfig.isEnableUserAuth()) {
             List<AuthUser> copyAuthUserList = JSONObject.parseArray(JSON.toJSONString(serverConfig.getAuthUsers()), AuthUser.class);
-            authManager = extendProvider.initAuthManager(copyAuthUserList);
+            this.authManager = extendProvider.initAuthManager(copyAuthUserList);
         }
 
-        connectEvent = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
+        this.connectEventProcessor = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
 
-        publishEvent = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
+        this.publishEventProcessor = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
 
-        InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEvent);
-        innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
+        InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEventProcessor);
+        this.innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
 
-        publishEvent.setInnerTraffic(innerTraffic);
+        publishEventProcessor.setInnerTraffic(innerTraffic);
 
-        connectionLostEvent = new ConnectionLostEventProcessor(sessionStore, publishEvent, innerTraffic, eventListenerExecutor, nodeName);
+        this.connectionLostEventProcessor = new ConnectionLostEventProcessor(sessionStore, publishEventProcessor, innerTraffic, eventListenerExecutor, nodeName);
 
-        pubAckEvent = new PubAckEventProcessor(dupPubMessageStore, eventListenerExecutor);
-        pubRecEvent = new PubRecEventProcessor(dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
-        pubRelEvent = new PubRelEventProcessor(eventListenerExecutor);
-        pubCompEvent = new PubCompEventProcessor(dupPubRelMessageStore, eventListenerExecutor);
+        this.pubAckEventProcessor = new PubAckEventProcessor(dupPubMessageStore, eventListenerExecutor);
+        this.pubRecEventProcessor = new PubRecEventProcessor(dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
+        this.pubRelEventProcessor = new PubRelEventProcessor(eventListenerExecutor);
+        this.pubCompEventProcessor = new PubCompEventProcessor(dupPubRelMessageStore, eventListenerExecutor);
 
-        subscribeEvent = new SubscribeEventProcessor(sessionStore, subscriptionStore, retainMessageStore, publishEvent, eventListenerExecutor);
-        unsubscribeEvent = new UnsubscribeEventProcessor(sessionStore, subscriptionStore, eventListenerExecutor);
+        this.subscribeEventProcessor = new SubscribeEventProcessor(sessionStore, subscriptionStore, retainMessageStore, publishEventProcessor, eventListenerExecutor);
+        this.unsubscribeEventProcessor = new UnsubscribeEventProcessor(sessionStore, subscriptionStore, eventListenerExecutor);
 
-        pingReqEvent = new PingReqEventProcessor(eventListenerExecutor);
+        this.pingReqEventProcessor = new PingReqEventProcessor(eventListenerExecutor);
 
-        disconnectEvent = new DisconnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
+        this.disconnectEventProcessor = new DisconnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
     }
 
     /**
@@ -126,7 +136,7 @@ public class MqttMaster {
      * @param msg
      */
     public void connect(ChannelHandlerContext ctx, MqttConnectMessage msg) {
-        connectEvent.process(ctx, msg);
+        connectEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -135,7 +145,7 @@ public class MqttMaster {
      * @param ctx
      */
     public void lostConnection(ChannelHandlerContext ctx) {
-        connectionLostEvent.process(ctx, new MqttMessage(null));
+        connectionLostEventProcessor.process(ctx, new MqttMessage(null));
     }
 
     /**
@@ -145,7 +155,7 @@ public class MqttMaster {
      * @param msg
      */
     public void subscribe(ChannelHandlerContext ctx, MqttSubscribeMessage msg) {
-        subscribeEvent.process(ctx, msg);
+        subscribeEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -155,7 +165,7 @@ public class MqttMaster {
      * @param msg
      */
     public void unsubscribe(ChannelHandlerContext ctx, MqttUnsubscribeMessage msg) {
-        unsubscribeEvent.process(ctx, msg);
+        unsubscribeEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -165,7 +175,7 @@ public class MqttMaster {
      * @param msg
      */
     public void publish(ChannelHandlerContext ctx, MqttPublishMessage msg) {
-        publishEvent.process(ctx, msg);
+        publishEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -175,7 +185,7 @@ public class MqttMaster {
      * @param msg
      */
     public void pubRec(ChannelHandlerContext ctx, MqttMessage msg) {
-        pubRecEvent.process(ctx, msg);
+        pubRecEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -185,7 +195,7 @@ public class MqttMaster {
      * @param msg
      */
     public void pubComp(ChannelHandlerContext ctx, MqttMessage msg) {
-        pubCompEvent.process(ctx, msg);
+        pubCompEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -195,7 +205,7 @@ public class MqttMaster {
      * @param msg
      */
     public void pubRel(ChannelHandlerContext ctx, MqttMessage msg) {
-        pubRelEvent.process(ctx, msg);
+        pubRelEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -205,7 +215,7 @@ public class MqttMaster {
      * @param msg
      */
     public void disconnect(ChannelHandlerContext ctx, MqttMessage msg) {
-        disconnectEvent.process(ctx, msg);
+        disconnectEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -215,7 +225,7 @@ public class MqttMaster {
      * @param msg
      */
     public void pubAck(ChannelHandlerContext ctx, MqttPubAckMessage msg) {
-        pubAckEvent.process(ctx, msg);
+        pubAckEventProcessor.process(ctx, msg);
     }
 
     /**
@@ -225,7 +235,7 @@ public class MqttMaster {
      * @param msg
      */
     public void pingReq(ChannelHandlerContext ctx, MqttMessage msg) {
-        pingReqEvent.process(ctx, msg);
+        pingReqEventProcessor.process(ctx, msg);
     }
 
     /**
