@@ -152,13 +152,14 @@ mqtt.customConfig.extConfig.k3.k32=v32
   >11. 初始化sslContext: SslContext initSslContext(boolean enableClientCA) throws Exception;
   
 #### 参考实现
->1. https://github.com/moquette-io/moquette
->2. https://gitee.com/recallcode/iot-mqtt-server
->3. https://github.com/Cicizz/jmqtt
->4. https://github.com/Wizzercn/MqttWk
->5. https://github.com/daoshenzzg/socket-mqtt
->6. https://github.com/1ssqq1lxr/iot_push
->7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
+1. https://github.com/moquette-io/moquette
+2. https://gitee.com/recallcode/iot-mqtt-server
+3. https://github.com/Cicizz/jmqtt
+4. https://github.com/Wizzercn/MqttWk
+5. https://github.com/daoshenzzg/socket-mqtt
+6. https://github.com/1ssqq1lxr/iot_push
+7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
+8. https://github.com/hivemq/hivemq-community-edition
 
 #### 客户端工具
 1. https://mqttfx.jensd.de/index.php/download 客户端工具下载 
