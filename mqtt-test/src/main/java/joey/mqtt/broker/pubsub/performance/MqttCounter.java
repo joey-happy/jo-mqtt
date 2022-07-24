@@ -1,9 +1,12 @@
-package joey.mqtt.pubsub.performance;
+package joey.mqtt.broker.pubsub.performance;
 
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * mqtt数据统计
+ * mqtt数据统计测试
+ *
+ * @author Joey
+ * @date 2019/11/12
  */
 public class MqttCounter {
     public static LongAdder receiveCount = new LongAdder();

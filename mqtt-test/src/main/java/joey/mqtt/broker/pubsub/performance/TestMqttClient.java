@@ -1,4 +1,4 @@
-package joey.mqtt.pubsub.performance;
+package joey.mqtt.broker.pubsub.performance;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.system.SystemUtil;
@@ -9,7 +9,10 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.util.Properties;
 
 /**
+ * mqtt client测试
  *
+ * @author Joey
+ * @date 2019/11/12
  */
 public class TestMqttClient implements MqttCallback {
     private String topic;

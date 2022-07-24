@@ -7,6 +7,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
+ * 测试套件
+ *
  * @author Joey
  * @date 2019/9/16
  */

@@ -1,14 +1,16 @@
-package joey.mqtt.pubsub;
+package joey.mqtt.broker.pubsub;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.RandomUtil;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import joey.mqtt.pubsub.performance.MqttCounter;
-import joey.mqtt.pubsub.performance.TestMqttClient;
+import joey.mqtt.broker.pubsub.performance.MqttCounter;
+import joey.mqtt.broker.pubsub.performance.TestMqttClient;
 
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 发布/订阅测试
+ *
  * @author Joey
  * @date 2019/11/12
  */

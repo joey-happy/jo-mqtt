@@ -59,7 +59,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springboot.version}</version>
                 <configuration>
-                    <mainClass>joey.mqtt.pubsub.PubSubTest</mainClass>
+                    <mainClass>joey.mqtt.broker.pubsub.PubSubTest</mainClass>
                     <layout>JAR</layout>
                 </configuration>
                 <executions>
@@ -71,7 +71,7 @@
                 </executions>
             </plugin>
 
-            <!--  添加编译插件 -->
+            <!-- 添加编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

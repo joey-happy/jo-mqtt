@@ -8,7 +8,7 @@ spring:
     profiles:
         active: local
     application:
-        name: jo-mqtt-app
+        name: mqtt-springboot
     main:
         allow-bean-definition-overriding: true
     mvc:

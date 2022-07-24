@@ -74,7 +74,7 @@
     </dependencies>
 
     <build>
-        <finalName>jo-mqtt-broker</finalName>
+        <finalName>mqtt-springboot</finalName>
 
         <plugins>
             <plugin>
