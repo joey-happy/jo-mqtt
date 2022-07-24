@@ -12,6 +12,7 @@ import static joey.mqtt.broker.constant.BusinessConstants.*;
 
 /**
  * topic工具类
+ * MQTT Part 5 主题和最佳实践: https://www.jianshu.com/p/fd8b379225fe
  *
  * @author Joey
  * @date 2019/8/29
