@@ -7,6 +7,8 @@ package joey.mqtt.broker.constant;
  * @date 2019/7/18
  */
 public class BusinessConstants {
+    public static final Integer MQTT_TCP_PORT = 1883;
+
     public static final String MQTT_CONFIG = "mqtt.conf";
 
     public static final String MQTT_CONFIG_PROPS_PRE = "mqtt";
