@@ -4,7 +4,7 @@ JAVA_MEM_OPTS="-Xms4g -Xmx4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -
 
 JAVA_GC_OPTS="-XX:+ExplicitGCInvokesConcurrent -XX:MaxTenuringThreshold=6 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+UseCMSInitiatingOccupancyOnly "
 
-JAVA_DUMP_OPTS="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/logs/jo-mqtt/ "
+JAVA_DUMP_OPTS="-XX:+CrashOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/logs/jo-mqtt/heap-dump.hprof "
 
 JAVA_LOG_OPTS="-XX:+PrintCommandLineFlags -Xloggc:/home/logs/jo-mqtt/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:ErrorFile=/home/logs/jo-mqtt/hs_err_pid_%p.log "
 
