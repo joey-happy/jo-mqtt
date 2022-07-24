@@ -1,6 +1,7 @@
 package joey.mqtt.broker.event.processor;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -84,7 +85,8 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
         //校验版本信息
         MqttConnectVariableHeader variableHeader = message.variableHeader();
-        if (!checkVersion(variableHeader.version())) {
+        // todo 暂不支持5.0协议
+        if (!checkVersion(variableHeader.version(), MqttVersion.MQTT_5)) {
             channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION));
             channel.close();
             log.error("Process-connect:error. Mqtt connect version not supported. clientId={},userName={},version={},remoteIdp={}", clientId, payload.userName(), variableHeader.version(), remoteIp);
@@ -211,6 +213,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
     /**
      * 重置keepAlive时间
+     *
      * @param channel
      * @param msg
      */
@@ -232,11 +235,32 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         return StrUtil.isNotBlank(clientId);
     }
 
-    private boolean checkVersion(int version) {
+    /**
+     * 检查版本号
+     *
+     * @param matchVersion
+     * @return
+     */
+    private boolean checkVersion(int matchVersion) {
+        return checkVersion(matchVersion, null);
+    }
+
+    /**
+     * 检查版本号
+     *
+     * @param matchVersion
+     * @param notSupportVersion
+     * @return
+     */
+    private boolean checkVersion(int matchVersion, MqttVersion notSupportVersion) {
         boolean valid = false;
 
         for (MqttVersion mqttVersion : MqttVersion.values()) {
-            if (mqttVersion.protocolLevel() == version) {
+            if (ObjectUtil.isNotNull(notSupportVersion) && ObjectUtil.equal(mqttVersion, notSupportVersion)) {
+                continue;
+            }
+
+            if (mqttVersion.protocolLevel() == matchVersion) {
                 valid = true;
                 break;
             }
