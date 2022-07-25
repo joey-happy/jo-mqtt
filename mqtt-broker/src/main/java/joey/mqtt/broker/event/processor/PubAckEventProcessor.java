@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PubAckEventMessage;
@@ -19,13 +20,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PubAckEventProcessor implements IEventProcessor<MqttPubAckMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final IDupPubMessageStore dupPubMessageStore;
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public PubAckEventProcessor(IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor) {
+    public PubAckEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.dupPubMessageStore = dupPubMessageStore;
-
         this.eventListenerExecutor = eventListenerExecutor;
     }
 

@@ -9,6 +9,7 @@ import io.netty.handler.codec.mqtt.MqttQoS;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import io.netty.handler.codec.mqtt.MqttTopicSubscription;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -32,6 +33,8 @@ import java.util.List;
  */
 @Slf4j
 public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final ISubscriptionStore subStore;
@@ -42,7 +45,8 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public SubscribeEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IRetainMessageStore retainMessageStore, PublishEventProcessor publishEvent, EventListenerExecutor eventListenerExecutor) {
+    public SubscribeEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IRetainMessageStore retainMessageStore, PublishEventProcessor publishEvent, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.retainMessageStore = retainMessageStore;

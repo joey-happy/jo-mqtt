@@ -15,6 +15,8 @@ public class BusinessConstants {
 
     public static final String MQTT_SUB_PROTOCOL_CSV_LIST = "mqtt, mqttv3.1, mqttv3.1.1";
 
+    public static final String MQTT_DISPATCHER_THREAD_NAME_PRE = "Mqtt-dispatcher-executor-";
+
     /**
      * netty handler名称常量
      */

@@ -10,6 +10,7 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -35,6 +36,8 @@ import java.util.List;
  */
 @Slf4j
 public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final ISubscriptionStore subStore;
@@ -52,7 +55,8 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
     @Setter
     private IInnerTraffic innerTraffic;
 
-    public PublishEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor, String nodeName) {
+    public PublishEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor, String nodeName) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.messageIdStore = messageIdStore;

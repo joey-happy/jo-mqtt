@@ -13,6 +13,7 @@ import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -41,6 +42,8 @@ import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
  */
 @Slf4j
 public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final IAuth authManager;
@@ -55,7 +58,8 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public ConnectEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, IAuth authManager, boolean useAuth, EventListenerExecutor eventListenerExecutor) {
+    public ConnectEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, IAuth authManager, boolean useAuth, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.dupPubMessageStore = dupPubMessageStore;
@@ -73,7 +77,6 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         MqttConnectPayload payload = message.payload();
         //检查clientId 必填项
         String clientId = payload.clientIdentifier();
-        Stopwatch stopwatch = Stopwatch.start();
         log.info("Process-connect:start. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);
 
         if (!checkClientId(clientId)) {
@@ -94,9 +97,8 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         }
 
         //校验授权
-        String userName = StrUtil.EMPTY;
         if (useAuth) {
-            userName = payload.userName();
+            String userName = payload.userName();
             byte[] passwordInBytes = payload.passwordInBytes();
 
             if (!authManager.checkAuth(userName, passwordInBytes)) {
@@ -107,21 +109,41 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             }
         }
 
+        dispatcherCommandCenter.dispatch(clientId, () -> {
+            doConnect(channel, clientId, message);
+            return null;
+        });
+    }
+
+    /**
+     * 连接处理
+     *
+     * @param channel
+     * @param clientId
+     * @param message
+     */
+    private void doConnect(Channel channel, String clientId, MqttConnectMessage message ) {
+        Stopwatch stopwatch = Stopwatch.start();
+
         //重置keepAlive超时时间
         resetKeepAliveTimeout(channel, message);
 
+        MqttConnectPayload payload = message.payload();
         //处理旧连接
         handleOldSession(clientId);
         sessionStore.remove(clientId);
-        log.info("Process-connect:handle and remove old session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
 
+        String userName = payload.userName();
+        log.info("Process-connect:handle and remove old session. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
+
+        MqttConnectVariableHeader variableHeader = message.variableHeader();
         //设置遗言信息
         MqttPublishMessage willMessage = null;
         if (variableHeader.isWillFlag()) {
             willMessage = (MqttPublishMessage) MqttMessageFactory.newMessage(
                     new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(variableHeader.willQos()), variableHeader.isWillRetain(), 0),
                     new MqttPublishVariableHeader(payload.willTopic(), 0), Unpooled.buffer().writeBytes(payload.willMessageInBytes()));
-            log.info("Process-connect:store will message. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+            log.info("Process-connect:store will message. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
         }
 
         boolean cleanSession = variableHeader.isCleanSession();
@@ -132,7 +154,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             dupPubMessageStore.removeAllFor(clientId);
             dupPubRelMessageStore.removeAllFor(clientId);
 
-            log.info("Process-connect:remove all store info for clean session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+            log.info("Process-connect:remove all store info for clean session. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
         } else {
             Set<Subscription> clientSubSet = subStore.findAllBy(clientId);
             if (CollUtil.isNotEmpty(clientSubSet)) {
@@ -140,12 +162,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
                     subStore.add(sub, true);
                 }
             }
-            log.info("Process-connect:add all sub info for no clean session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+            log.info("Process-connect:add all sub info for no clean session. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
         }
 
         //存储session信息
         sessionStore.add(newClientSession);
-        log.info("Process-connect:store new session. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+        log.info("Process-connect:store new session. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
 
         //设置channel通用属性
         NettyUtils.clientInfo(channel, clientId, userName);
@@ -153,15 +175,15 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         //发送ack回执
         MqttConnAckMessage connectResp = MessageUtils.buildConnectAckMessage(MqttConnectReturnCode.CONNECTION_ACCEPTED, !cleanSession);
         channel.writeAndFlush(connectResp);
-        log.info("Process-connect:ack successfully. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+        log.info("Process-connect:ack successfully. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
 
         //如果cleanSession为0,需要重发同一clientId存储的未完成的QoS1和QoS2的DUP消息
         if (!cleanSession) {
             sendDupMessage(channel, clientId);
-            log.info("Process-connect:send qos1&2 message for no ack. clientId={},userName={},timeCost={}ms", clientId, payload.userName(), stopwatch.elapsedMills());
+            log.info("Process-connect:send qos1&2 message for no ack. clientId={},userName={},timeCost={}ms", clientId, userName, stopwatch.elapsedMills());
         }
 
-        log.info("Process-connect:end. clientId={},userName={},remoteIp={},timeCost={}ms", clientId, payload.userName(), remoteIp, stopwatch.elapsedMills());
+        log.info("Process-connect:end. clientId={},userName={},remoteIp={},timeCost={}ms", clientId, userName, NettyUtils.getRemoteIp(channel), stopwatch.elapsedMills());
 
         //连接事件监听处理
         eventListenerExecutor.execute(new ConnectEventMessage(message), IEventListener.Type.CONNECT);

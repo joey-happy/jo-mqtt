@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.DisconnectEventMessage;
@@ -22,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final ISubscriptionStore subStore;
@@ -32,7 +35,8 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public DisconnectEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+    public DisconnectEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.dupPubMessageStore = dupPubMessageStore;

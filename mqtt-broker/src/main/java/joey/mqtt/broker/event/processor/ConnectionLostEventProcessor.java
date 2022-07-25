@@ -4,8 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
-import joey.mqtt.broker.core.client.ClientSession;
-import joey.mqtt.broker.core.message.CommonPublishMessage;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.ConnectionLostEventMessage;
@@ -25,6 +24,8 @@ import java.util.Optional;
  */
 @Slf4j
 public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final PublishEventProcessor publishEventProcessor;
@@ -35,7 +36,8 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
 
     private final String nodeName;
 
-    public ConnectionLostEventProcessor(ISessionStore sessionStore, PublishEventProcessor publishEventProcessor, IInnerTraffic innerTraffic, EventListenerExecutor eventListenerExecutor, String nodeName) {
+    public ConnectionLostEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, PublishEventProcessor publishEventProcessor, IInnerTraffic innerTraffic, EventListenerExecutor eventListenerExecutor, String nodeName) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.publishEventProcessor = publishEventProcessor;
         this.eventListenerExecutor = eventListenerExecutor;

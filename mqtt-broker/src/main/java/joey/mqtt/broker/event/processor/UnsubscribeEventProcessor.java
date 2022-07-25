@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -26,13 +27,16 @@ import java.util.Optional;
  */
 @Slf4j
 public class UnsubscribeEventProcessor implements IEventProcessor<MqttUnsubscribeMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final ISessionStore sessionStore;
 
     private final ISubscriptionStore subStore;
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public UnsubscribeEventProcessor(ISessionStore sessionStore, ISubscriptionStore subStore, EventListenerExecutor eventListenerExecutor) {
+    public UnsubscribeEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.eventListenerExecutor = eventListenerExecutor;

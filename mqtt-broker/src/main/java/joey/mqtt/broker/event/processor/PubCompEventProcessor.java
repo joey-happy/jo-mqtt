@@ -3,6 +3,7 @@ package joey.mqtt.broker.event.processor;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PubCompEventMessage;
@@ -18,11 +19,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PubCompEventProcessor implements IEventProcessor<MqttMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final IDupPubRelMessageStore pubRelMessageStore;
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public PubCompEventProcessor(IDupPubRelMessageStore pubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+    public PubCompEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, IDupPubRelMessageStore pubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.pubRelMessageStore = pubRelMessageStore;
         this.eventListenerExecutor = eventListenerExecutor;
     }

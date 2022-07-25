@@ -2,6 +2,7 @@ package joey.mqtt.broker.event.processor;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PingEventMessage;
@@ -17,16 +18,19 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PingReqEventProcessor implements IEventProcessor<MqttMessage> {
-    private final EventListenerExecutor eventListenerExecutror;
+    private final DispatcherCommandCenter dispatcherCommandCenter;
 
-    public PingReqEventProcessor(EventListenerExecutor eventListenerExecutor) {
-        this.eventListenerExecutror = eventListenerExecutor;
+    private final EventListenerExecutor eventListenerExecutor;
+
+    public PingReqEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
+        this.eventListenerExecutor = eventListenerExecutor;
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, MqttMessage message) {
         ctx.channel().writeAndFlush(MessageUtils.buildPingRespMessage());
 
-        eventListenerExecutror.execute(new PingEventMessage(NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel())), IEventListener.Type.PING);
+        eventListenerExecutor.execute(new PingEventMessage(NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel())), IEventListener.Type.PING);
     }
 }

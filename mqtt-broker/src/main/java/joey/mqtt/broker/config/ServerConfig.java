@@ -63,4 +63,14 @@ public class ServerConfig {
      * 授权用户名和密码list
      */
     private List<AuthUser> authUsers = new ArrayList<>();
+
+    /**
+     * 分发器数量
+     */
+    private Integer dispatcherCount = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * 每个分发器处理队列大小
+     */
+    private Integer dispatcherQueueSize = NumConstants.INT_1024;
 }

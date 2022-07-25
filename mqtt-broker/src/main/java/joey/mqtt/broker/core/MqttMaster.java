@@ -10,6 +10,7 @@ import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.config.Config;
 import joey.mqtt.broker.config.ServerConfig;
 import joey.mqtt.broker.core.client.ClientSession;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -80,6 +81,8 @@ public class MqttMaster {
 
     private final PingReqEventProcessor pingReqEventProcessor;
 
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     public MqttMaster(Config config, IExtendProvider extendProvider) {
         this.config = config;
         log.info("Mqtt config info:{}", JSON.toJSONString(config));
@@ -100,33 +103,36 @@ public class MqttMaster {
         }
 
         ServerConfig serverConfig = config.getServerConfig();
+
+        this.dispatcherCommandCenter = new DispatcherCommandCenter(serverConfig.getDispatcherCount(), serverConfig.getDispatcherQueueSize());
+
         if (serverConfig.isEnableUserAuth()) {
             List<AuthUser> copyAuthUserList = JSONObject.parseArray(JSON.toJSONString(serverConfig.getAuthUsers()), AuthUser.class);
             this.authManager = extendProvider.initAuthManager(copyAuthUserList);
         }
 
-        this.connectEventProcessor = new ConnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
+        this.connectEventProcessor = new ConnectEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
 
-        this.publishEventProcessor = new PublishEventProcessor(sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
+        this.publishEventProcessor = new PublishEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
 
         InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEventProcessor);
         this.innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
 
         publishEventProcessor.setInnerTraffic(innerTraffic);
 
-        this.connectionLostEventProcessor = new ConnectionLostEventProcessor(sessionStore, publishEventProcessor, innerTraffic, eventListenerExecutor, nodeName);
+        this.connectionLostEventProcessor = new ConnectionLostEventProcessor(dispatcherCommandCenter, sessionStore, publishEventProcessor, innerTraffic, eventListenerExecutor, nodeName);
 
-        this.pubAckEventProcessor = new PubAckEventProcessor(dupPubMessageStore, eventListenerExecutor);
-        this.pubRecEventProcessor = new PubRecEventProcessor(dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
-        this.pubRelEventProcessor = new PubRelEventProcessor(eventListenerExecutor);
-        this.pubCompEventProcessor = new PubCompEventProcessor(dupPubRelMessageStore, eventListenerExecutor);
+        this.pubAckEventProcessor = new PubAckEventProcessor(dispatcherCommandCenter, dupPubMessageStore, eventListenerExecutor);
+        this.pubRecEventProcessor = new PubRecEventProcessor(dispatcherCommandCenter, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
+        this.pubRelEventProcessor = new PubRelEventProcessor(dispatcherCommandCenter, eventListenerExecutor);
+        this.pubCompEventProcessor = new PubCompEventProcessor(dispatcherCommandCenter, dupPubRelMessageStore, eventListenerExecutor);
 
-        this.subscribeEventProcessor = new SubscribeEventProcessor(sessionStore, subscriptionStore, retainMessageStore, publishEventProcessor, eventListenerExecutor);
-        this.unsubscribeEventProcessor = new UnsubscribeEventProcessor(sessionStore, subscriptionStore, eventListenerExecutor);
+        this.subscribeEventProcessor = new SubscribeEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, retainMessageStore, publishEventProcessor, eventListenerExecutor);
+        this.unsubscribeEventProcessor = new UnsubscribeEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, eventListenerExecutor);
 
-        this.pingReqEventProcessor = new PingReqEventProcessor(eventListenerExecutor);
+        this.pingReqEventProcessor = new PingReqEventProcessor(dispatcherCommandCenter, eventListenerExecutor);
 
-        this.disconnectEventProcessor = new DisconnectEventProcessor(sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
+        this.disconnectEventProcessor = new DisconnectEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);
     }
 
     /**

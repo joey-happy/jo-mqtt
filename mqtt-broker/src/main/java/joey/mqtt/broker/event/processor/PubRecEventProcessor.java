@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PubRecEventMessage;
@@ -24,13 +25,16 @@ import java.util.Optional;
  */
 @Slf4j
 public class PubRecEventProcessor implements IEventProcessor<MqttMessage> {
+    private final DispatcherCommandCenter dispatcherCommandCenter;
+
     private final IDupPubMessageStore dupPubMessageStore;
 
     private final IDupPubRelMessageStore dupPubRelMessageStore;
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public PubRecEventProcessor(IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+    public PubRecEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore, EventListenerExecutor eventListenerExecutor) {
+        this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.dupPubMessageStore = dupPubMessageStore;
         this.dupPubRelMessageStore = dupPubRelMessageStore;
         this.eventListenerExecutor = eventListenerExecutor;
