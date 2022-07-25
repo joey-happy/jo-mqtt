@@ -3,6 +3,7 @@ package joey.mqtt.broker.event.processor;
 import cn.hutool.core.util.StrUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -34,16 +35,29 @@ public class PubAckEventProcessor implements IEventProcessor<MqttPubAckMessage> 
 
     @Override
     public void process(ChannelHandlerContext ctx, MqttPubAckMessage message) {
-        int messageId = message.variableHeader().messageId();
-
         Channel channel = ctx.channel();
         String clientId = NettyUtils.clientId(channel);
-        String userName = NettyUtils.userName(channel);
 
         if (StrUtil.isNotBlank(clientId)) {
-            dupPubMessageStore.remove(clientId, messageId);
+            dispatcherCommandCenter.dispatch(clientId, MqttMessageType.PUBACK, () -> {
+                doPubAck(clientId, channel, message);
+                return null;
+            });
         }
+    }
 
+    /**
+     * pub ack
+     *
+     * @param clientId
+     * @param channel
+     * @param message
+     */
+    private void doPubAck(String clientId, Channel channel, MqttPubAckMessage message) {
+        int messageId = message.variableHeader().messageId();
+        dupPubMessageStore.remove(clientId, messageId);
+
+        String userName = NettyUtils.userName(channel);
         eventListenerExecutor.execute(new PubAckEventMessage(clientId, userName, messageId), IEventListener.Type.PUB_ACK);
     }
 }

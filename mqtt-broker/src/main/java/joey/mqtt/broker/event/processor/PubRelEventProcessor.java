@@ -1,8 +1,11 @@
 package joey.mqtt.broker.event.processor;
 
+import cn.hutool.core.util.StrUtil;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -30,13 +33,30 @@ public class PubRelEventProcessor implements IEventProcessor<MqttMessage> {
 
     @Override
     public void process(ChannelHandlerContext ctx, MqttMessage message) {
-        String clientId = NettyUtils.clientId(ctx.channel());
-        String userName = NettyUtils.userName(ctx.channel());
+        Channel channel = ctx.channel();
+        String clientId = NettyUtils.clientId(channel);
 
-        MqttMessageIdVariableHeader variableHeader = (MqttMessageIdVariableHeader) message.variableHeader();
+        if (StrUtil.isNotBlank(clientId)) {
+            dispatcherCommandCenter.dispatch(clientId, MqttMessageType.PUBREL, () -> {
+                doPubRel(clientId, channel, message);
+                return null;
+            });
+        }
+    }
+
+    /**
+     * pub rel
+     *
+     * @param clientId
+     * @param channel
+     * @param message
+     */
+    private void doPubRel(String clientId, Channel channel, MqttMessage message) {
+        MqttMessageIdVariableHeader variableHeader = (MqttMessageIdVariableHeader)message.variableHeader();
         int messageId = variableHeader.messageId();
-        ctx.channel().writeAndFlush(MessageUtils.buildPubCompMessage(messageId));
+        channel.writeAndFlush(MessageUtils.buildPubCompMessage(messageId));
 
+        String userName = NettyUtils.userName(channel);
         eventListenerExecutor.execute(new PubRelEventMessage(clientId, userName, messageId), IEventListener.Type.PUB_REL);
     }
 }

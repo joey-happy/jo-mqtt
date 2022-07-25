@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
@@ -44,22 +45,35 @@ public class PubRecEventProcessor implements IEventProcessor<MqttMessage> {
     public void process(ChannelHandlerContext ctx, MqttMessage message) {
         Channel channel = ctx.channel();
         String clientId = NettyUtils.clientId(channel);
-        String userName = NettyUtils.userName(channel);
-
-        MqttMessageIdVariableHeader variableHeader = (MqttMessageIdVariableHeader)message.variableHeader();
-        int messageId = variableHeader.messageId();
 
         if (StrUtil.isNotBlank(clientId)) {
-            Optional.ofNullable(dupPubMessageStore.get(clientId, messageId))
-                    .ifPresent(pubMsg -> {
-                        dupPubMessageStore.remove(clientId, messageId);
-                        dupPubRelMessageStore.add(pubMsg.copy());
-                    });
+            dispatcherCommandCenter.dispatch(clientId, MqttMessageType.PUBREC, () -> {
+                doPubRec(clientId, channel, message);
+                return null;
+            });
         }
+    }
+
+    /**
+     * pub rec
+     *
+     * @param clientId
+     * @param channel
+     * @param message
+     */
+    private void doPubRec(String clientId, Channel channel, MqttMessage message) {
+        MqttMessageIdVariableHeader variableHeader = (MqttMessageIdVariableHeader)message.variableHeader();
+        int messageId = variableHeader.messageId();
+        Optional.ofNullable(dupPubMessageStore.get(clientId, messageId))
+                .ifPresent(pubMsg -> {
+                    dupPubMessageStore.remove(clientId, messageId);
+                    dupPubRelMessageStore.add(pubMsg.copy());
+                });
 
         MqttMessage pubRelResp = MessageUtils.buildPubRelMessage(messageId, false);
         channel.writeAndFlush(pubRelResp);
 
+        String userName = NettyUtils.userName(channel);
         eventListenerExecutor.execute(new PubRecEventMessage(clientId, userName, messageId), IEventListener.Type.PUB_REC);
     }
 }

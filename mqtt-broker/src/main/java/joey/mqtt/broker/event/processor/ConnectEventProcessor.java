@@ -109,20 +109,20 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             }
         }
 
-        dispatcherCommandCenter.dispatch(clientId, () -> {
-            doConnect(channel, clientId, message);
+        dispatcherCommandCenter.dispatch(clientId, MqttMessageType.CONNECT, () -> {
+            doConnect(clientId, channel, message);
             return null;
         });
     }
 
     /**
-     * 连接处理
+     * 连接
      *
-     * @param channel
      * @param clientId
+     * @param channel
      * @param message
      */
-    private void doConnect(Channel channel, String clientId, MqttConnectMessage message ) {
+    private void doConnect(String clientId, Channel channel, MqttConnectMessage message) {
         Stopwatch stopwatch = Stopwatch.start();
 
         //重置keepAlive超时时间
@@ -185,7 +185,6 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
 
         log.info("Process-connect:end. clientId={},userName={},remoteIp={},timeCost={}ms", clientId, userName, NettyUtils.getRemoteIp(channel), stopwatch.elapsedMills());
 
-        //连接事件监听处理
         eventListenerExecutor.execute(new ConnectEventMessage(message), IEventListener.Type.CONNECT);
     }
 

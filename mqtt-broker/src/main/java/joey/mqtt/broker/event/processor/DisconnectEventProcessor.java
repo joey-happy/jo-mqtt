@@ -1,8 +1,10 @@
 package joey.mqtt.broker.event.processor;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -54,7 +56,7 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
         log.info("Process-disconnect. clientId={},userName={}", clientId, userName);
 
         ClientSession clientSession = sessionStore.get(clientId);
-        if (null == clientSession) {
+        if (ObjectUtil.isNull(clientSession)) {
             channel.close();
             return;
         }
@@ -65,6 +67,19 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
             return;
         }
 
+        dispatcherCommandCenter.dispatch(clientId, MqttMessageType.DISCONNECT, () -> {
+            doDisconnect(clientSession);
+            return null;
+        });
+    }
+
+    /**
+     * 断开连接
+     *
+     * @param clientSession
+     */
+    private void doDisconnect(ClientSession clientSession) {
+        String clientId = clientSession.getClientId();
         if (clientSession.isCleanSession()) {
             subStore.removeAllBy(clientId);
             dupPubMessageStore.removeAllFor(clientId);
@@ -74,6 +89,6 @@ public class DisconnectEventProcessor implements IEventProcessor<MqttMessage> {
         clientSession.closeChannel();
         sessionStore.remove(clientId);
 
-        eventListenerExecutor.execute(new DisconnectEventMessage(clientId, userName), IEventListener.Type.DISCONNECT);
+        eventListenerExecutor.execute(new DisconnectEventMessage(clientId, clientSession.getUserName()), IEventListener.Type.DISCONNECT);
     }
 }

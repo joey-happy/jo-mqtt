@@ -3,6 +3,7 @@ package joey.mqtt.broker.event.processor;
 import cn.hutool.core.collection.CollectionUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
@@ -44,20 +45,33 @@ public class UnsubscribeEventProcessor implements IEventProcessor<MqttUnsubscrib
 
     @Override
     public void process(ChannelHandlerContext ctx, MqttUnsubscribeMessage message) {
-        List<String> topicList = message.payload().topics();
         Channel channel = ctx.channel();
         String clientId = NettyUtils.clientId(channel);
-        String userName = NettyUtils.userName(channel);
 
+        dispatcherCommandCenter.dispatch(clientId, MqttMessageType.UNSUBSCRIBE, () -> {
+            doUnsubscribe(clientId, channel, message);
+            return null;
+        });
+    }
+
+    /**
+     * 取消订阅
+     *
+     * @param clientId
+     * @param channel
+     * @param message
+     */
+    private void doUnsubscribe(String clientId, Channel channel, MqttUnsubscribeMessage message) {
+        String userName = NettyUtils.userName(channel);
+        List<String> topicList = message.payload().topics();
         log.info("Process-unsubscribe. clientId={},userName={},topicList={}", clientId, userName, topicList);
+
         if (CollectionUtil.isNotEmpty(topicList)) {
             Optional.ofNullable(sessionStore.get(clientId))
                     .ifPresent(clientSession -> {
                         topicList.forEach(topic -> {
                             Subscription sub = new Subscription(clientId, topic, null);
                             subStore.remove(sub);
-
-                            //处理监听事件
                             eventListenerExecutor.execute(new UnsubscribeEventMessage(topic, clientId, userName), IEventListener.Type.UNSUBSCRIBE);
                         });
 

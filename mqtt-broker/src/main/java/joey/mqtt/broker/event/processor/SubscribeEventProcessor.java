@@ -4,10 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
-import io.netty.handler.codec.mqtt.MqttTopicSubscription;
+import io.netty.handler.codec.mqtt.*;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
@@ -57,16 +54,28 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
     @Override
     public void process(ChannelHandlerContext ctx, MqttSubscribeMessage message) {
         Channel channel = ctx.channel();
-        List<MqttTopicSubscription> topicSubList = message.payload().topicSubscriptions();
-
         String clientId = NettyUtils.clientId(channel);
         ClientSession clientSession = sessionStore.get(clientId);
-
         if (ObjectUtil.isNull(clientSession)) {
             channel.close();
             return;
         }
 
+        dispatcherCommandCenter.dispatch(clientId, MqttMessageType.SUBSCRIBE, () -> {
+            doSubscribe(clientId, channel, message);
+            return null;
+        });
+    }
+
+    /**
+     * 订阅
+     *
+     * @param clientId
+     * @param channel
+     * @param message
+     */
+    private void doSubscribe(String clientId, Channel channel, MqttSubscribeMessage message) {
+        List<MqttTopicSubscription> topicSubList = message.payload().topicSubscriptions();
         List<Integer> mqttQoSList = new ArrayList<>();
 
         //添加订阅关系
@@ -76,7 +85,6 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
             Subscription subscription = new Subscription(clientId, topic, mqttQoS);
             boolean addSuccess = subStore.add(subscription, false);
             if (addSuccess) {
-                //处理监听事件
                 eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
             }
 
@@ -90,7 +98,6 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
         topicSubList.forEach(topicSub -> {
             String topic = topicSub.topicName();
             MqttQoS mqttQoS = topicSub.qualityOfService();
-
             sendRetainMessage(new Subscription(clientId, topic, mqttQoS));
         });
     }

@@ -37,6 +37,26 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
                     master.connect(ctx, (MqttConnectMessage) msg);
                     break;
 
+                case PUBLISH:
+                    master.publish(ctx, (MqttPublishMessage) msg);
+                    break;
+
+                case PUBACK:
+                    master.pubAck(ctx, (MqttPubAckMessage) msg);
+                    break;
+
+                case PUBREC:
+                    master.pubRec(ctx, msg);
+                    break;
+
+                case PUBREL:
+                    master.pubRel(ctx, msg);
+                    break;
+
+                case PUBCOMP:
+                    master.pubComp(ctx, msg);
+                    break;
+
                 case SUBSCRIBE:
                     master.subscribe(ctx, (MqttSubscribeMessage) msg);
                     break;
@@ -45,32 +65,12 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
                     master.unsubscribe(ctx, (MqttUnsubscribeMessage) msg);
                     break;
 
-                case PUBLISH:
-                    master.publish(ctx, (MqttPublishMessage) msg);
-                    break;
-
-                case PUBREC:
-                    master.pubRec(ctx, msg);
-                    break;
-
-                case PUBCOMP:
-                    master.pubComp(ctx, msg);
-                    break;
-
-                case PUBREL:
-                    master.pubRel(ctx, msg);
+                case PINGREQ:
+                    master.pingReq(ctx, msg);
                     break;
 
                 case DISCONNECT:
                     master.disconnect(ctx, msg);
-                    break;
-
-                case PUBACK:
-                    master.pubAck(ctx, (MqttPubAckMessage) msg);
-                    break;
-
-                case PINGREQ:
-                    master.pingReq(ctx, msg);
                     break;
 
                 default:

@@ -16,7 +16,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 public class EventListenerExecutor {
-    public static final String THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
+    public static final String THREAD_NAME_PRE = "mqtt-eventListener-executor-";
 
     public static final int THREAD_CORE_SIZE = NumConstants.INT_30;
 

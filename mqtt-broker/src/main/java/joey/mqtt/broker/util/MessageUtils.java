@@ -4,6 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttConnAckMessage buildConnectAckMessage(MqttConnectReturnCode returnCode, boolean sessionPresent) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, NumConstants.INT_0);
         MqttConnAckVariableHeader variableHeader = new MqttConnAckVariableHeader(returnCode, sessionPresent);
         return new MqttConnAckMessage(fixedHeader, variableHeader);
     }
@@ -59,7 +60,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttPublishMessage buildPubMsg(CommonPublishMessage msg, MqttQoS qos, int messageId) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, msg.isRetain(), 0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, msg.isRetain(), NumConstants.INT_0);
         MqttPublishVariableHeader variableHeader = new MqttPublishVariableHeader(msg.getTopic(), messageId);
         return new MqttPublishMessage(fixedHeader, variableHeader, Unpooled.buffer().writeBytes(msg.getMessageBody().getBytes()));
     }
@@ -71,7 +72,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttMessage buildSubAckMessage(int messageId, List<Integer> qosList) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.SUBACK,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.SUBACK,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessageIdVariableHeader idVariableHeader = MqttMessageIdVariableHeader.from(messageId);
         MqttSubAckPayload subAckPayload = new MqttSubAckPayload(qosList);
         return new MqttSubAckMessage(fixedHeader, idVariableHeader, subAckPayload);
@@ -83,7 +84,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttPubAckMessage buildPubAckMessage(int messageId) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessageIdVariableHeader idVariableHeader = MqttMessageIdVariableHeader.from(messageId);
         return new MqttPubAckMessage(fixedHeader, idVariableHeader);
     }
@@ -94,7 +95,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttMessage buildPubRecMessage(int messageId) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBREC,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBREC,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessage mqttMessage = new MqttMessage(fixedHeader, MqttMessageIdVariableHeader.from(messageId));
         return mqttMessage;
     }
@@ -105,7 +106,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttMessage buildPubCompMessage(int messageId) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBCOMP,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBCOMP,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessage mqttMessage = new MqttMessage(fixedHeader, MqttMessageIdVariableHeader.from(messageId));
         return mqttMessage;
     }
@@ -117,7 +118,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttMessage buildPubRelMessage(int messageId, boolean isDup) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBREL, isDup, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBREL, isDup, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessageIdVariableHeader idVariableHeader = MqttMessageIdVariableHeader.from(messageId);
         return new MqttMessage(fixedHeader, idVariableHeader);
     }
@@ -128,7 +129,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttUnsubAckMessage buildUnsubAckMessage(int messageId) {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.UNSUBACK,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.UNSUBACK,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessageIdVariableHeader idVariableHeader = MqttMessageIdVariableHeader.from(messageId);
         return new MqttUnsubAckMessage(fixedHeader, idVariableHeader);
     }
@@ -138,7 +139,7 @@ public class MessageUtils {
      * @return
      */
     public static MqttMessage buildPingRespMessage() {
-        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP,false, MqttQoS.AT_MOST_ONCE,false,0);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP,false, MqttQoS.AT_MOST_ONCE,false, NumConstants.INT_0);
         MqttMessage mqttMessage = new MqttMessage(fixedHeader);
         return mqttMessage;
     }

@@ -23,9 +23,7 @@ public class DispatcherCommand {
 
     public void execute() throws Exception {
         action.call();
-    }
 
-    public void complete() {
         task.complete(clientId);
     }
 
