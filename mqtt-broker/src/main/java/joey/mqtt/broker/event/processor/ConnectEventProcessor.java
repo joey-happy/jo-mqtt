@@ -231,6 +231,12 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
         }
     }
 
+    /**
+     * 检查clientId
+     *
+     * @param clientId
+     * @return
+     */
     private boolean checkClientId(String clientId) {
         return StrUtil.isNotBlank(clientId);
     }

@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 public class EventListenerExecutor {
     public static final String THREAD_NAME_PRE = "joMqtt-eventListenerExecutor-pool-";
 
-    public static final int THREAD_CORE_SIZE = NumConstants.INT_10;
+    public static final int THREAD_CORE_SIZE = NumConstants.INT_30;
 
     public static final int THREAD_MAX_SIZE = NumConstants.INT_200;
 
