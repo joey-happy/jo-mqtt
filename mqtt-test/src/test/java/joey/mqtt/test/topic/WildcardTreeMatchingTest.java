@@ -1,4 +1,4 @@
-package joey.mqtt.test.wildcardtree;
+package joey.mqtt.test.topic;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Console;

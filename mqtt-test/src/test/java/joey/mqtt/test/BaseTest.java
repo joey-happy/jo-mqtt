@@ -10,7 +10,7 @@ import static joey.mqtt.broker.constant.BusinessConstants.MQTT_CONFIG;
  * @date 2019/9/18
  */
 public class BaseTest {
-    protected String serviceUrl = "tcp://172.16.32.179:1883";
+    protected String serviceUrl = "tcp://localhost:1883";
 
     protected String userName = "local";
 

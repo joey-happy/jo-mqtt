@@ -2,7 +2,7 @@ package joey.mqtt.test;
 
 import joey.mqtt.test.store.memory.MemoryMessageIdStoreTest;
 import joey.mqtt.test.topic.TopicUtilsTest;
-import joey.mqtt.test.wildcardtree.WildcardTreeMatchingTest;
+import joey.mqtt.test.topic.WildcardTreeMatchingTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
