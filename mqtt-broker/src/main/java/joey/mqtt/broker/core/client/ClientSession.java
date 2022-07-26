@@ -78,10 +78,8 @@ public class ClientSession implements Serializable {
      */
     public CommonPublishMessage getPubMsgForWillMessage() {
         return Optional.ofNullable(willMessage)
-                       .map(msg -> {
-                                return CommonPublishMessage.convert(msg, true, StrUtil.EMPTY)
-                                                           .setCreateTimeStr(createTimeStr);
-                                }
+                       .map(msg -> CommonPublishMessage.convert(this.clientId, msg, true, StrUtil.EMPTY)
+                                                       .setCreateTimeStr(createTimeStr)
                             )
                         .orElse(null);
     }

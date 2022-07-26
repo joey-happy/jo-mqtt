@@ -11,6 +11,7 @@ import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
+import joey.mqtt.broker.core.dispatcher.DispatcherResult;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
@@ -26,7 +27,9 @@ import joey.mqtt.broker.util.TopicUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 发布事件处理
@@ -71,7 +74,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         String clientId = NettyUtils.clientId(ctx.channel());
         String userName = NettyUtils.userName(ctx.channel());
 
-        CommonPublishMessage pubMsg = CommonPublishMessage.convert(message, false, nodeName);
+        CommonPublishMessage pubMsg = CommonPublishMessage.convert(clientId, message, false, nodeName);
 
         String publishTopic = pubMsg.getTopic();
         if (CollUtil.isEmpty(TopicUtils.getTopicTokenList(publishTopic))) {
@@ -79,7 +82,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         }
 
         Stopwatch stopwatch = Stopwatch.start();
-        log.info("Process-publish start. clientId={},userName={},topic={},messageId={},message={},qos={},nodeName={}", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName);
+        log.info("Process-publish start. pubMessage={}", pubMsg);
 
         //集群间发送消息
         try {
@@ -95,25 +98,36 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
         switch (msgQoS) {
             case AT_MOST_ONCE:
-                publish2Subscribers(pubMsg);
-                //处理保留消息
-                handleRetainMessage(pubMsg);
+                dispatcherCommandCenter.dispatch(clientId, "Pub qos0", () -> {
+                    publish2Subscribers(pubMsg);
+
+                    //处理保留消息
+                    handleRetainMessage(pubMsg);
+                    return null;
+                });
                 break;
 
             case AT_LEAST_ONCE:
-                publish2Subscribers(pubMsg);
-                //处理保留消息
-                handleRetainMessage(pubMsg);
+                dispatcherCommandCenter.dispatch(clientId, "Pub qos1", () -> {
+                    publish2Subscribers(pubMsg);
+
+                    //处理保留消息
+                    handleRetainMessage(pubMsg);
+                    return null;
+                });
 
                 MqttPubAckMessage pubAckResp = MessageUtils.buildPubAckMessage(packetId);
                 ctx.channel().writeAndFlush(pubAckResp);
                 break;
 
             case EXACTLY_ONCE:
-                //TODO 当Qos=2时 应该在收到pubRel事件的时候,才应该触发触发消息发送,此处简化处理
-                publish2Subscribers(pubMsg);
-                //处理保留消息
-                handleRetainMessage(pubMsg);
+                dispatcherCommandCenter.dispatch(clientId, "Pub qos2", () -> {
+                    publish2Subscribers(pubMsg);
+
+                    //处理保留消息
+                    handleRetainMessage(pubMsg);
+                    return null;
+                });
 
                 MqttMessage pubRecResp = MessageUtils.buildPubRecMessage(packetId);
                 ctx.channel().writeAndFlush(pubRecResp);
@@ -135,34 +149,41 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
     /**
      * 发布消息到所有订阅者
      *
+     * 批量处理 将订阅者按照clientId分组之后 交给多线程处理 提升分发效率
+     *
      * @param pubMsg
      */
     public void publish2Subscribers(CommonPublishMessage pubMsg) {
         List<Subscription> matchSubList = subStore.match(pubMsg.getTopic());
 
         if (CollUtil.isNotEmpty(matchSubList)) {
+            BatchSubCollector collector = new BatchSubCollector(dispatcherCommandCenter.getDispatcherCount());
             for (Subscription sub : matchSubList) {
-                publish2Subscriber(sub, pubMsg);
+                collector.add(sub);
             }
+
+            collector.execute(subscriptionList -> {
+                for (Subscription sub : subscriptionList) {
+                    publish2Subscriber(sub, pubMsg);
+                }
+            });
         }
     }
 
     /**
      * 发布消息到指定订阅者
+     *
      * @param sub
      * @param pubMsg
      * @return
      */
-    void publish2Subscriber(Subscription sub, CommonPublishMessage pubMsg) {
+    boolean publish2Subscriber(Subscription sub, CommonPublishMessage pubMsg) {
         Stopwatch start = Stopwatch.start();
 
-        try {
-            if (doPublish2Subscriber(sub, pubMsg)) {
-                log.info("Process-publish to sub successfully. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills());
-            }
-        } catch (Throwable ex) {
-            log.error("Process-publish to sub failure. targetClientId={},topic={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), start.elapsedMills(), ex);
-        }
+        boolean sendResult = doPublish2Subscriber(sub, pubMsg);
+        log.info("Process-publish to sub finished. targetClientId={},topic={},sendResult={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), sendResult, start.elapsedMills());
+
+        return sendResult;
     }
 
     /**
@@ -183,30 +204,33 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
             MqttPublishMessage mqttPubMsg = null;
             int messageId = NumConstants.INT_0;
 
-            switch (msgQoS) {
-                case AT_MOST_ONCE:
-                    mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
-                    targetSession.sendMsg(mqttPubMsg);
-                    break;
+            try {
+                switch (msgQoS) {
+                    case AT_MOST_ONCE:
+                        mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
+                        targetSession.sendMsg(mqttPubMsg);
+                        break;
 
-                case AT_LEAST_ONCE:
-                case EXACTLY_ONCE:
-                    messageId = messageIdStore.getNextMessageId(targetClientId);
-                    dupPubMessageStore.add(commonPubMsg.copy().setTargetClientId(targetClientId).setMessageId(messageId));
+                    case AT_LEAST_ONCE:
+                    case EXACTLY_ONCE:
+                        messageId = messageIdStore.getNextMessageId(targetClientId);
+                        dupPubMessageStore.add(commonPubMsg.copy().setTargetClientId(targetClientId).setMessageId(messageId));
 
-                    mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
-                    targetSession.sendMsg(mqttPubMsg);
-                    break;
+                        mqttPubMsg = MessageUtils.buildPubMsg(commonPubMsg, msgQoS, messageId);
+                        targetSession.sendMsg(mqttPubMsg);
+                        break;
 
-                default:
-                    log.error("Process-publish error. Invalid mqtt qos. targetClientId={},topic={},qos={}", targetClientId, commonPubMsg.getTopic(), commonPubMsg.getMqttQoS());
-                    break;
+                    default:
+                        log.error("Process-publish error. Invalid mqtt qos. targetClientId={},topic={},qos={}", targetClientId, commonPubMsg.getTopic(), commonPubMsg.getMqttQoS());
+                        break;
+                }
+            } catch (Throwable t) {
+                log.error("Process-publish error. targetClientId={},topic={},qos={}", targetClientId, commonPubMsg.getTopic(), commonPubMsg.getMqttQoS(), t);
+                return false;
             }
-
-            return true;
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -231,6 +255,49 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
             //覆盖retain消息
             retainMessageStore.add(pubMsg.copy());
+        }
+    }
+
+    /**
+     * 批量订阅者收集器
+     * 参考: moquette BatchingPublishesCollector
+     *
+     * todo 日志打印
+     *
+     */
+    private class BatchSubCollector {
+        private final List<Subscription>[] subscriptionListArray;
+        private final int dispatcherCount;
+
+        BatchSubCollector(int dispatcherCount) {
+            this.subscriptionListArray = new ArrayList[dispatcherCount];
+            this.dispatcherCount = dispatcherCount;
+        }
+
+        void add(Subscription sub) {
+            int dispatcherIndex = Math.abs(sub.getClientId().hashCode()) % this.dispatcherCount;
+            if (subscriptionListArray[dispatcherIndex] == null) {
+                subscriptionListArray[dispatcherIndex] = new ArrayList<>();
+            }
+
+            subscriptionListArray[dispatcherIndex].add(sub);
+        }
+
+        List<DispatcherResult> execute(Consumer<List<Subscription>> action) {
+            List<DispatcherResult> publishResults = new ArrayList<>(this.dispatcherCount);
+
+            for (List<Subscription> subscriptionList : subscriptionListArray) {
+                if (CollUtil.isEmpty(subscriptionList)) {
+                    continue;
+                }
+
+                publishResults.add(dispatcherCommandCenter.dispatch(CollUtil.getFirst(subscriptionList).getClientId(), "Pub batch", () -> {
+                    action.accept(subscriptionList);
+                    return null;
+                }));
+            }
+
+            return publishResults;
         }
     }
 }

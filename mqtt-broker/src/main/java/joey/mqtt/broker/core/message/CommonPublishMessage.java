@@ -24,6 +24,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class CommonPublishMessage implements Serializable {
+    private String publishClientId;
+
     private String targetClientId;
 
     private String topic;
@@ -34,22 +36,35 @@ public class CommonPublishMessage implements Serializable {
 
     private int mqttQoS;
 
-    private boolean isRetain = false;
+    private boolean isRetain;
 
-    private boolean isWill = false;
+    private boolean isDup;
+
+    private boolean isWill;
 
     private String createTimeStr;
 
     private String sourceNodeName;
 
-    public static CommonPublishMessage convert(MqttPublishMessage msg, boolean isWill, String sourceNodeName) {
+    /**
+     * 转换消息
+     *
+     * @param publishClientId
+     * @param msg
+     * @param isWill
+     * @param sourceNodeName
+     * @return
+     */
+    public static CommonPublishMessage convert(String publishClientId, MqttPublishMessage msg, boolean isWill, String sourceNodeName) {
         CommonPublishMessage convert = new CommonPublishMessage();
+
+        convert.publishClientId = publishClientId;
 
         convert.topic = msg.variableHeader().topicName();
         convert.messageId = msg.variableHeader().packetId();
         convert.messageBody = new String(MessageUtils.readBytesAndRewind(msg.payload()));
         convert.mqttQoS = msg.fixedHeader().qosLevel().value();
-
+        convert.isDup = msg.fixedHeader().isDup();
         convert.isRetain = msg.fixedHeader().isRetain();
         convert.isWill = isWill;
 
@@ -59,14 +74,22 @@ public class CommonPublishMessage implements Serializable {
         return convert;
     }
 
+    /**
+     * 拷贝消息
+     *
+     * @return
+     */
     public CommonPublishMessage copy() {
         CommonPublishMessage copy = new CommonPublishMessage();
+
+        copy.publishClientId = this.publishClientId;
 
         copy.topic = this.topic;
         copy.messageId = this.messageId;
         copy.messageBody = this.messageBody;
         copy.mqttQoS = this.mqttQoS;
 
+        copy.isDup = this.isDup;
         copy.isRetain = this.isRetain;
         copy.isWill = this.isWill;
 

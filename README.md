@@ -163,6 +163,7 @@ mqtt.customConfig.extConfig.k3.k32=v32
 
 #### 客户端工具
 1. https://mqttfx.jensd.de/index.php/download 客户端工具下载 
+2. https://github.com/emqx/MQTTX/releases 客户端工具
 
 #### 压测工具
 >1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可

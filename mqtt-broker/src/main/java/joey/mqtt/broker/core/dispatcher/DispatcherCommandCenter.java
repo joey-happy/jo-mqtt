@@ -3,6 +3,7 @@ package joey.mqtt.broker.core.dispatcher;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.constant.NumConstants;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -17,13 +18,14 @@ import java.util.concurrent.FutureTask;
  **/
 @Slf4j
 public class DispatcherCommandCenter {
-    private Thread[] dispatcherExecutors;
+    private final Thread[] dispatcherExecutors;
 
-    private BlockingQueue<FutureTask<String>>[] dispatcherQueue;
+    private final BlockingQueue<FutureTask<String>>[] dispatcherQueue;
 
-    private int dispatcherCount;
+    @Getter
+    private final int dispatcherCount;
 
-    private int dispatcherQueueSize;
+    private final int dispatcherQueueSize;
 
     public DispatcherCommandCenter(int dispatcherCount, int dispatcherQueueSize) {
         this.dispatcherCount = dispatcherCount;
@@ -45,14 +47,26 @@ public class DispatcherCommandCenter {
     /**
      * 分发执行任务
      *
-     * todo 返回值处理 添加日志
-     *
      * @param clientId
      * @param messageType
      * @param action
      * @return
      */
     public DispatcherResult dispatch(String clientId, MqttMessageType messageType, final Callable<String> action) {
+        return dispatch(clientId, messageType.toString(), action);
+    }
+
+    /**
+     * 分发执行任务
+     *
+     * todo 返回值处理
+     *
+     * @param clientId
+     * @param actionName
+     * @param action
+     * @return
+     */
+    public DispatcherResult dispatch(String clientId, String actionName, final Callable<String> action) {
         final DispatcherCommand command = new DispatcherCommand(clientId, action);
         final FutureTask<String> task = new FutureTask<>(() -> {
             command.execute();
@@ -60,14 +74,14 @@ public class DispatcherCommandCenter {
         });
 
         int dispatcherIndex = Math.abs(clientId.hashCode()) % this.dispatcherCount;
-        log.debug("DispatcherCommandCenter dispatch task. clientId={},messageType={},dispatcherIndex={}",
-                                                          clientId, messageType, dispatcherIndex);
+        log.debug("DispatcherCommandCenter dispatch task. clientId={},actionName={},dispatcherIndex={}", clientId, actionName, dispatcherIndex);
 
         if (Thread.currentThread() == dispatcherExecutors[dispatcherIndex]) {
             DispatcherWorker.executeTask(task);
             return new DispatcherResult();
         }
 
+        //todo 此处需要考虑如何处理
         if (this.dispatcherQueue[dispatcherIndex].offer(task)) {
             return new DispatcherResult();
         } else {
