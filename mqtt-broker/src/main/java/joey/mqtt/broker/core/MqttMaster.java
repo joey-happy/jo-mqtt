@@ -120,7 +120,9 @@ public class MqttMaster {
 
         publishEventProcessor.setInnerTraffic(innerTraffic);
 
-        this.connectionLostEventProcessor = new ConnectionLostEventProcessor(dispatcherCommandCenter, sessionStore, publishEventProcessor, innerTraffic, eventListenerExecutor, nodeName);
+        this.connectionLostEventProcessor = new ConnectionLostEventProcessor(dispatcherCommandCenter, sessionStore, publishEventProcessor,
+                                                                             subscriptionStore, dupPubMessageStore, dupPubRelMessageStore,
+                                                                             innerTraffic, eventListenerExecutor, nodeName);
 
         this.pubAckEventProcessor = new PubAckEventProcessor(dispatcherCommandCenter, dupPubMessageStore, eventListenerExecutor);
         this.pubRecEventProcessor = new PubRecEventProcessor(dispatcherCommandCenter, dupPubMessageStore, dupPubRelMessageStore, eventListenerExecutor);

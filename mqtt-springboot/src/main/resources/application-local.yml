@@ -11,8 +11,8 @@ mqtt:
         enableClientCA: false # 是否开启客户端认证
         hostname: ''
         # provider配置 默认有如下3中实现
-        extendProviderClass: joey.mqtt.broker.provider.RedisExtendProvider # 支持集群间通信 支持消息持久化
-        #        extendProviderClass: joey.mqtt.broker.provider.ExtendProviderAdapter # 不支持集群间通信 不支持消息持久化
+#        extendProviderClass: joey.mqtt.broker.provider.RedisExtendProvider # 支持集群间通信 支持消息持久化
+        extendProviderClass: joey.mqtt.broker.provider.ExtendProviderAdapter # 不支持集群间通信 不支持消息持久化
         # hazelcastProvider相关配置 支持集群间通信 不支持消息持久化
         # 需要配置mqtt.customConfig.hazelcastConfigFile和mqtt.customConfig.hazelcastConfigFile
         #        extendProviderClass: joey.mqtt.broker.provider.HazelcastExtendProvider
@@ -24,7 +24,7 @@ mqtt:
             - password: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
               userName: admin
     nettyConfig: # netty配置
-        bossThreads: 0
+        bossThreads: 1
         workerThreads: 0
         epoll: false
         soBacklog: 1024

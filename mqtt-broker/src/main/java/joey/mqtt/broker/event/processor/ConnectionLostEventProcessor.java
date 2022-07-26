@@ -9,7 +9,10 @@ import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.ConnectionLostEventMessage;
 import joey.mqtt.broker.innertraffic.IInnerTraffic;
+import joey.mqtt.broker.store.IDupPubMessageStore;
+import joey.mqtt.broker.store.IDupPubRelMessageStore;
 import joey.mqtt.broker.store.ISessionStore;
+import joey.mqtt.broker.store.ISubscriptionStore;
 import joey.mqtt.broker.util.NettyUtils;
 import joey.mqtt.broker.util.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
@@ -30,16 +33,29 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
 
     private final PublishEventProcessor publishEventProcessor;
 
+    private final ISubscriptionStore subStore;
+
+    private final IDupPubMessageStore dupPubMessageStore;
+
+    private final IDupPubRelMessageStore dupPubRelMessageStore;
+
     private final EventListenerExecutor eventListenerExecutor;
 
     private final IInnerTraffic innerTraffic;
 
     private final String nodeName;
 
-    public ConnectionLostEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, PublishEventProcessor publishEventProcessor, IInnerTraffic innerTraffic, EventListenerExecutor eventListenerExecutor, String nodeName) {
+    public ConnectionLostEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, PublishEventProcessor publishEventProcessor,
+                                        ISubscriptionStore subStore, IDupPubMessageStore dupPubMessageStore, IDupPubRelMessageStore dupPubRelMessageStore,
+                                        IInnerTraffic innerTraffic, EventListenerExecutor eventListenerExecutor, String nodeName) {
         this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.publishEventProcessor = publishEventProcessor;
+
+        this.subStore = subStore;
+        this.dupPubMessageStore = dupPubMessageStore;
+        this.dupPubRelMessageStore = dupPubRelMessageStore;
+
         this.eventListenerExecutor = eventListenerExecutor;
         this.innerTraffic = innerTraffic;
         this.nodeName = nodeName;
@@ -93,7 +109,15 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
                                 publishEventProcessor.handleRetainMessage(willPubMsg);
                             });
 
+                    //todo 此处是否需要这样处理 之前是没有这个逻辑
+                    if (clientSession.isCleanSession()) {
+                        subStore.removeAllBy(clientId);
+                        dupPubMessageStore.removeAllFor(clientId);
+                        dupPubRelMessageStore.removeAllFor(clientId);
+                    }
+
                     //移除session
+                    clientSession.closeChannel();
                     sessionStore.remove(clientId);
 
                     //处理监听连接丢失事件

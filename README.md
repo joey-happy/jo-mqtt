@@ -170,7 +170,8 @@ mqtt.customConfig.extConfig.k3.k32=v32
 >2. https://github.com/daoshenzzg/mqtt-mock ./mqtt-mock -broker "tcp://localhost:1883" -c 6000 -n 1000 -action sub -topic test -username local -password local -debug true
 
 #### 工具推荐
->1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
->2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
->3. https://blog.csdn.net/Just_shunjian/article/details/78288229 Linux 内核优化-调大TCP最大连接数
->4. https://github.com/xiaojiaqi/C1000kPracticeGuide C1000k优化实践
+1. https://github.com/looly/hutool Hutool是一个小而全的Java工具类库 作者有问必答 强烈推荐
+2. http://www.tongxinmao.com/txm/webmqtt.php 在线mqtt测试
+3. https://www.emqx.io/docs/zh/v4.3/tutorial/tune.html 系统调优
+4. https://blog.csdn.net/Just_shunjian/article/details/78288229 Linux 内核优化-调大TCP最大连接数
+5. https://github.com/xiaojiaqi/C1000kPracticeGuide C1000k优化实践

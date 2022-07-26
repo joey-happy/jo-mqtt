@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -250,6 +251,9 @@ public class MqttServer {
 
         bootstrap.option(ChannelOption.SO_REUSEADDR, nettyConfig.isSoReuseAddress());
         bootstrap.option(ChannelOption.SO_BACKLOG, nettyConfig.getSoBacklog());
+
+        //todo 此参数需要研究
+        bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
     }
 
     /**
