@@ -97,7 +97,7 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
                                 //集群间发送消息
                                 try {
                                     innerTraffic.publish(willPubMsg);
-                                    log.info("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), stopwatch.elapsedMills());
+                                    log.debug("Process-connectionLost publish will message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, willPubMsg.getTopic(), stopwatch.elapsedMills());
                                 } catch (Exception ex) {
                                     log.error("Process-connectionLost publish will message with inner traffic error.", ex);
                                 }

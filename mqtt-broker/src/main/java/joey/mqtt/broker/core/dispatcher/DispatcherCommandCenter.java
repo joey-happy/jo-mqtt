@@ -84,8 +84,8 @@ public class DispatcherCommandCenter {
         //todo 此处需要考虑如何处理
         if (this.dispatcherQueue[dispatcherIndex].offer(task)) {
             return new DispatcherResult();
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

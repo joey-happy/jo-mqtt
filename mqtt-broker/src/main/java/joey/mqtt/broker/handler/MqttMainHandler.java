@@ -86,7 +86,7 @@ public class MqttMainHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        log.warn("MqttMainHandler-channelInactive clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
+        log.debug("MqttMainHandler-channelInactive clientId={},userName={}", NettyUtils.clientId(ctx.channel()), NettyUtils.userName(ctx.channel()));
         master.lostConnection(ctx);
         ctx.close();
     }

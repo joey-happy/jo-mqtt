@@ -87,7 +87,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         //集群间发送消息
         try {
             innerTraffic.publish(pubMsg);
-            log.info("Process-publish publish message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), stopwatch.elapsedMills());
+            log.debug("Process-publish publish message to cluster end. clientId={},userName={},topic={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), stopwatch.elapsedMills());
         } catch (Exception ex) {
             log.error("PublishEventProcessor-process inner traffic publish error.", ex);
         }
@@ -138,7 +138,8 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 break;
         }
 
-        log.info("Process-publish end. pubClientId={},userName={},topic={},messageId={},message={},qos={},nodeName={},timeCost={}ms", clientId, userName, pubMsg.getTopic(), pubMsg.getMessageId(), pubMsg.getMessageBody(), pubMsg.getMqttQoS(), nodeName, stopwatch.elapsedMills());
+        log.info("Process-publish end. sourceNodeName={},publishClientId={},topic={},timeCost={}ms",
+                             pubMsg.getSourceNodeName(), pubMsg.getPublishClientId(), pubMsg.getTopic(), stopwatch.elapsedMills());
 
         if (validQos) {
             //处理事件监听
@@ -181,7 +182,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         Stopwatch start = Stopwatch.start();
 
         boolean sendResult = doPublish2Subscriber(sub, pubMsg);
-        log.info("Process-publish to sub finished. targetClientId={},topic={},sendResult={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), sendResult, start.elapsedMills());
+        log.debug("Process-publish to sub finished. targetClientId={},topic={},sendResult={},timeCost={}ms", sub.getClientId(), pubMsg.getTopic(), sendResult, start.elapsedMills());
 
         return sendResult;
     }
