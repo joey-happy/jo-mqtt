@@ -67,7 +67,7 @@ public class TopicUtilsTest {
     }
 
     @Test
-    public void testMatch() {
+    public void testMatchTopic() {
         List<String> subTokenList = TopicUtils.getTopicTokenList("a/+");
         List<String> matchTokenList = TopicUtils.getTopicTokenList("a/b");
         boolean match = TopicUtils.match(subTokenList, matchTokenList);

@@ -21,7 +21,7 @@ import java.util.UUID;
  * @date 2019/8/29
  */
 @Slf4j
-public class WildcardTreeMatchingTest {
+public class WildcardTreeTest {
     private MemorySubscriptionStore subStore;
 
     @Before
