@@ -160,10 +160,12 @@ mqtt.customConfig.extConfig.k3.k32=v32
 6. https://github.com/1ssqq1lxr/iot_push
 7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
 8. https://github.com/hivemq/hivemq-community-edition
+9. https://github.com/lets-mica/mica-mqtt aio tio实现
 
 #### 客户端工具
 1. https://mqttfx.jensd.de/index.php/download 客户端工具下载 
 2. https://github.com/emqx/MQTTX/releases 客户端工具
+3. http://www.emqx.io/online-mqtt-client/#/recent_connections 在线调试工具
 
 #### 压测工具
 >1. https://github.com/takanorig/mqtt-bench 拷贝mqtt-test工程下mqtt-mock文件到测试机 执行即可
