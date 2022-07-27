@@ -66,9 +66,9 @@ public class ServerConfig {
 
     /**
      * 分发器数量
-     * todo 此处对pub时间有影响
+     * todo 此处设置动态调整
      */
-    private Integer dispatcherCount = Runtime.getRuntime().availableProcessors() * 3;
+    private Integer dispatcherCount = Runtime.getRuntime().availableProcessors();
 
     /**
      * 每个分发器处理队列大小
