@@ -1,6 +1,6 @@
 package joey.mqtt.test;
 
-import joey.mqtt.test.store.memory.RetainMessageForMemoryStoreTest;
+import joey.mqtt.test.pubSub.RetainMessageTest;
 import joey.mqtt.test.topic.TopicUtilsTest;
 import joey.mqtt.test.topic.WildcardTreeTest;
 import org.junit.runner.RunWith;
@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         TopicUtilsTest.class,
         WildcardTreeTest.class,
-        RetainMessageForMemoryStoreTest.class
+        RetainMessageTest.class
 })
 public class TestSuite {
 }

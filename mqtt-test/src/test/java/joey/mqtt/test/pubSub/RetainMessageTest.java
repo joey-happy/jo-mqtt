@@ -1,4 +1,4 @@
-package joey.mqtt.test.store.memory;
+package joey.mqtt.test.pubSub;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Joey
  * @date 2019/9/18
  */
-public class RetainMessageForMemoryStoreTest extends BaseTest {
+public class RetainMessageTest extends BaseTest {
     private static final String RETAIN_TOPIC = "test/retain";
 
     /**

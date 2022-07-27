@@ -1,4 +1,4 @@
-package joey.mqtt.test.store.memory;
+package joey.mqtt.test.pubSub;
 
 import io.netty.handler.codec.mqtt.MqttQoS;
 import joey.mqtt.test.BaseTest;
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author Joey
  * @date 2019/9/18
  */
-public class WillMessageForMemoryStoreTest extends BaseTest {
+public class WillMessageTest extends BaseTest {
     private static final String WILL_TOPIC = "test/will";
 
     /**
