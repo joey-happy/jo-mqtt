@@ -20,8 +20,9 @@ public class StatsTask {
 
     /**
      * 打印当前连接session数量
+     * TODO 暂时注释掉
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
+//    @Scheduled(cron = "0 0/1 * * * ?")
     public void statSessionCount() {
         int sessionCount = mqttServer.getSessionCount();
         log.info("StatsTask-statSessionCount count={}.", sessionCount);

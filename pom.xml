@@ -19,7 +19,7 @@
         <mqtt.broker.version>2.0.0-SNAPSHOT</mqtt.broker.version>
         <mqtt.springboot.version>1.0.0-SNAPSHOT</mqtt.springboot.version>
 
-        <springboot.version>2.4.10</springboot.version>
+        <springboot.version>2.7.2</springboot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
