@@ -252,8 +252,9 @@ public class MqttServer {
         bootstrap.option(ChannelOption.SO_REUSEADDR, nettyConfig.isSoReuseAddress());
         bootstrap.option(ChannelOption.SO_BACKLOG, nettyConfig.getSoBacklog());
 
-//        //todo 此参数需要研究 目前测试 影响不大
+        //todo 此参数需要研究 目前测试 影响不大
 //        bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+//        bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
     }
 
     /**

@@ -58,7 +58,6 @@ public class DispatcherCommandCenter {
 
     /**
      * 分发执行任务
-     *
      * todo 返回值处理
      *
      * @param clientId
@@ -82,10 +81,10 @@ public class DispatcherCommandCenter {
         }
 
         //todo 此处需要考虑如何处理
-        if (this.dispatcherQueue[dispatcherIndex].offer(task)) {
-            return new DispatcherResult();
+        if (!this.dispatcherQueue[dispatcherIndex].offer(task)) {
+            log.warn("DispatcherCommandCenter target queue full. dispatcherIndex={}", dispatcherIndex);
         }
 
-        return null;
+        return new DispatcherResult();
     }
 }
