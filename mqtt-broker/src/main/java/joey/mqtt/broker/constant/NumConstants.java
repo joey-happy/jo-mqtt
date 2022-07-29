@@ -12,6 +12,10 @@ public final class NumConstants {
 
     public static final Integer INT_NEGATIVE_1 = -1;
 
+    public static final Integer INT_2 = 2;
+
+    public static final Integer INT_3 = 3;
+
     public static final Integer INT_10 = 10;
 
     public static final Integer INT_30 = 30;
@@ -25,6 +29,8 @@ public final class NumConstants {
     public static final Integer INT_1000 = 1000;
 
     public static final Integer INT_1024 = 1024;
+
+    public static final Integer INT_5000 = 5000;
 
     public static final Integer INT_65535 = 65535;
 

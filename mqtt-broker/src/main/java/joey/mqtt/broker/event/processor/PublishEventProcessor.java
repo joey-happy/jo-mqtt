@@ -101,17 +101,16 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 dispatcherCommandCenter.dispatch(clientId, "Pub qos0", () -> {
                     publish2Subscribers(pubMsg);
 
-                    //处理保留消息
                     handleRetainMessage(pubMsg);
                     return null;
                 });
                 break;
 
             case AT_LEAST_ONCE:
+                //TODO 此处需要针对pub失败的情况进行处理 如果有失败 则不发送ack 等待客户端在此发送请求
                 dispatcherCommandCenter.dispatch(clientId, "Pub qos1", () -> {
                     publish2Subscribers(pubMsg);
 
-                    //处理保留消息
                     handleRetainMessage(pubMsg);
                     return null;
                 });
@@ -124,7 +123,6 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
                 dispatcherCommandCenter.dispatch(clientId, "Pub qos2", () -> {
                     publish2Subscribers(pubMsg);
 
-                    //处理保留消息
                     handleRetainMessage(pubMsg);
                     return null;
                 });
@@ -261,9 +259,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
     /**
      * 批量订阅者收集器
-     * 参考: moquette BatchingPublishesCollector
-     *
-     * todo 日志打印
+     * 参考: moquette PostOffice.BatchingPublishesCollector
      *
      */
     private class BatchSubCollector {
@@ -285,20 +281,20 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         }
 
         List<DispatcherResult> execute(Consumer<List<Subscription>> action) {
-            List<DispatcherResult> publishResults = new ArrayList<>(this.dispatcherCount);
+            List<DispatcherResult> publishResultList = new ArrayList<>(this.dispatcherCount);
 
             for (List<Subscription> subscriptionList : subscriptionListArray) {
                 if (CollUtil.isEmpty(subscriptionList)) {
                     continue;
                 }
 
-                publishResults.add(dispatcherCommandCenter.dispatch(CollUtil.getFirst(subscriptionList).getClientId(), "Pub batch", () -> {
+                publishResultList.add(dispatcherCommandCenter.dispatch(CollUtil.getFirst(subscriptionList).getClientId(), "Pub batch", () -> {
                     action.accept(subscriptionList);
                     return null;
                 }));
             }
 
-            return publishResults;
+            return publishResultList;
         }
     }
 }

@@ -260,6 +260,8 @@ public class MqttMaster {
 
         dupPubRelMessageStore.close();
 
+        dispatcherCommandCenter.close();
+
         eventListenerExecutor.close();
     }
 

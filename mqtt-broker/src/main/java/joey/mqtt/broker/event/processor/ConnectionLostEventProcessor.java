@@ -109,7 +109,6 @@ public class ConnectionLostEventProcessor implements IEventProcessor<MqttMessage
                                 publishEventProcessor.handleRetainMessage(willPubMsg);
                             });
 
-                    //todo 此处是否需要这样处理 之前是没有这个逻辑
                     if (clientSession.isCleanSession()) {
                         subStore.removeAllBy(clientId);
                         dupPubMessageStore.removeAllFor(clientId);

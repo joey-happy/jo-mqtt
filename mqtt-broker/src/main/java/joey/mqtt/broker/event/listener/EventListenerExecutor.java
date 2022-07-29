@@ -1,5 +1,6 @@
 package joey.mqtt.broker.event.listener;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadFactoryBuilder;
 import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.event.message.*;
@@ -51,13 +52,15 @@ public class EventListenerExecutor {
     }
 
     public void execute(EventMessage eventMessage, IEventListener.Type eventType) {
-        eventListenerList.forEach(eventListener -> {
-            try {
-                executorService.execute(new EventTask(eventListener, eventMessage, eventType));
-            } catch (Throwable ex) {
-                log.error("EventListenerExecutor-execute error.", ex);
-            }
-        });
+        if (CollUtil.isNotEmpty(eventListenerList)) {
+            eventListenerList.forEach(eventListener -> {
+                try {
+                    executorService.execute(new EventTask(eventListener, eventMessage, eventType));
+                } catch (Throwable ex) {
+                    log.error("EventListenerExecutor-execute error.", ex);
+                }
+            });
+        }
     }
 
     public void close() {

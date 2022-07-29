@@ -135,7 +135,6 @@ public class SubWildcardTree {
         SubNode updateSubNode = oldSubNode.copy();
         updateSubNode.subscriptionSet.remove(subscription);
 
-        //TODO 只是简单删除订阅关系 节点仍然保留 没有考虑 节点订阅为空 删除节点等操作 (要处理 需要考虑并发添加问题 现在的节点数据copy是浅拷贝)
         return matchNodeWrapper.compareAndSet(oldSubNode, updateSubNode) ? Action.OK : Action.REPEAT;
     }
 

@@ -4,8 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Console;
 import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.constant.BusinessConstants;
+import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.subscription.Subscription;
 import joey.mqtt.broker.store.memory.MemorySubscriptionStore;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Joey
@@ -288,6 +291,45 @@ public class WildcardTreeTest {
 
         Console.log();
         Console.log("===================================");
+        Console.log(subStore.dumpWildcardSubData());
+    }
+
+    @Test
+    public void testConcurrentAddTopic() {
+        AtomicInteger clientId = new AtomicInteger(NumConstants.INT_0);
+
+        List<List<String>> baseTopicList = CollUtil.toList(
+                                            CollUtil.newArrayList("a/+", "b/+", "c/+", "d/+", "e/+"),
+                                            CollUtil.newArrayList("a/a/+", "b/b/+", "c/c/+", "d/d/+", "e/e/+"),
+                                            CollUtil.newArrayList("a/+/a", "b/+/b", "c/+/c", "d/+/d", "e/+/e"),
+                                            CollUtil.newArrayList("a/+/+", "b/+/+", "c/+/+", "d/+/+", "e/+/+"),
+                                            CollUtil.newArrayList("a/b/#", "b/a/#", "c/d/#", "d/c/#", "e/e/+"),
+                                            CollUtil.newArrayList("f/a/#", "f/b/#", "f/c/#", "f/d/#", "f/e/+"),
+                                            CollUtil.newArrayList("f/a/+", "f/b/+", "f/c/+", "f/d/+", "f/e/+")
+                                        );
+
+        CountDownLatch latch = new CountDownLatch(1);
+        int baseTopicSize = baseTopicList.size();
+        for (int i=0; i<10; i++) {
+            final int index = i;
+            new Thread(() -> {
+                try {
+                    List<String> topicList = baseTopicList.get(index % baseTopicSize);
+                    int topicSize = topicList.size();
+
+                    latch.await();
+                    for (int j=0; j<10; j++) {
+                        Subscription sub = new Subscription(String.valueOf(clientId.incrementAndGet()), topicList.get(j % topicSize), MqttQoS.AT_MOST_ONCE);
+                        subStore.add(sub, false);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+
+        latch.countDown();
+
         Console.log(subStore.dumpWildcardSubData());
     }
 }

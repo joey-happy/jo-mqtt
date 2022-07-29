@@ -1,5 +1,6 @@
 package joey.mqtt.broker.core.dispatcher;
 
+import cn.hutool.core.util.IdUtil;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.constant.NumConstants;
@@ -15,6 +16,8 @@ import java.util.concurrent.FutureTask;
  * @Author：Joey
  * @Date: 2022/7/25
  * @Desc: 调度指挥中心
+ *
+ * 参考: moquette PostOffice
  **/
 @Slf4j
 public class DispatcherCommandCenter {
@@ -58,7 +61,6 @@ public class DispatcherCommandCenter {
 
     /**
      * 分发执行任务
-     * todo 返回值处理
      *
      * @param clientId
      * @param actionName
@@ -77,14 +79,35 @@ public class DispatcherCommandCenter {
 
         if (Thread.currentThread() == dispatcherExecutors[dispatcherIndex]) {
             DispatcherWorker.executeTask(task);
-            return new DispatcherResult();
+            return DispatcherResult.success(command.getClientId(), command.completableFuture());
         }
 
-        //todo 此处需要考虑如何处理
-        if (!this.dispatcherQueue[dispatcherIndex].offer(task)) {
-            log.warn("DispatcherCommandCenter target queue full. dispatcherIndex={}", dispatcherIndex);
+        if (this.dispatcherQueue[dispatcherIndex].offer(task)) {
+            return DispatcherResult.success(command.getClientId(), command.completableFuture());
+
+        } else {
+            String uuid = IdUtil.fastSimpleUUID();
+            log.warn("DispatcherCommandCenter target queue full. clientId={},actionName={},dispatcherIndex={},uuid={}", clientId, actionName, dispatcherIndex, uuid);
+            return DispatcherResult.failed(command.getClientId(), "DispatcherCommandCenter target queue full. uuid=" + uuid);
+        }
+    }
+
+    /**
+     * 终止线程执行
+     *
+     */
+    public void close() {
+        for (Thread processor : dispatcherExecutors) {
+            processor.interrupt();
         }
 
-        return new DispatcherResult();
+        for (Thread processor : dispatcherExecutors) {
+            try {
+                //等待线程执行结束
+                processor.join(NumConstants.INT_5000);
+            } catch (InterruptedException ex) {
+                log.info("Interrupted while joining session event loop {}", processor.getName(), ex);
+            }
+        }
     }
 }

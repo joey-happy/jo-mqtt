@@ -66,7 +66,8 @@ public class ServerConfig {
 
     /**
      * 分发器数量
-     * todo 此处设置动态调整
+     *
+     * 压力测试结果表现 此处数量与cpu核数相同为最佳
      */
     private Integer dispatcherCount = Runtime.getRuntime().availableProcessors();
 
