@@ -71,11 +71,11 @@ mqtt.serverConfig.enableClientCA=false
 mqtt.serverConfig.hostname=
 
 #provider配置 默认有如下3中实现
-#支持集群间通信 支持消息持久化
-mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.RedisExtendProvider
-
 #不支持集群间通信 不支持消息持久化
-#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.MemoryExtendProvider
+mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.MemoryExtendProvider
+
+#支持集群间通信 支持消息持久化
+#mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.RedisExtendProvider
 
 #hazelcastProvider相关配置 支持集群间通信 不支持消息持久化
 #mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.HazelcastExtendProvider
