@@ -24,7 +24,7 @@ import java.util.List;
  * @author Joey
  * @date 2019/7/23
  */
-public class ExtendProviderAdapter implements IExtendProvider {
+public class MemoryExtendProvider implements IExtendProvider {
     protected final CustomConfig customConfig;
 
     /**
@@ -32,7 +32,7 @@ public class ExtendProviderAdapter implements IExtendProvider {
      *
      * @param customConfig
      */
-    public ExtendProviderAdapter(CustomConfig customConfig) {
+    public MemoryExtendProvider(CustomConfig customConfig) {
         this.customConfig = customConfig;
     }
 

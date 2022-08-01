@@ -16,7 +16,7 @@ import joey.mqtt.broker.store.redis.*;
  * @author Joey
  * @date 2019/9/7
  */
-public class RedisExtendProvider extends ExtendProviderAdapter {
+public class RedisExtendProvider extends MemoryExtendProvider {
     private final RedisClient redisClient;
 
     private final RedisConfig redisConfig;

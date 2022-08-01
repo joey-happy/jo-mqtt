@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2020/04/09
  */
 @Slf4j
-public class HazelcastExtendProvider extends ExtendProviderAdapter {
+public class HazelcastExtendProvider extends MemoryExtendProvider {
     private final String configFile;
 
     private final HazelcastInstance hzInstance;

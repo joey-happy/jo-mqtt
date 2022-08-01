@@ -21,7 +21,7 @@ import joey.mqtt.broker.store.redis.*;
  * @author Joey
  * @date 2019/9/7
  */
-public class RedisWithHzInnerTrafficExtendProvider extends ExtendProviderAdapter {
+public class RedisWithHzInnerTrafficExtendProvider extends MemoryExtendProvider {
     private RedisClient redisClient;
 
     private final RedisConfig redisConfig;

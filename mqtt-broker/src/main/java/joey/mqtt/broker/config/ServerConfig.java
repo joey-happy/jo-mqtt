@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.constant.BusinessConstants;
 import joey.mqtt.broker.constant.NumConstants;
-import joey.mqtt.broker.provider.ExtendProviderAdapter;
+import joey.mqtt.broker.provider.MemoryExtendProvider;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class ServerConfig {
     /**
      * extendProvider接口实现的类全路径名称
      */
-    private String extendProviderClass = ExtendProviderAdapter.class.getName();
+    private String extendProviderClass = MemoryExtendProvider.class.getName();
 
     /**
      * 是否开启用户名密码认证

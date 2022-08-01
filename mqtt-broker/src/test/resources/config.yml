@@ -9,7 +9,7 @@ mqtt:
         hostname: ''
         # provider配置 默认有如下3中实现
         extendProviderClass: joey.mqtt.broker.provider.RedisExtendProvider # 支持集群间通信 支持消息持久化
-        #        extendProviderClass: joey.mqtt.broker.provider.ExtendProviderAdapter # 不支持集群间通信 不支持消息持久化
+        #        extendProviderClass: joey.mqtt.broker.provider.MemoryExtendProvider # 不支持集群间通信 不支持消息持久化
         # hazelcastProvider相关配置 支持集群间通信 不支持消息持久化
         # 需要配置mqtt.customConfig.hazelcastConfigFile和mqtt.customConfig.hazelcastConfigFile
         #        extendProviderClass: joey.mqtt.broker.provider.HazelcastExtendProvider
