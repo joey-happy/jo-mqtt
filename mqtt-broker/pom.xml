@@ -97,7 +97,27 @@
     </dependencies>
 
     <build>
+        <!-- 脱离spring单独运行broker 请放开此注释 -->
+        <!--<finalName>mqtt-broker</finalName>-->
+
         <plugins>
+            <!-- 脱离spring单独运行broker 请放开此注释 -->
+            <!--<plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${springboot.version}</version>
+                <configuration>
+                    <mainClass>joey.mqtt.broker.MqttServerMain</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
+
             <!--  添加编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
