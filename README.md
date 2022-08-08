@@ -196,3 +196,6 @@ mqtt.customConfig.extConfig.k3.k32=v32
 3. https://www.emqx.io/docs/zh/v4.3/tutorial/tune.html 系统调优
 4. https://blog.csdn.net/Just_shunjian/article/details/78288229 Linux 内核优化-调大TCP最大连接数
 5. https://github.com/xiaojiaqi/C1000kPracticeGuide C1000k优化实践
+
+#### 作者微信（备注请标明jo-mqtt 方便时间内 有问必答）
+![img](img/readme/author.png)
