@@ -3,6 +3,7 @@
 #### 作者微信（备注请标明jo-mqtt 方便时间内 有问必答）
 
 <img src="img/readme/author.png" width="30%" height="30%">
+<img src="img/readme/redBag.png" width="30%" height="30%">
 
 #### 项目介绍
 
