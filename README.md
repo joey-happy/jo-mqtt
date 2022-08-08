@@ -198,4 +198,4 @@ mqtt.customConfig.extConfig.k3.k32=v32
 5. https://github.com/xiaojiaqi/C1000kPracticeGuide C1000k优化实践
 
 #### 作者微信（备注请标明jo-mqtt 方便时间内 有问必答）
-![img](img/readme/author.png=100x100)
+![img]<img src="img/readme/author.png" width="50%" height="50%">
