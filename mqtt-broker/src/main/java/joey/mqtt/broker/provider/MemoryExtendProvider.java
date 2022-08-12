@@ -40,9 +40,7 @@ public class MemoryExtendProvider implements IExtendProvider {
     public SslContext initSslContext(boolean enableClientCA) throws Exception {
         SslContextConfig cfg = customConfig.getSslContextConfig();
 
-        return SslContextUtils.build(enableClientCA, cfg.getSslKeyFilePath(),
-                                     cfg.getSslKeyStoreType(), cfg.getSslManagerPwd(),
-                                     cfg.getSslStorePwd());
+        return SslContextUtils.build(enableClientCA, cfg);
     }
 
     @Override

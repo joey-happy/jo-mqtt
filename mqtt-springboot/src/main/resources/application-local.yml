@@ -49,19 +49,12 @@ mqtt:
                 maxIdle: 80
                 minIdle: 50
         # 如果开启ssl 则必须配置如下信息
-        # 参考：https://www.emqx.com/zh/blog/emqx-server-ssl-tls-secure-connection-configuration-guide
-        # 建议使用：keytool -genkey -alias <desired certificate alias>
-        #                         -keystore <path to keystore.pfx>
-        #                         -storetype PKCS12
-        #                         -keyalg RSA
-        #                         -storepass <password>
-        #                         -validity 730
-        #                         -keysize 2048
         sslContextConfig:
-            sslKeyFilePath: ssl/jomqtt-server.pfx
-            sslKeyStoreType: PKCS12
-            sslManagerPwd: jo_mqtt
-            sslStorePwd: jo_mqtt
+            sslProvider: JDK # 目前支持3种 JDK,OPENSSL,OPENSSL_REFCNT
+            jksFilePath: ssl/server.jks
+            keyStoreType: JKS
+            keyStorePassword: 123456
+            keyManagerPassword: mqtt
         #        nodeName: jo_mqtt_1 # 自定义节点名称 可以不配置 默认是UUID
         extConfig: # 用户扩展配置
             k1: v1-测试

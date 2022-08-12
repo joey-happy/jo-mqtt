@@ -20,14 +20,6 @@ public interface IExtendProvider {
     /**
      * 初始化sslContext
      *
-     * 建议使用：keytool -genkey -alias <desired certificate alias>
-     *                         -keystore <path to keystore.pfx>
-     *                         -storetype PKCS12
-     *                         -keyalg RSA
-     *                         -storepass <password>
-     *                         -validity 730
-     *                         -keysize 2048
-     *
      * @param enableClientCA
      * @return
      * @throws Exception

@@ -129,14 +129,6 @@ mqtt.customConfig.redisConfig.pool.maxIdle=50
 mqtt.customConfig.redisConfig.pool.minIdle=20
 
 # 如果开启ssl 则必须配置如下信息
-# 参考：https://www.emqx.com/zh/blog/emqx-server-ssl-tls-secure-connection-configuration-guide
-# 建议使用：keytool -genkey -alias <desired certificate alias>
-#                         -keystore <path to keystore.pfx>
-#                         -storetype PKCS12
-#                         -keyalg RSA
-#                         -storepass <password>
-#                         -validity 730
-#                         -keysize 2048
 mqtt.customConfig.sslContextConfig.sslKeyFilePath=ssl/jomqtt-server.pfx
 mqtt.customConfig.sslContextConfig.sslKeyStoreType=PKCS12
 mqtt.customConfig.sslContextConfig.sslManagerPwd=jo_mqtt

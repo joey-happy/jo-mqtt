@@ -10,23 +10,28 @@ import lombok.Data;
 @Data
 public class SslContextConfig {
     /**
-     * Key文件路径
-     * 文件绝对路径或者classPath路径
+     * ssl支持
+     * @see io.netty.handler.ssl.SslProvider
      */
-    private String sslKeyFilePath;
+    private String sslProvider;
+
+    /**
+     * jks文件绝对路径或者classPath路径
+     */
+    private String jksFilePath;
 
     /**
      * keyStore类型
      */
-    private String sslKeyStoreType;
+    private String keyStoreType;
 
     /**
-     * manager密码
+     * 打开keyStore密码
      */
-    private String sslManagerPwd;
+    private String keyStorePassword;
 
     /**
-     * store密码
+     * 管理keyStore中别名密码
      */
-    private String sslStorePwd;
+    private String keyManagerPassword;
 }
