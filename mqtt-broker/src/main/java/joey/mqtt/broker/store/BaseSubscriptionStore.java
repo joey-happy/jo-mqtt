@@ -59,10 +59,8 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
         } else {
             //解决添加和删除并发操作出现订阅失败问题
             for (;;) {
-                topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                AtomicBoolean atomicBoolean = topicLockMap.get(topic);
-
-                if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
+                AtomicBoolean lockFlag = topicLockMap.computeIfAbsent(topic, b -> new AtomicBoolean(false));
+                if (lockFlag.compareAndSet(false, true)) {
                     Set<Subscription> subSet = commonTopicSubCache.computeIfAbsent(topic, s -> new ConcurrentHashSet<>());
                     subSet.add(subscription);
                     log.debug("MemorySubscriptionStore-addSub success. subscription={}", subscription);
@@ -100,10 +98,8 @@ public abstract class BaseSubscriptionStore implements ISubscriptionStore {
                 if (CollUtil.isEmpty(subSet)) {
                     //解决添加和删除并发操作出现订阅失败问题
                     for (;;) {
-                        topicLockMap.putIfAbsent(topic, new AtomicBoolean(false));
-                        AtomicBoolean atomicBoolean = topicLockMap.get(topic);
-
-                        if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
+                        AtomicBoolean lockFlag = topicLockMap.computeIfAbsent(topic, b -> new AtomicBoolean(false));
+                        if (lockFlag.compareAndSet(false, true)) {
                             //获取到锁
                             subSet = commonTopicSubCache.get(topic);
                             if (CollUtil.isEmpty(subSet)) {

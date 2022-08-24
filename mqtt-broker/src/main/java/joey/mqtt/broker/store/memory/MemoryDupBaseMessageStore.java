@@ -36,10 +36,8 @@ public class MemoryDupBaseMessageStore {
         //解决添加和删除并发操作问题
         for (;;) {
             String clientId = message.getTargetClientId();
-            lockMap.putIfAbsent(clientId, new AtomicBoolean(false));
-            AtomicBoolean atomicBoolean = lockMap.get(clientId);
-
-            if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
+            AtomicBoolean lockFlag = lockMap.computeIfAbsent(clientId, b -> new AtomicBoolean(false));
+            if (lockFlag.compareAndSet(false, true)) {
                 ConcurrentHashMap<Integer, CommonPublishMessage> msgMap = messageCache.computeIfAbsent(clientId, m -> new ConcurrentHashMap<>());
                 msgMap.put(message.getMessageId(), message);
                 lockMap.remove(clientId);
@@ -71,10 +69,8 @@ public class MemoryDupBaseMessageStore {
     public void remove(String clientId, int messageId) {
         //解决添加和删除并发操作问题
         for (;;) {
-            lockMap.putIfAbsent(clientId, new AtomicBoolean(false));
-            AtomicBoolean atomicBoolean = lockMap.get(clientId);
-
-            if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
+            AtomicBoolean lockFlag = lockMap.computeIfAbsent(clientId, b -> new AtomicBoolean(false));
+            if (lockFlag.compareAndSet(false, true)) {
                 ConcurrentHashMap<Integer, CommonPublishMessage> msgMap = messageCache.get(clientId);
                 if (MapUtil.isNotEmpty(msgMap)) {
                     msgMap.remove(messageId);
@@ -89,10 +85,8 @@ public class MemoryDupBaseMessageStore {
     public void removeAllFor(String clientId) {
         //解决添加和删除并发操作问题
         for (;;) {
-            lockMap.putIfAbsent(clientId, new AtomicBoolean(false));
-            AtomicBoolean atomicBoolean = lockMap.get(clientId);
-
-            if (null != atomicBoolean && atomicBoolean.compareAndSet(false, true)) {
+            AtomicBoolean lockFlag = lockMap.computeIfAbsent(clientId, b -> new AtomicBoolean(false));
+            if (lockFlag.compareAndSet(false, true)) {
                 messageCache.remove(clientId);
                 lockMap.remove(clientId);
                 break;
