@@ -7,6 +7,7 @@ import cn.hutool.crypto.SecureUtil;
 import joey.mqtt.broker.auth.AuthUser;
 import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.config.CustomConfig;
+import joey.mqtt.broker.enums.AuthTopicOperationEnum;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,7 @@ public class DefaultAuthImpl implements IAuth {
     }
 
     @Override
-    public boolean checkAuth(String userName, byte[] password) {
+    public boolean checkUserAuth(String userName, byte[] password) {
         if (StrUtil.isBlank(userName) || null == password) {
             return false;
         }
@@ -46,6 +47,26 @@ public class DefaultAuthImpl implements IAuth {
         String encodedPass = SecureUtil.sha256(new String(password));
         if (ObjectUtil.notEqual(authPass, encodedPass)) {
             return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean checkTopicAuth(String clientId, String topic, AuthTopicOperationEnum topicOperationEnum) {
+        // todo 需要业务方自己完善
+        switch (topicOperationEnum) {
+            case READ:
+                break;
+
+            case WRITE:
+                break;
+
+            case READ_WRITE:
+                break;
+
+            default:
+                // ignore
         }
 
         return true;

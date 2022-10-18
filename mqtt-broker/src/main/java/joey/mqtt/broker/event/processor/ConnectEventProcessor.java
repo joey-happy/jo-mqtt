@@ -101,7 +101,7 @@ public class ConnectEventProcessor implements IEventProcessor<MqttConnectMessage
             String userName = payload.userName();
             byte[] passwordInBytes = payload.passwordInBytes();
 
-            if (!authManager.checkAuth(userName, passwordInBytes)) {
+            if (!authManager.checkUserAuth(userName, passwordInBytes)) {
                 channel.writeAndFlush(MessageUtils.buildConnectAckMessage(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD));
                 channel.close();
                 log.error("Process-connect:error. Unauthorized user. clientId={},userName={},remoteIp={}", clientId, payload.userName(), remoteIp);

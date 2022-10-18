@@ -113,7 +113,7 @@ public class MqttMaster {
 
         this.connectEventProcessor = new ConnectEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, dupPubMessageStore, dupPubRelMessageStore, authManager, serverConfig.isEnableUserAuth(), eventListenerExecutor);
 
-        this.publishEventProcessor = new PublishEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName);
+        this.publishEventProcessor = new PublishEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, messageIdStore, retainMessageStore, dupPubMessageStore, eventListenerExecutor, nodeName, authManager);
 
         InnerPublishEventProcessor innerPublishEventProcessor = new InnerPublishEventProcessor(publishEventProcessor);
         this.innerTraffic = extendProvider.initInnerTraffic(innerPublishEventProcessor, nodeName);
@@ -129,7 +129,7 @@ public class MqttMaster {
         this.pubRelEventProcessor = new PubRelEventProcessor(dispatcherCommandCenter, eventListenerExecutor);
         this.pubCompEventProcessor = new PubCompEventProcessor(dispatcherCommandCenter, dupPubRelMessageStore, eventListenerExecutor);
 
-        this.subscribeEventProcessor = new SubscribeEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, retainMessageStore, publishEventProcessor, eventListenerExecutor);
+        this.subscribeEventProcessor = new SubscribeEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, retainMessageStore, publishEventProcessor, eventListenerExecutor, authManager);
         this.unsubscribeEventProcessor = new UnsubscribeEventProcessor(dispatcherCommandCenter, sessionStore, subscriptionStore, eventListenerExecutor);
 
         this.pingReqEventProcessor = new PingReqEventProcessor(dispatcherCommandCenter, eventListenerExecutor);

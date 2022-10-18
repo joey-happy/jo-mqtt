@@ -5,10 +5,12 @@ import cn.hutool.core.util.ObjectUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.mqtt.*;
+import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
+import joey.mqtt.broker.enums.AuthTopicOperationEnum;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.SubscribeEventMessage;
@@ -42,13 +44,16 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
 
     private final EventListenerExecutor eventListenerExecutor;
 
-    public SubscribeEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IRetainMessageStore retainMessageStore, PublishEventProcessor publishEvent, EventListenerExecutor eventListenerExecutor) {
+    private final IAuth authManager;
+
+    public SubscribeEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IRetainMessageStore retainMessageStore, PublishEventProcessor publishEvent, EventListenerExecutor eventListenerExecutor, IAuth authManager) {
         this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
         this.retainMessageStore = retainMessageStore;
         this.publishEvent = publishEvent;
         this.eventListenerExecutor = eventListenerExecutor;
+        this.authManager = authManager;
     }
 
     @Override
@@ -81,14 +86,21 @@ public class SubscribeEventProcessor implements IEventProcessor<MqttSubscribeMes
         //添加订阅关系
         topicSubList.forEach(topicSub -> {
             String topic = topicSub.topicName();
-            MqttQoS mqttQoS = topicSub.qualityOfService();
-            Subscription subscription = new Subscription(clientId, topic, mqttQoS);
-            boolean addSuccess = subStore.add(subscription, false);
-            if (addSuccess) {
-                eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
-            }
 
-            mqttQoSList.add(addSuccess ? mqttQoS.value() : MqttQoS.FAILURE.value());
+            if (!authManager.checkTopicAuth(clientId, topic, AuthTopicOperationEnum.READ)) {
+                log.warn("Process-doSubscribe client id not auth to subscribe topic. clientId:{}, topic:{}", clientId, topic);
+                mqttQoSList.add(MqttQoS.FAILURE.value());
+
+            } else {
+                MqttQoS mqttQoS = topicSub.qualityOfService();
+                Subscription subscription = new Subscription(clientId, topic, mqttQoS);
+                boolean addSuccess = subStore.add(subscription, false);
+                if (addSuccess) {
+                    eventListenerExecutor.execute(new SubscribeEventMessage(subscription, NettyUtils.userName(channel)), IEventListener.Type.SUBSCRIBE);
+                }
+
+                mqttQoSList.add(addSuccess ? mqttQoS.value() : MqttQoS.FAILURE.value());
+            }
         });
 
         MqttMessage ackResp = MessageUtils.buildSubAckMessage(message.variableHeader().messageId(), mqttQoSList);

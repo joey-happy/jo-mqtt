@@ -8,12 +8,14 @@ import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import joey.mqtt.broker.auth.IAuth;
 import joey.mqtt.broker.constant.NumConstants;
 import joey.mqtt.broker.core.client.ClientSession;
 import joey.mqtt.broker.core.dispatcher.DispatcherCommandCenter;
 import joey.mqtt.broker.core.dispatcher.DispatcherResult;
 import joey.mqtt.broker.core.message.CommonPublishMessage;
 import joey.mqtt.broker.core.subscription.Subscription;
+import joey.mqtt.broker.enums.AuthTopicOperationEnum;
 import joey.mqtt.broker.event.listener.EventListenerExecutor;
 import joey.mqtt.broker.event.listener.IEventListener;
 import joey.mqtt.broker.event.message.PublishEventMessage;
@@ -55,10 +57,12 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
 
     private final String nodeName;
 
+    private final IAuth authManager;
+
     @Setter
     private IInnerTraffic innerTraffic;
 
-    public PublishEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor, String nodeName) {
+    public PublishEventProcessor(DispatcherCommandCenter dispatcherCommandCenter, ISessionStore sessionStore, ISubscriptionStore subStore, IMessageIdStore messageIdStore, IRetainMessageStore retainMessageStore, IDupPubMessageStore dupPubMessageStore, EventListenerExecutor eventListenerExecutor, String nodeName, IAuth authManager) {
         this.dispatcherCommandCenter = dispatcherCommandCenter;
         this.sessionStore = sessionStore;
         this.subStore = subStore;
@@ -67,6 +71,7 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         this.dupPubMessageStore = dupPubMessageStore;
         this.eventListenerExecutor = eventListenerExecutor;
         this.nodeName = nodeName;
+        this.authManager = authManager;
     }
 
     @Override
@@ -79,6 +84,11 @@ public class PublishEventProcessor implements IEventProcessor<MqttPublishMessage
         String publishTopic = pubMsg.getTopic();
         if (CollUtil.isEmpty(TopicUtils.getTopicTokenList(publishTopic))) {
             throw new MqttException("Publish invalid topic. topic=" + publishTopic);
+        }
+
+        if (!authManager.checkTopicAuth(clientId, publishTopic, AuthTopicOperationEnum.WRITE)) {
+            log.error("Process-publish client id not auth to publish topic. clientId:{}, topic:{}", clientId, publishTopic);
+            return;
         }
 
         Stopwatch stopwatch = Stopwatch.start();

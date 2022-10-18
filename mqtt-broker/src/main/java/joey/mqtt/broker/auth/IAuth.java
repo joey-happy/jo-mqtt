@@ -1,5 +1,7 @@
 package joey.mqtt.broker.auth;
 
+import joey.mqtt.broker.enums.AuthTopicOperationEnum;
+
 /**
  * 连接授权
  *
@@ -14,5 +16,15 @@ public interface IAuth {
      * @param password
      * @return
      */
-    boolean checkAuth(String userName, byte[] password);
+    boolean checkUserAuth(String userName, byte[] password);
+
+    /**
+     * 检查topic权限
+     *
+     * @param clientId
+     * @param topic
+     * @param topicOperationEnum
+     * @return
+     */
+    boolean checkTopicAuth(String clientId, String topic, AuthTopicOperationEnum topicOperationEnum);
 }
