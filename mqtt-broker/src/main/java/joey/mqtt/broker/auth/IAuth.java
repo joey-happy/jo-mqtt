@@ -3,7 +3,7 @@ package joey.mqtt.broker.auth;
 import joey.mqtt.broker.enums.AuthTopicOperationEnum;
 
 /**
- * 连接授权
+ * 授权
  *
  * @author Joey
  * @date 2022/7/22
