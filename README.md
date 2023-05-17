@@ -128,7 +128,7 @@ mqtt.customConfig.redisConfig.pool.maxWait=1000
 mqtt.customConfig.redisConfig.pool.maxIdle=50
 mqtt.customConfig.redisConfig.pool.minIdle=20
 
-# 如果开启ssl 则必须配置如下信息
+#如果开启ssl 则必须配置如下信息
 mqtt.customConfig.sslContextConfig.sslKeyFilePath=ssl/jomqtt-server.pfx
 mqtt.customConfig.sslContextConfig.sslKeyStoreType=PKCS12
 mqtt.customConfig.sslContextConfig.sslManagerPwd=jo_mqtt
