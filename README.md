@@ -174,6 +174,8 @@ mqtt.customConfig.extConfig.k3.k32=v32
 7. https://mp.weixin.qq.com/s/9ErXfPUnJk20bPi5rSzcWA
 8. https://github.com/hivemq/hivemq-community-edition
 9. https://github.com/lets-mica/mica-mqtt aio tio实现
+10. https://github.com/quickmsg/smqtt
+11. https://github.com/jetlinks/jetlinks-community
 
 #### 客户端工具
 
