@@ -86,7 +86,7 @@ mqtt.serverConfig.enableClientCA=false
 
 mqtt.serverConfig.hostname=
 
-#provider配置 默认有如下3中实现
+#provider配置 默认有如下3种实现
 #不支持集群间通信 不支持消息持久化
 mqtt.serverConfig.extendProviderClass=joey.mqtt.broker.provider.MemoryExtendProvider
 
